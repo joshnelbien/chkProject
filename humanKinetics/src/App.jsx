@@ -6,6 +6,7 @@ import ContactPage from './PAGES/Contact/ContactPage';
 import EventPage from './PAGES/Events/EventPage';
 import HomePage from './PAGES/HomePage/HomePage';
 import ProgramPage from './PAGES/Programs/ProgramPage';
+import 'leaflet/dist/leaflet.css';
 
 function App() {
 

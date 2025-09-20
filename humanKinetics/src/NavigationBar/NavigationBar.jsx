@@ -8,7 +8,7 @@ function NavigationBar() {
 
   // Define a custom theme color for Tailwind using a style object
   const navBgColor = '#1E4620';
-  const highlightColor = '#20E81C';
+  const highlightBgColor = '#467346';
 
   const routes = [
     { path: "/", name: "Home" },
@@ -50,16 +50,16 @@ function NavigationBar() {
       ${isDarkMode ? 'dark' : ''}`}
       style={{ backgroundColor: navBgColor }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo and Text */}
-          <div className="flex-shrink-0 flex items-center space-x-4">
+          <div className="flex-shrink-0 flex items-center pl-4">
             <img 
               src="/plsplogo.png" 
               alt="PLSP Logo" 
               className="h-12 w-12 rounded-full border-2 border-white" 
             />
-            <div className="flex flex-col text-white">
+            <div className="flex flex-col text-white ml-4">
               <h1 className="text-lg md:text-xl font-semibold">Pamantasan ng Lungsod ng San Pablo</h1>
               <h2 className="text-sm md:text-base text-gray-300">College of Human Kinetics</h2>
             </div>
@@ -74,7 +74,7 @@ function NavigationBar() {
                 onClick={() => handleLinkClick(route.path)}
                 className={`transition-colors duration-300 font-medium rounded-lg px-3 py-2
                   ${activePath === route.path
-                    ? `text-[${highlightColor}]`
+                    ? `bg-[${highlightBgColor}] text-white`
                     : 'text-white hover:text-gray-300'
                   }`}
               >
@@ -127,7 +127,7 @@ function NavigationBar() {
                 }}
                 className={`block font-medium rounded-lg px-3 py-2
                   ${activePath === route.path
-                    ? `text-[${highlightColor}]`
+                    ? `bg-[${highlightBgColor}] text-white`
                     : 'text-gray-700 hover:text-gray-900'
                   }
                   ${isDarkMode ? 'dark:text-gray-200 dark:hover:text-white' : ''}
