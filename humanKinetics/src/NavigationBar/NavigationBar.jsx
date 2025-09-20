@@ -1,5 +1,5 @@
-import { Menu, X, Moon, Sun } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Menu, Moon, Sun, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 function NavigationBar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,6 +18,7 @@ function NavigationBar() {
     { path: "/coaches", name: "Coaches" },
     { path: "/event", name: "Events" },
     { path: "/contact", name: "Contact" },
+    { path: "/login", name: "Login" }
   ];
 
   const handleDarkModeToggle = () => {

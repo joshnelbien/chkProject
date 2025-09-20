@@ -1,4 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import OverView from './INSIDEPAGES/DASHBOARD/OVERVIEW/overView';
+import Login from './LOGIN/login';
 import AboutPage from './PAGES/About/AboutPage';
 import AthletePage from './PAGES/Athlete/AthletePage';
 import CoachesPage from './PAGES/Coaches/CoachesPage';
@@ -21,6 +23,8 @@ function App() {
           <Route path='/event' element={<EventPage />} />
           <Route path='/contact' element={<ContactPage />} />
           <Route path='/athletes' element={<AthletePage />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/overView' element={<OverView />} />
 
           
           
