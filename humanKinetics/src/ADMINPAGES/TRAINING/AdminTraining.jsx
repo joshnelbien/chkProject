@@ -27,7 +27,7 @@ function AdminTraining() {
         },
       ],
     },
-    {
+    { 
       day: "Tuesday",
       events: [
         {
