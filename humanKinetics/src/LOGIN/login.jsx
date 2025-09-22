@@ -1,6 +1,6 @@
+import { BarChart2, CheckCircle, Eye, EyeOff, Sun } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, CheckCircle, BarChart2, Sun } from "lucide-react";
 
 function Login() {
   const navigate = useNavigate();
@@ -9,6 +9,7 @@ function Login() {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [loginType, setLoginType] = useState("athlete"); // ✅ athlete | admin
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,9 +17,11 @@ function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // In a real application, you would handle authentication here.
-    // For this example, we simply navigate to the overview page.
-    navigate("/overView");
+    if (loginType === "athlete") {
+      navigate("/overView");
+    } else {
+      navigate("/admin-overview");
+    }
   };
 
   return (
@@ -34,8 +37,12 @@ function Login() {
                 className="h-12 w-12 rounded-full border-2 border-white"
               />
               <div className="flex flex-col text-black ml-4">
-                <h1 className="text-lg md:text-xl font-semibold">Pamantasan ng Lungsod ng San Pablo</h1>
-                <h2 className="text-sm md:text-base text-gray-500">College of Human Kinetics</h2>
+                <h1 className="text-lg md:text-xl font-semibold">
+                  Pamantasan ng Lungsod ng San Pablo
+                </h1>
+                <h2 className="text-sm md:text-base text-gray-500">
+                  College of Human Kinetics
+                </h2>
               </div>
             </div>
             <div className="pr-4">
@@ -48,7 +55,7 @@ function Login() {
       {/* Main Content Area */}
       <main className="flex-grow flex items-center justify-center p-8 bg-gray-100">
         <div className="flex flex-col md:flex-row w-full max-w-5xl rounded-lg shadow-lg overflow-hidden my-24">
-          {/* Left Section - Welcome and Features */}
+          {/* Left Section */}
           <div className="flex-1 bg-green-900 text-white p-12 flex flex-col justify-between">
             <div>
               <h1 className="text-4xl font-bold mb-4">Welcome to E-Athleta</h1>
@@ -104,17 +111,45 @@ function Login() {
 
           {/* Right Section - Login Form */}
           <div className="flex-1 bg-white p-12 flex flex-col justify-center items-center">
+            {/* ✅ Toggle Login Type */}
+            <div className="flex mb-6 w-full max-w-sm">
+              <button
+                type="button"
+                onClick={() => setLoginType("athlete")}
+                className={`flex-1 py-2 font-semibold rounded-l-md border 
+                ${loginType === "athlete" ? "bg-green-700 text-white" : "bg-gray-100 text-gray-700"}`}
+              >
+                Athlete
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoginType("admin")}
+                className={`flex-1 py-2 font-semibold rounded-r-md border 
+                ${loginType === "admin" ? "bg-green-700 text-white" : "bg-gray-100 text-gray-700"}`}
+              >
+                Admin
+              </button>
+            </div>
+
+            {/* Avatar */}
             <div className="flex items-center justify-center mb-6">
               <div className="h-24 w-24 rounded-full flex items-center justify-center overflow-hidden">
                 <img
-                  src="/lexi.jpg"
-                  alt="PLSP Logo"
+                  src={loginType === "athlete" ? "/lexi.jpg" : "/plsplogo.png"}
+                  alt="User Avatar"
                   className="h-full w-full object-cover"
                 />
               </div>
             </div>
-            <h2 className="text-2xl font-bold mb-2 text-gray-800">Welcome Back!</h2>
-            <p className="text-gray-600 mb-6">Sign in to access your account</p>
+
+            <h2 className="text-2xl font-bold mb-2 text-gray-800">
+              {loginType === "athlete" ? "Welcome Back Athlete!" : "Welcome Admin!"}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {loginType === "athlete"
+                ? "Sign in to access your athlete account"
+                : "Sign in to access the admin dashboard"}
+            </p>
 
             <form onSubmit={handleSubmit} className="w-full max-w-sm">
               <div className="mb-4">
@@ -165,23 +200,27 @@ function Login() {
                 Sign In
               </button>
 
-              <p className="text-center text-gray-500 mt-4">
-                Don't have an account?{" "}
-                <a href="#" className="text-green-700 font-semibold hover:underline">
-                  Register Now
-                </a>
-              </p>
-              <p className="text-center text-gray-500 my-4">or</p>
+              {loginType === "athlete" && (
+                <>
+                  <p className="text-center text-gray-500 mt-4">
+                    Don't have an account?{" "}
+                    <a href="#" className="text-green-700 font-semibold hover:underline">
+                      Register Now
+                    </a>
+                  </p>
+                  <p className="text-center text-gray-500 my-4">or</p>
 
-              <button className="w-full flex items-center justify-center space-x-2 bg-white py-2.5 rounded-md border border-gray-300 hover:bg-gray-100 mb-3 transition-colors">
-                <img src="/google.png" alt="Google" className="h-8 w-8" />
-                <span className="text-gray-700 font-semibold">Continue with Google</span>
-              </button>
+                  <button className="w-full flex items-center justify-center space-x-2 bg-white py-2.5 rounded-md border border-gray-300 hover:bg-gray-100 mb-3 transition-colors">
+                    <img src="/google.png" alt="Google" className="h-8 w-8" />
+                    <span className="text-gray-700 font-semibold">Continue with Google</span>
+                  </button>
 
-              <button className="w-full flex items-center justify-center space-x-2 bg-white text-gray-700 py-2.5 rounded-md border border-gray-300 hover:bg-gray-100 transition-colors">
-                <img src="/facebook.png" alt="Facebook" className="h-5 w-5" />
-                <span className="font-semibold">Continue with Facebook</span>
-              </button>
+                  <button className="w-full flex items-center justify-center space-x-2 bg-white text-gray-700 py-2.5 rounded-md border border-gray-300 hover:bg-gray-100 transition-colors">
+                    <img src="/facebook.png" alt="Facebook" className="h-5 w-5" />
+                    <span className="font-semibold">Continue with Facebook</span>
+                  </button>
+                </>
+              )}
             </form>
           </div>
         </div>
@@ -189,7 +228,9 @@ function Login() {
 
       {/* Footer */}
       <footer className="w-full py-4 text-center text-gray-500 text-sm bg-white">
-        <p className="text-gray-500">&copy; 2024 Pamantasan ng Lungsod ng San Pablo - College of Human Kinetics. All rights reserved.</p>
+        <p className="text-gray-500">
+          &copy; 2024 Pamantasan ng Lungsod ng San Pablo - College of Human Kinetics. All rights reserved.
+        </p>
       </footer>
     </div>
   );

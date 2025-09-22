@@ -1,5 +1,13 @@
 import 'leaflet/dist/leaflet.css';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import AdminAthletes from './ADMINPAGES/ATHLETES/AdminAthletes';
+import AdminAttendance from './ADMINPAGES/ATTENDANCE/AdminAttendance';
+import AdminOverView from './ADMINPAGES/OVERVIEW/OverView';
+import AdminPerformance from './ADMINPAGES/PERFORMANCE/AdminPerformance';
+import AdminSchedule from './ADMINPAGES/SCHEDULE/AdminSchedule';
+import AdminTeam from './ADMINPAGES/TEAMS/AdminTeam';
+import AdminTournament from './ADMINPAGES/TOURNAMENT/AdminTournament';
+import AdminTraining from './ADMINPAGES/TRAINING/AdminTraining';
 import MedalTally from './INSIDEPAGES/DASHBOARD/MEDALTALLY/medalTally';
 import OverView from './INSIDEPAGES/DASHBOARD/OVERVIEW/overView';
 import TrainProgram from './INSIDEPAGES/DASHBOARD/TRAINPROGRAM/trainProgram';
@@ -36,7 +44,7 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/overView' element={<OverView />} />
 
-      
+        {/* ATHLETE PAGES */}
         <Route path="/medal-tally" element={<MedalTally/>} />
         <Route path="/training-program" element={<TrainProgram/>} />
         <Route path="/analytics" element={<Analytics/>} />
@@ -47,6 +55,15 @@ function App() {
         <Route path="/sportEvent" element={<SportEvent/>} />
         <Route path="/staffs" element={<Staff/>} />
           
+        {/* ADMIN PAGES */}
+        <Route path="/admin-overview" element={<AdminOverView />} />
+        <Route path="/admin-team" element={<AdminTeam/>} />
+        <Route path="/admin-athletes" element={<AdminAthletes />} />
+        <Route path="/admin-performance" element={<AdminPerformance />} />
+        <Route path="/admin-schedule" element={<AdminSchedule />} />
+        <Route path="/admin-training" element={<AdminTraining />} />
+        <Route path="/admin-tournament" element={<AdminTournament />} />
+        <Route path="/admin-attendance" element={<AdminAttendance />} />
           
         </Routes>
       </BrowserRouter>
