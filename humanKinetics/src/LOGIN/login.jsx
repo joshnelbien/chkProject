@@ -66,9 +66,12 @@ function Login() {
                       <CheckCircle size={24} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">Real-time Updates</h3>
+                      <h3 className="text-xl font-semibold">
+                        Real-time Updates
+                      </h3>
                       <p className="text-gray-100">
-                        Track live competition scores and instant performance metrics across all sports events.
+                        Track live competition scores and instant performance
+                        metrics across all sports events.
                       </p>
                     </div>
                   </div>
@@ -79,9 +82,12 @@ function Login() {
                       <BarChart2 size={24} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">Performance Analytics</h3>
+                      <h3 className="text-xl font-semibold">
+                        Performance Analytics
+                      </h3>
                       <p className="text-gray-100">
-                        Comprehensive analytics and insights for athletes, coaches, and team management.
+                        Comprehensive analytics and insights for athletes,
+                        coaches, and team management.
                       </p>
                     </div>
                   </div>
@@ -90,20 +96,27 @@ function Login() {
             </div>
             <div className="mt-8">
               <p className="text-lg text-gray-300 mb-4">
-                Empowering athletes and coaches through excellence in sports education and training.
+                Empowering athletes and coaches through excellence in sports
+                education and training.
               </p>
               <div className="flex space-x-6 text-2xl font-bold">
                 <div>
                   <span className="block">500+</span>
-                  <span className="text-sm font-normal text-gray-200">Active Athletes</span>
+                  <span className="text-sm font-normal text-gray-200">
+                    Active Athletes
+                  </span>
                 </div>
                 <div>
                   <span className="block">50+</span>
-                  <span className="text-sm font-normal text-gray-200">Expert Coaches</span>
+                  <span className="text-sm font-normal text-gray-200">
+                    Expert Coaches
+                  </span>
                 </div>
                 <div>
                   <span className="block">4</span>
-                  <span className="text-sm font-normal text-gray-200">Sports Programs</span>
+                  <span className="text-sm font-normal text-gray-200">
+                    Sports Programs
+                  </span>
                 </div>
               </div>
             </div>
@@ -117,7 +130,11 @@ function Login() {
                 type="button"
                 onClick={() => setLoginType("athlete")}
                 className={`flex-1 py-2 font-semibold rounded-l-md border 
-                ${loginType === "athlete" ? "bg-green-700 text-white" : "bg-gray-100 text-gray-700"}`}
+                ${
+                  loginType === "athlete"
+                    ? "bg-green-700 text-white"
+                    : "bg-gray-100 text-gray-700"
+                }`}
               >
                 Athlete
               </button>
@@ -125,7 +142,11 @@ function Login() {
                 type="button"
                 onClick={() => setLoginType("admin")}
                 className={`flex-1 py-2 font-semibold rounded-r-md border 
-                ${loginType === "admin" ? "bg-green-700 text-white" : "bg-gray-100 text-gray-700"}`}
+                ${
+                  loginType === "admin"
+                    ? "bg-green-700 text-white"
+                    : "bg-gray-100 text-gray-700"
+                }`}
               >
                 Admin
               </button>
@@ -143,7 +164,9 @@ function Login() {
             </div>
 
             <h2 className="text-2xl font-bold mb-2 text-gray-800">
-              {loginType === "athlete" ? "Welcome Back Athlete!" : "Welcome Admin!"}
+              {loginType === "athlete"
+                ? "Welcome Back Athlete!"
+                : "Welcome Admin!"}
             </h2>
             <p className="text-gray-600 mb-6">
               {loginType === "athlete"
@@ -189,7 +212,10 @@ function Login() {
                 </div>
               </div>
 
-              <a href="#" className="block text-right text-sm text-green-700 hover:underline mb-6">
+              <a
+                href="#"
+                className="block text-right text-sm text-green-700 hover:underline mb-6"
+              >
                 Forgot Password?
               </a>
 
@@ -204,7 +230,10 @@ function Login() {
                 <>
                   <p className="text-center text-gray-500 mt-4">
                     Don't have an account?{" "}
-                    <a href="#" className="text-green-700 font-semibold hover:underline">
+                    <a
+                      href="/register"
+                      className="text-green-700 font-semibold hover:underline"
+                    >
                       Register Now
                     </a>
                   </p>
@@ -212,12 +241,20 @@ function Login() {
 
                   <button className="w-full flex items-center justify-center space-x-2 bg-white py-2.5 rounded-md border border-gray-300 hover:bg-gray-100 mb-3 transition-colors">
                     <img src="/google.png" alt="Google" className="h-8 w-8" />
-                    <span className="text-gray-700 font-semibold">Continue with Google</span>
+                    <span className="text-gray-700 font-semibold">
+                      Continue with Google
+                    </span>
                   </button>
 
                   <button className="w-full flex items-center justify-center space-x-2 bg-white text-gray-700 py-2.5 rounded-md border border-gray-300 hover:bg-gray-100 transition-colors">
-                    <img src="/facebook.png" alt="Facebook" className="h-5 w-5" />
-                    <span className="font-semibold">Continue with Facebook</span>
+                    <img
+                      src="/facebook.png"
+                      alt="Facebook"
+                      className="h-5 w-5"
+                    />
+                    <span className="font-semibold">
+                      Continue with Facebook
+                    </span>
                   </button>
                 </>
               )}
@@ -229,7 +266,8 @@ function Login() {
       {/* Footer */}
       <footer className="w-full py-4 text-center text-gray-500 text-sm bg-white">
         <p className="text-gray-500">
-          &copy; 2024 Pamantasan ng Lungsod ng San Pablo - College of Human Kinetics. All rights reserved.
+          &copy; 2024 Pamantasan ng Lungsod ng San Pablo - College of Human
+          Kinetics. All rights reserved.
         </p>
       </footer>
     </div>
