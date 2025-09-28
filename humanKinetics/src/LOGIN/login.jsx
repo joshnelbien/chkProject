@@ -226,6 +226,7 @@ function Login() {
                 Sign In
               </button>
 
+              {/* ✅ Athlete Register Options */}
               {loginType === "athlete" && (
                 <>
                   <p className="text-center text-gray-500 mt-4">
@@ -257,6 +258,19 @@ function Login() {
                     </span>
                   </button>
                 </>
+              )}
+
+              {/* ✅ Admin Register Option */}
+              {loginType === "admin" && (
+                <p className="text-center text-gray-500 mt-4">
+                  Don’t have an admin account?{" "}
+                  <a
+                    href="/adminRegister"
+                    className="text-green-700 font-semibold hover:underline"
+                  >
+                    Register as Admin
+                  </a>
+                </p>
               )}
             </form>
           </div>

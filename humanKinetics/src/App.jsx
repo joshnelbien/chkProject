@@ -27,6 +27,7 @@ import EventPage from "./PAGES/Events/EventPage";
 import HomePage from "./PAGES/HomePage/HomePage";
 import ProgramPage from "./PAGES/Programs/ProgramPage";
 import Register from "./PAGES/Register/Register";
+import AdminRegister from "./PAGES/Register/adminRegister";
 
 function App() {
   return (
@@ -43,6 +44,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/overView" element={<OverView />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/adminRegister" element={<AdminRegister />} />
+
           {/* ATHLETE PAGES */}
           <Route path="/medal-tally" element={<MedalTally />} />
           <Route path="/training-program" element={<TrainProgram />} />

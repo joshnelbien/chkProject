@@ -103,9 +103,9 @@ const StatusMessage = ({ type, message, onClose }) => {
   );
 };
 
-// --- Main Application Component ---
+// --- Main Registerlication Component ---
 
-const App = () => {
+const Register = () => {
   const Navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -636,4 +636,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Register;
