@@ -169,16 +169,20 @@ function AdminSchedule() {
   const currentWeek = scheduleData["February 19-23, 2024"];
 
   return (
-    <>
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
       <Sidebar />
-      <Navbar />
-      <div className="ml-64 mt-16 flex flex-col min-h-screen bg-gray-100">
-        {/* Main Content */}
-        <main className="flex-grow p-6">
+
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-grow">
+        <Navbar />
+        <main className="flex-grow p-4 sm:p-6 mt-16 md:mt-20">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
-              <h2 className="text-2xl font-semibold text-green-700">Schedule</h2>
+              <h2 className="text-2xl font-semibold text-green-700">
+                Schedule
+              </h2>
               <p className="text-gray-500">Training and Events Calendar</p>
             </div>
             <div className="flex space-x-2">
@@ -192,7 +196,7 @@ function AdminSchedule() {
           </div>
 
           {/* Calendar Navigation */}
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
             <div className="flex items-center space-x-2">
               <button className="text-gray-400">
                 <svg
@@ -230,6 +234,7 @@ function AdminSchedule() {
                 </svg>
               </button>
             </div>
+
             <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full">
               <button className="px-4 py-2 bg-white text-gray-700 font-semibold rounded-full shadow">
                 Week
@@ -241,7 +246,7 @@ function AdminSchedule() {
           </div>
 
           {/* Schedule Grid */}
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {currentWeek.map((dayData) => (
               <div key={dayData.day} className="flex flex-col">
                 <div className="text-center pb-2">
@@ -256,44 +261,10 @@ function AdminSchedule() {
                     <p className="text-xs font-semibold">{event.time}</p>
                     <p className="font-semibold">{event.title}</p>
                     <p className="text-xs text-gray-500 flex items-center mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3 mr-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      {event.location}
+                      📍 {event.location}
                     </p>
                     <p className="text-xs text-gray-500 flex items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3 mr-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 20h-5m2-2m-2 2v2m-7.232-9.232A24.965 24.965 0 017 10.5a24.965 24.965 0 01-2.768-4.768M10 11a7 7 0 100-14 7 7 0 000 14z"
-                        />
-                      </svg>
-                      {event.participants}
+                      👥 {event.participants}
                     </p>
                   </div>
                 ))}
@@ -302,10 +273,9 @@ function AdminSchedule() {
           </div>
         </main>
 
-        {/* Footer at the bottom */}
         <Footer />
       </div>
-    </>
+    </div>
   );
 }
 

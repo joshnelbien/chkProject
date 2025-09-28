@@ -4,44 +4,47 @@ import Sidebar from "../SIDEBAR/SideBar";
 
 function AdminOverView() {
   return (
-    <>
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar on the left */}
       <Sidebar />
-      <Navbar />
-      <div className="ml-64 mt-16 flex flex-col min-h-screen bg-gray-100">
+
+      {/* Right section: Navbar + Content */}
+      <div className="flex flex-col flex-grow">
+        <Navbar />
+
         {/* Main Content */}
-        <main className="flex-grow p-6">
+        <main className="flex-grow p-4 sm:p-6 max-w-7xl mx-auto w-full mt-16 md:mt-20">
           {/* Performance Overview Section */}
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-4 text-green-700">
               Overview
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Total Athletes Card */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
+
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-md text-center sm:text-left">
                 <p className="text-gray-500 text-sm">Total Athletes</p>
                 <p className="text-2xl font-bold">24</p>
               </div>
 
-              {/* Avg Attendance Card */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="bg-white p-6 rounded-lg shadow-md text-center sm:text-left">
                 <p className="text-gray-500 text-sm">Avg Attendance</p>
                 <p className="text-2xl font-bold">90%</p>
               </div>
 
-              {/* Avg Performance Card */}
-              <div className="bg-white p-6 rounded-lg shadow-md border-2 border-blue-500">
+              <div className="bg-white p-6 rounded-lg shadow-md border-2 border-blue-500 text-center sm:text-left">
                 <p className="text-gray-500 text-sm">Avg Performance</p>
                 <p className="text-2xl font-bold">88%</p>
               </div>
 
-              {/* Upcoming Sessions Card */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="bg-white p-6 rounded-lg shadow-md text-center sm:text-left">
                 <p className="text-gray-500 text-sm">Upcoming Sessions</p>
                 <p className="text-2xl font-bold">8</p>
               </div>
             </div>
           </div>
 
+          {/* Bottom Grid Sections */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recent Activities Section */}
             <div className="bg-white p-6 rounded-lg shadow-md">
@@ -64,6 +67,7 @@ function AdminOverView() {
                     <p className="text-gray-400 text-sm">2 hours ago</p>
                   </div>
                 </li>
+
                 <li className="flex items-start">
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3"></div>
                   <div>
@@ -76,6 +80,7 @@ function AdminOverView() {
                     <p className="text-gray-400 text-sm">4 hours ago</p>
                   </div>
                 </li>
+
                 <li className="flex items-start">
                   <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3"></div>
                   <div>
@@ -101,10 +106,10 @@ function AdminOverView() {
           </div>
         </main>
 
-        {/* Footer at the bottom */}
+        {/* Footer */}
         <Footer />
       </div>
-    </>
+    </div>
   );
 }
 
