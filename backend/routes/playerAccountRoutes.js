@@ -1,66 +1,91 @@
+// routes/playerAccountRoutes.js
+
 const express = require("express");
-const playerAccounts = require("../db/model/playerAccountsDb");
-const { sequelize } = require("../db/sequelize");
-
-const app = express();
-const PORT = 3000;
-
 const router = express.Router();
+const bcrypt = require("bcryptjs");
+const { Op } = require("sequelize"); // ✅ FIX: Import Op properly
+const playerAccounts = require("../db/model/playerAccountsDb"); // ✅ Your Sequelize model
 
-app.use(express.json());
+// POST /userAccounts/register - Handles new user registration
+router.post("/register", async (req, res) => {
+  console.log("📥 Incoming body:", req.body);
 
-app.post("/api/register", async (req, res) => {
-  const firstname = "TestRunne5";
-  const lastname = "TestAccount2";
-  const email = "tasfasf@hardcode.com";
-  const password = "HardcodedSecurePassword123";
-  console.log(`Attempting to insert hardcoded user: ${email}`);
+  // 1. Destructure and Validate Request Body
+  const {
+    firstName,
+    lastName,
+    studentNumber,
+    email,
+    course,
+    yearLevel,
+    sport,
+    password,
+    confirmPassword,
+    agreedToTerms,
+  } = req.body;
+
+  // ✅ Basic Server-Side Validation
+  if (password !== confirmPassword) {
+    return res.status(400).json({ message: "Passwords do not match." });
+  }
+
+  if (!firstName || !email || !password || !studentNumber || !agreedToTerms) {
+    return res
+      .status(400)
+      .json({ message: "All required fields must be filled." });
+  }
 
   try {
+    // 2. Check for Existing User (by email OR student number)
+    const existingUser = await playerAccounts.findOne({
+      where: {
+        [Op.or]: [
+          // ✅ FIX: Use Op directly
+          { email: email },
+          { studentNumber: studentNumber },
+        ],
+      },
+    });
+
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return res.status(409).json({
+          message: "An account with this email already exists.",
+        });
+      } else if (existingUser.studentNumber === studentNumber) {
+        return res.status(409).json({
+          message: "An account with this student number already exists.",
+        });
+      }
+    }
+
+    // 3. Hash the Password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // 4. Create New Account in Database
     const newPlayer = await playerAccounts.create({
-      lastname,
-      firstname,
+      firstName,
+      lastName,
+      studentNumber,
       email,
+      course,
+      yearLevel,
+      sport,
       password: hashedPassword,
+      isVerified: false,
     });
 
-    const responseData = newPlayer.toJSON();
-    delete responseData.password;
-
+    // 5. Send Success Response (excluding the password)
+    const { password: _, ...playerData } = newPlayer.toJSON();
     res.status(201).json({
-      message: "Hardcoded player account inserted successfully.",
-      user: responseData,
+      message: "Player account created successfully!",
+      player: playerData,
     });
   } catch (error) {
-    console.error("Error during hardcoded registration insertion:", error);
-
-    if (error.name === "SequelizeUniqueConstraintError") {
-      const field = error.errors[0].path;
-      return res.status(409).json({
-        error: `Insertion failed: ${
-          field.charAt(0).toUpperCase() + field.slice(1)
-        } is already in use. Please change the hardcoded value in app.js before testing again.`,
-        field: field,
-      });
-    }
-
-    res.status(500).json({
-      error:
-        "Internal server error while processing hardcoded insertion. Check your console for Sequelize errors.",
-      details: error.message,
-    });
+    console.error("Registration Error:", error);
+    res.status(500).json({ message: "Server error during registration." });
   }
-});
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(
-    "Test registration via POST request to http://localhost:3000/api/register"
-  );
 });
 
 module.exports = router;

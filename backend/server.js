@@ -7,6 +7,7 @@ const playerAccount = require("./db/model/playerAccountsDb");
 const playerAccountRoutes = require("./routes/playerAccountRoutes");
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 

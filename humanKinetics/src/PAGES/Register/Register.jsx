@@ -1,19 +1,112 @@
 import React, { useState } from "react";
-import { Eye, EyeOff, X } from "lucide-react"; // Using lucide-react for icons
+import { useNavigate } from "react-router-dom";
+import {
+  Eye,
+  EyeOff,
+  X,
+  CheckCircle,
+  AlertTriangle,
+  Loader,
+} from "lucide-react";
 
-// Mock function for form submission
-const handleSubmit = (formData) => {
-  console.log("Form Data Submitted:", formData);
-  // NOTE: Using console.log instead of alert for success message
-  console.log(
-    "Registration attempt logged to console. Check network tab for actual API call details."
+// ... (PasswordInputWithToggle and StatusMessage components remain the same) ...
+const PasswordInputWithToggle = ({
+  id,
+  name,
+  label,
+  placeholder,
+  value,
+  onChange,
+  disabled,
+}) => {
+  // Local state for password visibility
+  const [showPassword, setShowPassword] = useState(false);
+
+  const toggleVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  return (
+    <div className="flex flex-col">
+      <label htmlFor={id} className="text-sm font-medium text-gray-700">
+        {label} <span className="text-red-500">*</span>
+      </label>
+      <div className="mt-1 relative">
+        <input
+          // Dynamically set the type based on the state
+          type={showPassword ? "text" : "password"}
+          id={id}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required
+          disabled={disabled}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm pr-10 disabled:bg-gray-50 disabled:cursor-not-allowed"
+        />
+        <button
+          type="button"
+          onClick={toggleVisibility}
+          disabled={disabled}
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-green-700 transition duration-150 disabled:opacity-50"
+          aria-label={showPassword ? "Hide password" : "Show password"}
+        >
+          {/* Dynamically show the Eye or EyeOff icon */}
+          {showPassword ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+    </div>
   );
-  // In a real application, you would make your API call here
-  // e.g., fetch('/api/register', { method: 'POST', body: JSON.stringify(formData) })
 };
 
-const Register = () => {
-  // 1. STATE MANAGEMENT (State is kept but no longer linked to inputs)
+/**
+ * Custom component for displaying API feedback (Success/Error).
+ */
+const StatusMessage = ({ type, message, onClose }) => {
+  if (!message) return null;
+
+  let bgColor = "";
+  let textColor = "";
+  let Icon = AlertTriangle; // Default to error icon
+
+  if (type === "success") {
+    bgColor = "bg-green-100 border-green-400";
+    textColor = "text-green-700";
+    Icon = CheckCircle;
+  } else if (type === "error") {
+    bgColor = "bg-red-100 border-red-400";
+    textColor = "text-red-700";
+    Icon = AlertTriangle;
+  }
+
+  return (
+    <div
+      className={`relative p-4 mb-4 text-sm border rounded-lg ${bgColor} ${textColor} transition-all duration-300 ease-in-out`}
+      role={type === "error" ? "alert" : "status"}
+    >
+      <div className="flex items-start">
+        <Icon className="h-5 w-5 mr-3 shrink-0 mt-0.5" />
+        <p className="font-medium flex-1">{message}</p>
+        <button
+          onClick={onClose}
+          className="ml-4 p-1 rounded-full text-gray-500 hover:text-gray-900 transition-colors"
+          aria-label="Close notification"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// --- Main Application Component ---
+
+const App = () => {
+  const Navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -26,154 +119,149 @@ const Register = () => {
     confirmPassword: "",
     agreedToTerms: false,
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Function to update parent formData state (kept, but no longer called by InputField)
-  const updateFormData = (name, value, type, checked) => {
-    setFormData((prevData) => ({
-      ...prevData,
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState({ type: null, message: null });
+
+  // Generic handler for all input changes
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    // Clear status message on new input
+    setStatus({ type: null, message: null });
   };
 
-  // Handles form submission (still uses the potentially empty formData)
-  const onSubmit = (e) => {
+  const handleStatusClose = () => {
+    setStatus({ type: null, message: null });
+  };
+
+  const onSubmit = async (e) => {
     e.preventDefault();
+    setStatus({ type: null, message: null }); // Clear previous messages
+
     if (formData.password !== formData.confirmPassword) {
-      // NOTE: Replaced alert() with console.error()
-      console.error("Error: Passwords do not match!");
+      setStatus({
+        type: "error",
+        message: "Password and Confirm Password must match.",
+      });
       return;
     }
+
     if (!formData.agreedToTerms) {
-      // NOTE: Replaced alert() with console.error()
-      console.error(
-        "Error: You must agree to the Terms of Service and Privacy Policy."
-      );
+      setStatus({
+        type: "error",
+        message: "You must agree to the Terms of Service and Privacy Policy.",
+      });
       return;
     }
 
     setIsSubmitting(true);
-    // Simulate API call delay
-    setTimeout(() => {
-      handleSubmit(formData);
-      setIsSubmitting(false);
-    }, 1500);
-  };
 
-  // 2. FORM INPUT COMPONENT (Reusable) - 'update' prop is still received, but inputs below don't pass it.
-  const InputField = ({
-    label,
-    name,
-    value, // Value is received but might be undefined
-    type = "text",
-    placeholder,
-    className = "",
-    required = false,
-    children,
-    update, // Prop is received but is now always undefined from the parent component calls
-  }) => {
-    // Determine input type behavior
-    const isPassword = name === "password" || name === "confirmPassword";
-    const isSelect = type === "select";
+    try {
+      // 1. Prepare data for the API call
+      const dataToSend = { ...formData };
 
-    // Password fields leverage closure access to parent state (showPassword/showConfirmPassword)
-    const isShown = name === "password" ? showPassword : showConfirmPassword;
-    const toggleVisibility = () => {
-      name === "password"
-        ? setShowPassword(!showPassword)
-        : setShowConfirmPassword(!showConfirmPassword);
-    };
+      // 2. Make the API request
+      const response = await fetch(
+        "http://localhost:5000/userAccounts/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dataToSend),
+        }
+      );
 
-    // Determine the actual type attribute for the <input> element
-    const inputType = isPassword ? (isShown ? "text" : "password") : type;
+      // 3. Process the response defensively
+      let result = {};
+      try {
+        // Attempt to parse the body as JSON (works for 201 success and 409/400 errors with JSON bodies)
+        result = await response.json();
+      } catch (parseError) {
+        // Catch the SyntaxError: Unexpected end of JSON input here.
+        console.error(
+          "JSON Parsing Error (Server returned non-JSON/empty body):",
+          parseError
+        );
 
-    // Local handler is defined but 'update' is undefined in all consumer calls
-    const localHandleChange = (e) => {
-      const { name, value, type, checked } = e.target;
-      // This line will cause an error if 'update' is not passed/defined.
-      // Since we are deleting 'update' below, this will break functionality.
-      if (update) {
-        update(name, value, type, checked);
+        // If the parsing failed, try to determine what went wrong based on the status.
+        if (response.ok) {
+          // Success status (200-299) but no JSON body. This is unexpected but treat as success.
+          result.message =
+            "Registration successful, but the server response was malformed.";
+        } else {
+          // Error status (4xx, 5xx) and no JSON error message.
+          const errorText = await response.text();
+          console.error("Server Error Response Text:", errorText);
+          result.message =
+            "A server error occurred, and the response was unreadable. Check your console for details.";
+        }
       }
-    };
 
-    return (
-      <div className={`flex flex-col ${className}`}>
-        <label htmlFor={name} className="text-sm font-medium text-gray-700">
-          {label} {required && <span className="text-red-500">*</span>}
-        </label>
-        <div className="mt-1 relative">
-          {isSelect ? (
-            /* Renders <select> element */
-            <select
-              id={name}
-              name={name}
-              // WARNING: value is removed, making this an uncontrolled input
-              // value={value}
-              // WARNING: onChange is removed, preventing state update
-              // onChange={localHandleChange}
-              required={required}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm appearance-none bg-white cursor-pointer"
-            >
-              {children}
-            </select>
-          ) : (
-            /* Renders <input> element (Standard or Password) */
-            <>
-              <input
-                type={inputType}
-                id={name}
-                name={name}
-                // WARNING: value is removed, making this an uncontrolled input
-                // value={value}
-                // WARNING: onChange is removed, preventing state update
-                // onChange={localHandleChange}
-                placeholder={placeholder}
-                required={required}
-                className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm ${
-                  isPassword ? "pr-10" : ""
-                }`} // pr-10 makes room for the icon
-              />
-              {isPassword && (
-                /* Password Visibility Toggle Button */
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-green-700"
-                  onClick={toggleVisibility}
-                  aria-label={isShown ? "Hide password" : "Show password"}
-                >
-                  {isShown ? (
-                    <Eye className="h-4 w-4" />
-                  ) : (
-                    <EyeOff className="h-4 w-4" />
-                  )}
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    );
+      // 4. Handle Success or Explicit Error Message
+      if (response.ok) {
+        // HTTP Status 201 Created (Success)
+        setStatus({
+          type: "success",
+          message:
+            result.message || "Registration successful! You can now sign in.",
+        });
+        // Optionally reset form data on success
+        setFormData({
+          firstName: "",
+          lastName: "",
+          studentNumber: "",
+          email: "",
+          course: "",
+          yearLevel: "",
+          sport: "",
+          password: "",
+          confirmPassword: "",
+          agreedToTerms: false,
+        });
+      } else {
+        // HTTP Status 400, 409, 500 (Error)
+        // Use the message parsed from the JSON result (or the fallback message if parsing failed)
+        setStatus({
+          type: "error",
+          message:
+            result.message ||
+            "An unexpected error occurred. Please try again later.",
+        });
+      }
+    } catch (error) {
+      // This catch handles network errors (e.g., server offline)
+      console.error("Fetch Error:", error);
+      setStatus({
+        type: "error",
+        message:
+          "Network error: Could not connect to the registration service.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  // 3. MAIN COMPONENT RENDER
+  // Define shared disabled state
+  const isDisabled = isSubmitting || status.type === "success";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 font-inter">
-      {/* The main container matching the image's structure */}
-      <div className="flex w-full max-w-7xl h-[80vh] overflow-hidden rounded-xl shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 font-inter p-4 md:p-8">
+      <div className="flex flex-col md:flex-row w-full max-w-7xl h-auto md:h-[90vh] overflow-hidden rounded-xl shadow-2xl">
         {/* Left Side: Marketing/Info Panel (Dark Green) */}
-        <div className="w-full md:w-1/3 p-12 flex flex-col justify-between bg-green-900 text-white">
+        <div className="w-full md:w-1/3 p-8 md:p-12 flex flex-col justify-between bg-green-900 text-white">
           <div>
             {/* Mock Header/Logo */}
-            <div className="flex items-center text-sm font-semibold mb-12">
-              {/* Mock Logo or Icon */}
+            <div className="flex items-center text-sm font-semibold mb-8 md:mb-12">
               <span className="text-xl mr-2">🏃</span>
               Pamantasan ng Lungsod ng San Pablo
             </div>
 
-            <h1 className="text-5xl font-extrabold leading-tight mb-6">
+            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-6">
               Join E-Athleta
             </h1>
             <p className="text-gray-300 mb-8">
@@ -181,218 +269,289 @@ const Register = () => {
             </p>
 
             <ul className="space-y-4 text-sm">
-              <li className="flex items-center">
-                <span className="bg-green-700 p-1 rounded-full mr-3">
-                  <svg
-                    className="w-4 h-4 text-green-100"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    ></path>
-                  </svg>
-                </span>
-                Access to training schedules and events
-              </li>
-              <li className="flex items-center">
-                <span className="bg-green-700 p-1 rounded-full mr-3">
-                  <svg
-                    className="w-4 h-4 text-green-100"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    ></path>
-                  </svg>
-                </span>
-                Track your athletic progress
-              </li>
-              <li className="flex items-center">
-                <span className="bg-green-700 p-1 rounded-full mr-3">
-                  <svg
-                    className="w-4 h-4 text-green-100"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    ></path>
-                  </svg>
-                </span>
-                Connect with coaches and teammates
-              </li>
+              {[
+                "Access to training schedules and events",
+                "Track your athletic progress",
+                "Connect with coaches and teammates",
+              ].map((item, index) => (
+                <li key={index} className="flex items-center">
+                  <span className="bg-green-700 p-1 rounded-full mr-3 shrink-0">
+                    <svg
+                      className="w-4 h-4 text-green-100"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      ></path>
+                    </svg>
+                  </span>
+                  {item}
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Stats Section */}
-          <div className="flex justify-start space-x-8 mt-12">
+          <div className="flex justify-start space-x-6 md:space-x-8 mt-12 pt-8 border-t border-green-700">
             <div>
-              <p className="text-4xl font-bold text-green-300">500+</p>
-              <p className="text-sm text-gray-400">Active Athletes</p>
+              <p className="text-3xl md:text-4xl font-bold text-green-300">
+                500+
+              </p>
+              <p className="text-xs md:text-sm text-gray-400">
+                Active Athletes
+              </p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-green-300">50+</p>
-              <p className="text-sm text-gray-400">Expert Coaches</p>
+              <p className="text-3xl md:text-4xl font-bold text-green-300">
+                50+
+              </p>
+              <p className="text-xs md:text-sm text-gray-400">Expert Coaches</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-green-300">4</p>
-              <p className="text-sm text-gray-400">Sports Programs</p>
+              <p className="text-3xl md:text-4xl font-bold text-green-300">4</p>
+              <p className="text-xs md:text-sm text-gray-400">
+                Sports Programs
+              </p>
             </div>
           </div>
         </div>
 
         {/* Right Side: Registration Form (White/Light) */}
-        <div className="w-full md:w-2/3 bg-white p-12 overflow-y-auto">
+        <div className="w-full md:w-2/3 bg-white p-8 md:p-12 overflow-y-auto">
           {/* Close Button / Header Icon */}
           <div className="flex justify-end mb-4">
-            <button className="text-gray-400 hover:text-gray-700">
+            <button
+              type="button"
+              className="text-gray-400 hover:text-gray-700"
+              onClick={() => Navigate("/login")}
+            >
               <X className="w-6 h-6" />
             </button>
           </div>
 
-          <div className="max-w-md mx-auto">
+          <div className="max-w-xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-900">
               Create Your Account
             </h2>
-            <p className="mt-2 text-sm text-gray-500 mb-8">
+            <p className="mt-2 text-sm text-gray-500 mb-6">
               Fill in your details to get started
             </p>
 
-            <form onSubmit={onSubmit} className="space-y-4">
+            {/* Status Message Display */}
+            <StatusMessage
+              type={status.type}
+              message={status.message}
+              onClose={handleStatusClose}
+            />
+
+            {/* FORM START */}
+            <form className="space-y-4" onSubmit={onSubmit}>
               {/* Row 1: First Name & Last Name */}
               <div className="flex space-x-4">
-                <InputField
-                  label="First Name"
-                  name="firstName"
-                  placeholder="e.g., Juan"
-                  className="w-1/2"
-                  required
-                  // DELETED: value={formData.firstName}
-                  // DELETED: update={updateFormData}
-                />
-                <InputField
-                  label="Last Name"
-                  name="lastName"
-                  placeholder="e.g., Dela Cruz"
-                  className="w-1/2"
-                  required
-                  // DELETED: value={formData.lastName}
-                  // DELETED: update={updateFormData}
-                />
+                <div className="flex flex-col w-1/2">
+                  <label
+                    htmlFor="firstName"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    First Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="mt-1 relative">
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Juan"
+                      required
+                      disabled={isDisabled}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col w-1/2">
+                  <label
+                    htmlFor="lastName"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Last Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="mt-1 relative">
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Dela Cruz"
+                      required
+                      disabled={isDisabled}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Row 2: Student Number */}
-              <InputField
-                label="Student Number"
-                name="studentNumber"
-                placeholder="e.g., 2024-0001"
-                required
-                // DELETED: value={formData.studentNumber}
-                // DELETED: update={updateFormData}
-              />
+              <div className="flex flex-col">
+                <label
+                  htmlFor="studentNumber"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Student Number <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    type="text"
+                    id="studentNumber"
+                    name="studentNumber"
+                    value={formData.studentNumber}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 2024-0001"
+                    required
+                    disabled={isDisabled}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
 
               {/* Row 3: Email Address */}
-              <InputField
-                label="Email Address"
-                name="email"
-                type="email"
-                placeholder="e.g., student.juan@plsp.edu.ph"
-                required
-                // DELETED: value={formData.email}
-                // DELETED: update={updateFormData}
-              />
+              <div className="flex flex-col">
+                <label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Email Address (PLSP Email){" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="e.g., student.juan@plsp.edu.ph"
+                    required
+                    disabled={isDisabled}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
 
               {/* Row 4: Course & Year Level (Selects) */}
               <div className="flex space-x-4">
-                <InputField
-                  label="Course"
-                  name="course"
-                  type="select"
-                  className="w-1/2"
-                  required
-                  // DELETED: value={formData.course}
-                  // DELETED: update={updateFormData}
-                >
-                  <option value="" disabled>
-                    Select your course
-                  </option>
-                  <option value="BSCK">BS Human Kinetics</option>
-                  <option value="BSIT">BS Information Technology</option>
-                </InputField>
-                <InputField
-                  label="Year Level"
-                  name="yearLevel"
-                  type="select"
-                  className="w-1/2"
-                  required
-                  // DELETED: value={formData.yearLevel}
-                  // DELETED: update={updateFormData}
-                >
-                  <option value="" disabled>
-                    Select Year Level
-                  </option>
-                  <option value="1">1st Year</option>
-                  <option value="2">2nd Year</option>
-                  <option value="3">3rd Year</option>
-                  <option value="4">4th Year</option>
-                </InputField>
+                <div className="flex flex-col w-1/2">
+                  <label
+                    htmlFor="course"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Course <span className="text-red-500">*</span>
+                  </label>
+                  <div className="mt-1 relative">
+                    <select
+                      id="course"
+                      name="course"
+                      value={formData.course}
+                      onChange={handleInputChange}
+                      required
+                      disabled={isDisabled}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm appearance-none bg-white cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="" disabled>
+                        Select your course
+                      </option>
+                      <option value="BSCK">BS Human Kinetics</option>
+                      <option value="BSIT">BS Information Technology</option>
+                      <option value="BSED">BS Secondary Education</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex flex-col w-1/2">
+                  <label
+                    htmlFor="yearLevel"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Year Level <span className="text-red-500">*</span>
+                  </label>
+                  <div className="mt-1 relative">
+                    <select
+                      id="yearLevel"
+                      name="yearLevel"
+                      value={formData.yearLevel}
+                      onChange={handleInputChange}
+                      required
+                      disabled={isDisabled}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm appearance-none bg-white cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="" disabled>
+                        Select Year Level
+                      </option>
+                      <option value="1">1st Year</option>
+                      <option value="2">2nd Year</option>
+                      <option value="3">3rd Year</option>
+                      <option value="4">4th Year</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               {/* Row 5: Sport (Select) */}
-              <InputField
-                label="Sport"
-                name="sport"
-                type="select"
-                required
-                // DELETED: value={formData.sport}
-                // DELETED: update={updateFormData}
-              >
-                <option value="" disabled>
-                  Select Sport
-                </option>
-                <option value="basketball">Basketball</option>
-                <option value="volleyball">Volleyball</option>
-                <option value="chess">Chess</option>
-                <option value="track">Track and Field</option>
-              </InputField>
+              <div className="flex flex-col">
+                <label
+                  htmlFor="sport"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Preferred Sport <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1 relative">
+                  <select
+                    id="sport"
+                    name="sport"
+                    value={formData.sport}
+                    onChange={handleInputChange}
+                    required
+                    disabled={isDisabled}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm appearance-none bg-white cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled>
+                      Select Sport
+                    </option>
+                    <option value="basketball">Basketball</option>
+                    <option value="volleyball">Volleyball</option>
+                    <option value="chess">Chess</option>
+                    <option value="track">Track and Field</option>
+                    <option value="badminton">Badminton</option>
+                  </select>
+                </div>
+              </div>
 
               {/* Row 6: Password */}
-              <InputField
-                label="Password"
+              <PasswordInputWithToggle
+                id="password"
                 name="password"
-                type="password"
+                label="Password"
                 placeholder="••••••••"
-                required
-                // DELETED: value={formData.password}
-                // DELETED: update={updateFormData}
+                value={formData.password}
+                onChange={handleInputChange}
+                disabled={isDisabled}
               />
 
               {/* Row 7: Confirm Password */}
-              <InputField
-                label="Confirm Password"
+              <PasswordInputWithToggle
+                id="confirmPassword"
                 name="confirmPassword"
-                type="password"
+                label="Confirm Password"
                 placeholder="••••••••"
-                required
-                // DELETED: value={formData.confirmPassword}
-                // DELETED: update={updateFormData}
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                disabled={isDisabled}
               />
 
               {/* Row 8: Terms Checkbox */}
@@ -401,19 +560,24 @@ const Register = () => {
                   id="agreedToTerms"
                   name="agreedToTerms"
                   type="checkbox"
-                  // DELETED: checked={formData.agreedToTerms}
-                  // DELETED: onChange handler
-                  className="h-4 w-4 text-green-700 border-gray-300 rounded focus:ring-green-700 mt-1 cursor-pointer"
+                  checked={formData.agreedToTerms}
+                  onChange={handleInputChange}
+                  disabled={isDisabled}
+                  className="h-4 w-4 text-green-900 border-gray-300 rounded focus:ring-green-900 mt-1 cursor-pointer disabled:opacity-50"
                   required
                 />
                 <label
                   htmlFor="agreedToTerms"
-                  className="ml-3 text-sm text-gray-600"
+                  className="ml-3 text-sm text-gray-600 select-none"
                 >
                   I agree to the
                   <a
                     href="#"
                     className="font-medium text-green-700 hover:text-green-800 ml-1"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log("Terms clicked");
+                    }}
                   >
                     Terms of Service
                   </a>
@@ -421,6 +585,10 @@ const Register = () => {
                   <a
                     href="#"
                     className="font-medium text-green-700 hover:text-green-800 ml-1"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log("Privacy clicked");
+                    }}
                   >
                     Privacy Policy
                   </a>
@@ -430,30 +598,14 @@ const Register = () => {
               {/* Row 9: Register Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-green-900 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-700 transition duration-150 ease-in-out disabled:opacity-50"
+                disabled={isSubmitting || !formData.agreedToTerms}
+                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-green-900 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-700 transition duration-150 ease-in-out disabled:opacity-50 mt-6"
               >
                 {isSubmitting ? (
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                  <>
+                    <Loader className="h-5 w-5 mr-2 animate-spin" />
+                    Registering...
+                  </>
                 ) : (
                   "Register"
                 )}
@@ -463,13 +615,14 @@ const Register = () => {
               <p className="mt-4 text-center text-sm text-gray-500">
                 Already have an account?
                 <a
-                  href="login"
+                  href="#"
                   className="font-medium text-green-700 hover:text-green-800 ml-1"
                 >
                   Sign In
                 </a>
               </p>
             </form>
+            {/* FORM END */}
           </div>
 
           {/* Footer */}
@@ -483,4 +636,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default App;
