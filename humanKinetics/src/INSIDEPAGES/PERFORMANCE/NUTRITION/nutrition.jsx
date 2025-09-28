@@ -1,90 +1,110 @@
+import { useState } from "react";
 import Footer from "../../FOOTER/footer";
 import Navbar from "../../NAVBAR/navbar";
 import Sidebar from "../../SIDEBAR/sidebar";
 import { BarChart2 } from "lucide-react";
 
 function Nutrition() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const metrics = [
+    {
+      title: "Calorie Target Achievement",
+      value: "92%",
+      delta: "+3.2%",
+      width: "92%",
+    },
+    { title: "Protein Goals Met", value: "88%", delta: "+4.5%", width: "88%" },
+    {
+      title: "Meal Plan Adherence",
+      value: "85%",
+      delta: "+2.8%",
+      width: "85%",
+    },
+    { title: "Hydration Goals", value: "78%", delta: "+1.5%", width: "78%" },
+  ];
+
+  const strengths = [
+    { name: "Protein Intake", value: "95%" },
+    { name: "Meal Timing", value: "92%" },
+    { name: "Vegetable Intake", value: "88%" },
+  ];
+
+  const improvements = [
+    { name: "Omega-3 Intake", value: "65%" },
+    { name: "Fiber Goals", value: "72%" },
+    { name: "Hydration", value: "78%" },
+  ];
+
   return (
-    <>
-      <Sidebar />
-      <Navbar />
-      <div className="ml-64 mt-16 flex flex-col min-h-screen bg-gray-100">
-        {/* Main Content */}
-        <main className="flex-grow p-6">
-          <h1 className="text-2xl font-bold text-green-700 mb-6">Nutrition Dashboard</h1>
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+      />
 
-          {/* Top Performance Metrics Section */}
+      {/* Main container */}
+      <div
+        className={`flex flex-col flex-1 transition-all duration-300 ${
+          sidebarOpen ? "ml-64" : "ml-0"
+        }`}
+      >
+        {/* Navbar */}
+        <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+
+        {/* Main content */}
+        <main className="flex-1 overflow-y-auto mt-16 p-4 md:p-6">
+          <h1 className="text-2xl font-bold text-green-700 mb-6">
+            Nutrition Dashboard
+          </h1>
+
+          {/* Top Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            {/* Calorie Target Achievement Card */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-500 mb-2">Calorie Target Achievement</p>
-              <h3 className="text-3xl font-bold text-gray-800 mb-1">92%</h3>
-              <div className="flex items-center text-green-500 text-sm">
-                <span className="mr-1">+3.2%</span>
-                <BarChart2 size={16} />
+            {metrics.map((metric, idx) => (
+              <div key={idx} className="bg-white p-6 rounded-lg shadow">
+                <p className="text-gray-500 mb-2">{metric.title}</p>
+                <h3 className="text-3xl font-bold text-gray-800 mb-1">
+                  {metric.value}
+                </h3>
+                <div className="flex items-center text-green-500 text-sm">
+                  <span className="mr-1">{metric.delta}</span>
+                  <BarChart2 size={16} />
+                </div>
+                <div className="h-1 bg-gray-200 rounded-full mt-4">
+                  <div
+                    className="h-full bg-green-500 rounded-full"
+                    style={{ width: metric.width }}
+                  ></div>
+                </div>
               </div>
-              <div className="h-1 bg-gray-200 rounded-full mt-4">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: '92%' }}></div>
-              </div>
-            </div>
-
-            {/* Protein Goals Met Card */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-500 mb-2">Protein Goals Met</p>
-              <h3 className="text-3xl font-bold text-gray-800 mb-1">88%</h3>
-              <div className="flex items-center text-green-500 text-sm">
-                <span className="mr-1">+4.5%</span>
-                <BarChart2 size={16} />
-              </div>
-              <div className="h-1 bg-gray-200 rounded-full mt-4">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: '88%' }}></div>
-              </div>
-            </div>
-
-            {/* Meal Plan Adherence Card */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-500 mb-2">Meal Plan Adherence</p>
-              <h3 className="text-3xl font-bold text-gray-800 mb-1">85%</h3>
-              <div className="flex items-center text-green-500 text-sm">
-                <span className="mr-1">+2.8%</span>
-                <BarChart2 size={16} />
-              </div>
-              <div className="h-1 bg-gray-200 rounded-full mt-4">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: '85%' }}></div>
-              </div>
-            </div>
-
-            {/* Hydration Goals Card */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <p className="text-gray-500 mb-2">Hydration Goals</p>
-              <h3 className="text-3xl font-bold text-gray-800 mb-1">78%</h3>
-              <div className="flex items-center text-green-500 text-sm">
-                <span className="mr-1">+1.5%</span>
-                <BarChart2 size={16} />
-              </div>
-              <div className="h-1 bg-gray-200 rounded-full mt-4">
-                <div className="h-full bg-green-500 rounded-full" style={{ width: '78%' }}></div>
-              </div>
-            </div>
+            ))}
           </div>
 
           {/* Filters Section */}
-          <div className="flex items-center space-x-2 mb-6">
-            <button className="px-4 py-2 rounded-lg bg-green-700 text-white font-semibold shadow">
-              Overview
-            </button>
-            <button className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-600 font-semibold shadow">
-              Meal Analysis
-            </button>
-            <button className="px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-600 font-semibold shadow">
-              Macro Tracking
-            </button>
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            {["Overview", "Meal Analysis", "Macro Tracking"].map(
+              (filter, idx) => (
+                <button
+                  key={idx}
+                  className={`px-4 py-2 rounded-lg font-semibold shadow ${
+                    idx === 0
+                      ? "bg-green-700 text-white"
+                      : "bg-white border border-gray-300 text-gray-600"
+                  }`}
+                >
+                  {filter}
+                </button>
+              )
+            )}
           </div>
 
-          {/* Caloric Distribution Section */}
+          {/* Caloric Distribution */}
           <div className="bg-white p-6 rounded-lg shadow mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Caloric Distribution</h2>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Caloric Distribution
+              </h2>
               <div className="flex space-x-2">
                 <button className="px-3 py-1 text-sm rounded-lg bg-gray-100 border border-gray-300 text-gray-600">
                   All Meals
@@ -99,51 +119,50 @@ function Nutrition() {
             </div>
           </div>
 
-          {/* Nutritional Strengths & Areas for Improvement Section */}
+          {/* Strengths & Improvements */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Nutritional Strengths */}
             <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Nutritional Strengths</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                Nutritional Strengths
+              </h2>
               <ul className="space-y-3">
-                <li className="flex justify-between items-center text-gray-700">
-                  <p>Protein Intake</p>
-                  <p className="font-semibold">95%</p>
-                </li>
-                <li className="flex justify-between items-center text-gray-700">
-                  <p>Meal Timing</p>
-                  <p className="font-semibold">92%</p>
-                </li>
-                <li className="flex justify-between items-center text-gray-700">
-                  <p>Vegetable Intake</p>
-                  <p className="font-semibold">88%</p>
-                </li>
+                {strengths.map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex justify-between items-center text-gray-700"
+                  >
+                    <p>{item.name}</p>
+                    <p className="font-semibold">{item.value}</p>
+                  </li>
+                ))}
               </ul>
             </div>
+
             {/* Areas for Improvement */}
             <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Areas for Improvement</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                Areas for Improvement
+              </h2>
               <ul className="space-y-3">
-                <li className="flex justify-between items-center text-gray-700">
-                  <p>Omega-3 Intake</p>
-                  <p className="font-semibold">65%</p>
-                </li>
-                <li className="flex justify-between items-center text-gray-700">
-                  <p>Fiber Goals</p>
-                  <p className="font-semibold">72%</p>
-                </li>
-                <li className="flex justify-between items-center text-gray-700">
-                  <p>Hydration</p>
-                  <p className="font-semibold">78%</p>
-                </li>
+                {improvements.map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex justify-between items-center text-gray-700"
+                  >
+                    <p>{item.name}</p>
+                    <p className="font-semibold">{item.value}</p>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
         </main>
 
-        {/* Footer at the bottom */}
+        {/* Footer */}
         <Footer />
       </div>
-    </>
+    </div>
   );
 }
 

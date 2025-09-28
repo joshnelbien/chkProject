@@ -1,11 +1,21 @@
-import { Bell, Sun } from "lucide-react"; // Import Bell and Sun icons
+import { Bell, Sun, Menu } from "lucide-react";
 
-function Navbar() {
+function Navbar({ toggleSidebar }) {
   return (
-    <div className="ml-64 h-16 bg-green-900 text-white shadow flex items-center justify-between px-6 fixed top-0 left-0 right-0 z-10">
-      {/* Left Side - Logo and Title */}
+    <div
+      className="fixed top-0 left-0 right-0 z-20 bg-green-900 text-white shadow flex items-center justify-between h-16 px-4 md:px-6
+                 md:left-64 left-0 w-full md:w-[calc(100%-16rem)] transition-all"
+    >
       <div className="flex items-center space-x-3">
-        {/* Placeholder Logo */}
+        {/* Mobile toggle button */}
+        <button
+          className="md:hidden w-10 h-10 flex items-center justify-center bg-green-700 hover:bg-green-800 rounded-lg shadow-md transition-colors"
+          onClick={toggleSidebar}
+        >
+          <Menu size={24} />
+        </button>
+
+        {/* Logo */}
         <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden">
           <img
             src="/plsplogo.png"
@@ -13,7 +23,8 @@ function Navbar() {
             className="w-full h-full object-cover"
           />
         </div>
-        <div>
+
+        <div className="hidden sm:flex flex-col">
           <h1 className="text-lg font-semibold">
             Pamantasan ng Lungsod ng San Pablo
           </h1>
@@ -21,7 +32,6 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Right Side - Buttons */}
       <div className="flex items-center space-x-3">
         <button className="w-10 h-10 flex items-center justify-center bg-green-700 hover:bg-green-800 rounded-lg shadow-md transition-colors">
           <Bell size={24} />
