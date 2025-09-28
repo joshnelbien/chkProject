@@ -55,10 +55,10 @@ function NavigationBar() {
               className="h-12 w-12 rounded-full border-2 border-white"
             />
             <div className="flex flex-col text-white ml-3">
-              <h1 className="text-base md:text-xl font-semibold leading-tight">
+              <h1 className="text-[10px] md:text-xl font-semibold leading-tight">
                 Pamantasan ng Lungsod ng San Pablo
               </h1>
-              <h2 className="text-xs md:text-base text-gray-300">
+              <h2 className="text-[8px] md:text-base text-gray-300">
                 College of Human Kinetics
               </h2>
             </div>
