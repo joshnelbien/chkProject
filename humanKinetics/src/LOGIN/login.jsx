@@ -238,25 +238,6 @@ function Login() {
                       Register Now
                     </a>
                   </p>
-                  <p className="text-center text-gray-500 my-4">or</p>
-
-                  <button className="w-full flex items-center justify-center space-x-2 bg-white py-2.5 rounded-md border border-gray-300 hover:bg-gray-100 mb-3 transition-colors">
-                    <img src="/google.png" alt="Google" className="h-8 w-8" />
-                    <span className="text-gray-700 font-semibold">
-                      Continue with Google
-                    </span>
-                  </button>
-
-                  <button className="w-full flex items-center justify-center space-x-2 bg-white text-gray-700 py-2.5 rounded-md border border-gray-300 hover:bg-gray-100 transition-colors">
-                    <img
-                      src="/facebook.png"
-                      alt="Facebook"
-                      className="h-5 w-5"
-                    />
-                    <span className="font-semibold">
-                      Continue with Facebook
-                    </span>
-                  </button>
                 </>
               )}
 

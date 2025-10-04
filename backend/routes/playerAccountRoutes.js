@@ -3,10 +3,9 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const { Op } = require("sequelize"); // ✅ FIX: Import Op properly
-const playerAccounts = require("../db/model/playerAccountsDb"); // ✅ Your Sequelize model
+const { Op } = require("sequelize");
+const playerAccounts = require("../db/model/playerAccountsDb");
 
-// POST /userAccounts/register - Handles new user registration
 router.post("/register", async (req, res) => {
   console.log("📥 Incoming body:", req.body);
 
@@ -85,6 +84,17 @@ router.post("/register", async (req, res) => {
   } catch (error) {
     console.error("Registration Error:", error);
     res.status(500).json({ message: "Server error during registration." });
+  }
+});
+
+router.get("/players", async (req, res) => {
+  try {
+    // Fetch data from DB
+    const players = await playerAccounts.findAll();
+    res.json(players);
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({ error: "Failed to fetch players" });
   }
 });
 

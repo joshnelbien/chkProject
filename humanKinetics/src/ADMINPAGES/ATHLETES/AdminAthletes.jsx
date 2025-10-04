@@ -1,8 +1,27 @@
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 function AdminAthletes() {
+  const [players, setPlayers] = useState([]);
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/userAccounts/players"
+        );
+        console.log("📌 Fetched Players (Frontend):", res.data);
+        setPlayers(res.data);
+      } catch (error) {
+        console.error("❌ Error fetching players (Frontend):", error);
+      }
+    };
+
+    fetchPlayers();
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar - fixed on the left */}
