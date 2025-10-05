@@ -15,6 +15,7 @@ const adminAccountRoutes = require("./routes/adminAccountRoutes");
 const TrainingSchedule = require("./db/model/trainingSchedulesDB");
 const trainingScheduleRoutes = require("./routes/trainingScheduleRoutes");
 
+const TournamentSchedule = require("./db/model/tournament");
 const Tournament = require("./db/model/tournamentSchedules");
 const tournamentRoutes = require("./routes/tournamentRoutes");
 
@@ -33,6 +34,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
     await adminAccount.sync({ alter: true });
     await TrainingSchedule.sync({ alter: true });
     await Tournament.sync({ alter: true });
+    await TournamentSchedule.sync({ alter: true });
 
     // Insert hardcoded data into teamSchedule table
     console.log("Database ready.");

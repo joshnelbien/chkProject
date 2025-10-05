@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Tournament = require("../db/model/tournamentSchedules");
+const TournamentSchedule = require("../db/model/tournament");
 
 // ✅ Add new tournament
 router.post("/tournaments", async (req, res) => {
@@ -16,11 +17,36 @@ router.post("/tournaments", async (req, res) => {
 // 🟡 (Optional) Fetch all tournaments
 router.get("/tournaments-activities", async (req, res) => {
   try {
-    const tournaments = await Tournament.findAll();
+    const tournaments = await Tournament.findAll({
+      include: {
+        model: TournamentSchedule,
+        as: "schedules", // 👈 must match alias in association
+      },
+    });
     res.json(tournaments);
   } catch (error) {
     console.error("❌ Error fetching tournaments:", error);
     res.status(500).json({ error: "Failed to fetch tournaments" });
+  }
+});
+
+router.post("/tournaments/:id/schedule", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date, startTime, endTime, opponent } = req.body;
+
+    const schedule = await TournamentSchedule.create({
+      tournamentId: id,
+      date,
+      startTime,
+      endTime,
+      opponent,
+    });
+
+    res.status(201).json(schedule);
+  } catch (error) {
+    console.error("❌ Error saving schedule:", error);
+    res.status(500).json({ error: "Failed to save schedule" });
   }
 });
 

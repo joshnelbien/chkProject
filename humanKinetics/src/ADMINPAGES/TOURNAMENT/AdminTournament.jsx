@@ -9,13 +9,24 @@ function AdminTournament() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tournaments, setTournaments] = useState([]);
 
-  // ✅ Fetch tournaments from backend
+  // 📝 For Set Schedule Modal
+  const [selectedTournament, setSelectedTournament] = useState(null);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({
+    date: "",
+    startTime: "",
+    endTime: "",
+    opponent: "",
+  });
+
+  // ✅ Fetch tournaments from backend (with schedules)
   const fetchTournaments = async () => {
     try {
       const response = await axios.get(
         "http://localhost:5000/tournament/tournaments-activities"
       );
-      setTournaments(response.data);
+      console.log("📌 Tournaments from backend:", response.data);
+      setTournaments(response.data); // ✅ use backend schedules directly
     } catch (error) {
       console.error("❌ Failed to fetch tournaments:", error);
     }
@@ -24,6 +35,33 @@ function AdminTournament() {
   useEffect(() => {
     fetchTournaments();
   }, []);
+
+  // ✅ Handle Schedule Submit
+  const handleScheduleSubmit = async (e) => {
+    e.preventDefault();
+
+    const { date, startTime, endTime, opponent } = scheduleForm;
+    if (!date || !startTime || !endTime || !opponent) {
+      alert("Please complete all fields");
+      return;
+    }
+
+    try {
+      await axios.post(
+        `http://localhost:5000/tournament/tournaments/${selectedTournament.id}/schedule`,
+        scheduleForm
+      );
+
+      alert("✅ Schedule saved successfully!");
+      fetchTournaments(); // refresh tournaments to include new schedule
+      setIsScheduleModalOpen(false);
+      setScheduleForm({ date: "", startTime: "", endTime: "", opponent: "" });
+      setSelectedTournament(null);
+    } catch (error) {
+      console.error("❌ Failed to save schedule:", error);
+      alert("Failed to save schedule");
+    }
+  };
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
@@ -78,14 +116,11 @@ function AdminTournament() {
               tournaments.map((tournament) => (
                 <TournamentCard
                   key={tournament.id}
-                  title={tournament.tournamentName}
-                  status="Upcoming"
-                  sport={tournament.sport}
-                  date={`${tournament.startDate} - ${tournament.endDate}`}
-                  location={tournament.location}
-                  teams={`${tournament.teams} teams`}
-                  schedule={[]} // You can extend this later
-                  matches={[]} // You can extend this later
+                  tournament={tournament}
+                  onSetSchedule={() => {
+                    setSelectedTournament(tournament);
+                    setIsScheduleModalOpen(true);
+                  }}
                 />
               ))
             ) : (
@@ -98,42 +133,155 @@ function AdminTournament() {
 
         <Footer />
       </div>
+
+      {/* 📝 Schedule Modal */}
+      {isScheduleModalOpen && selectedTournament && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-green-700">
+                Set Schedule for {selectedTournament.tournamentName}
+              </h2>
+              <button
+                onClick={() => setIsScheduleModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleScheduleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <input
+                  type="date"
+                  value={scheduleForm.date}
+                  onChange={(e) =>
+                    setScheduleForm({ ...scheduleForm, date: e.target.value })
+                  }
+                  className="w-full border rounded-lg px-3 py-2"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    value={scheduleForm.startTime}
+                    onChange={(e) =>
+                      setScheduleForm({
+                        ...scheduleForm,
+                        startTime: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-lg px-3 py-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    value={scheduleForm.endTime}
+                    onChange={(e) =>
+                      setScheduleForm({
+                        ...scheduleForm,
+                        endTime: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-lg px-3 py-2"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Opponent
+                </label>
+                <input
+                  type="text"
+                  value={scheduleForm.opponent}
+                  onChange={(e) =>
+                    setScheduleForm({
+                      ...scheduleForm,
+                      opponent: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-lg px-3 py-2"
+                  placeholder="Enter opponent name"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <button
+                  type="submit"
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                >
+                  Save Schedule
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function TournamentCard({
-  title,
-  status,
-  sport,
-  date,
-  location,
-  teams,
-  schedule,
-  matches,
-}) {
+// 🎯 Tournament Card Component
+function TournamentCard({ tournament, onSetSchedule }) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold text-gray-800">{title}</h3>
+        <h3 className="text-xl font-semibold text-gray-800">
+          {tournament.tournamentName}
+        </h3>
         <span className="bg-blue-200 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
-          {status}
+          Upcoming
         </span>
       </div>
 
-      <p className="text-gray-500 text-sm mb-4">{sport}</p>
+      <p className="text-gray-500 text-sm mb-4">{tournament.sport}</p>
       <div className="flex flex-wrap items-center gap-4 text-gray-500 text-sm mb-4">
-        <div>📅 {date}</div>
-        <div>📍 {location}</div>
-        <div>🧑‍🤝‍🧑 {teams}</div>
+        <div>
+          📅 {tournament.startDate} - {tournament.endDate}
+        </div>
+        <div>📍 {tournament.location}</div>
+        <div>🧑‍🤝‍🧑 {tournament.teams || 0} teams</div>
       </div>
 
-      {/* Placeholder if no schedule */}
-      {schedule.length === 0 && (
+      {/* 📌 Schedule Section */}
+      {tournament.schedules && tournament.schedules.length > 0 ? (
+        <div className="bg-gray-50 p-3 rounded-lg mb-3">
+          <h4 className="font-semibold text-sm mb-2">Scheduled Matches:</h4>
+          <ul className="text-xs text-gray-600 space-y-1">
+            {tournament.schedules.map((s, i) => (
+              <li key={i}>
+                📅 {s.date} — ⏰ {s.startTime} - {s.endTime} — 🆚 {s.opponent}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
         <p className="text-sm text-gray-400 italic mb-2">
           No schedule added yet
         </p>
       )}
+
+      <button
+        onClick={onSetSchedule}
+        className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition"
+      >
+        ➕ Set Schedule
+      </button>
     </div>
   );
 }
