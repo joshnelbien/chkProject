@@ -1,8 +1,12 @@
+import { useState } from "react";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
+import AddEventModal from "./addEventModal";
 
 function AdminSchedule() {
+  const [isModalOpen, setModalOpen] = useState(false);
+
   const scheduleData = {
     "February 19-23, 2024": [
       {
@@ -24,22 +28,6 @@ function AdminSchedule() {
             participants: "14 athletes",
             color: "bg-gray-100",
             textColor: "text-gray-800",
-          },
-          {
-            time: "2:00 PM - 3:00 PM",
-            title: "Team Meeting",
-            location: "Meeting Room 1",
-            participants: "15 athletes",
-            color: "bg-purple-100",
-            textColor: "text-purple-800",
-          },
-          {
-            time: "3:30 PM - 5:00 PM",
-            title: "Skills Training",
-            location: "Court 2",
-            participants: "14 athletes",
-            color: "bg-cyan-100",
-            textColor: "text-cyan-800",
           },
         ],
       },
@@ -63,104 +51,6 @@ function AdminSchedule() {
             color: "bg-yellow-100",
             textColor: "text-yellow-800",
           },
-          {
-            time: "4:00 PM - 5:00 PM",
-            title: "Recovery Session",
-            location: "Gym",
-            participants: "14 athletes",
-            color: "bg-lime-100",
-            textColor: "text-lime-800",
-          },
-        ],
-      },
-      {
-        day: "Wednesday",
-        date: "21",
-        events: [
-          {
-            time: "9:00 AM - 11:00 AM",
-            title: "Basketball Training",
-            location: "Main Court",
-            participants: "12 athletes",
-            color: "bg-green-100",
-            textColor: "text-green-800",
-          },
-          {
-            time: "2:00 PM - 4:00 PM",
-            title: "Volleyball Game vs Aces",
-            location: "Court 2",
-            participants: "14 athletes",
-            color: "bg-yellow-100",
-            textColor: "text-yellow-800",
-          },
-          {
-            time: "4:00 PM - 5:00 PM",
-            title: "Team Analysis",
-            location: "Meeting Room 1",
-            participants: "12 athletes",
-            color: "bg-purple-100",
-            textColor: "text-purple-800",
-          },
-        ],
-      },
-      {
-        day: "Thursday",
-        date: "22",
-        events: [
-          {
-            time: "8:00 AM - 10:00 AM",
-            title: "Volleyball Training",
-            location: "Court 2",
-            participants: "14 athletes",
-            color: "bg-gray-100",
-            textColor: "text-gray-800",
-          },
-          {
-            time: "2:00 PM - 4:00 PM",
-            title: "Basketball Practice",
-            location: "Main Court",
-            participants: "12 athletes",
-            color: "bg-green-100",
-            textColor: "text-green-800",
-          },
-          {
-            time: "4:00 PM - 5:00 PM",
-            title: "Team Strategy",
-            location: "Meeting Room 2",
-            participants: "12 athletes",
-            color: "bg-purple-100",
-            textColor: "text-purple-800",
-          },
-        ],
-      },
-      {
-        day: "Friday",
-        date: "23",
-        events: [
-          {
-            time: "9:00 AM - 11:00 AM",
-            title: "Basketball Training",
-            location: "Main Court",
-            participants: "12 athletes",
-            color: "bg-green-100",
-            textColor: "text-green-800",
-          },
-          {
-            time: "11:30 AM - 1:30 PM",
-            title: "Volleyball Practice",
-            location: "Court 2",
-            participants: "14 athletes",
-            color: "bg-gray-100",
-            textColor: "text-gray-800",
-          },
-          {
-            time: "2:30 PM - 4:00 PM",
-            title: "Team Building",
-            location: "Meeting Hall",
-            participants: "40 athletes",
-            color: "bg-purple-100",
-            textColor: "text-purple-800",
-          },
         ],
       },
     ],
@@ -173,9 +63,10 @@ function AdminSchedule() {
       {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div className="flex flex-col flex-grow">
         <Navbar />
+
         <main className="flex-grow p-4 sm:p-6 mt-16 md:mt-20">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -189,7 +80,10 @@ function AdminSchedule() {
               <button className="px-4 py-2 bg-white rounded-full border border-gray-300 text-gray-700">
                 All Teams
               </button>
-              <button className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow">
+              <button
+                onClick={() => setModalOpen(true)}
+                className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow hover:bg-green-700 transition"
+              >
                 Add Event
               </button>
             </div>
@@ -260,10 +154,10 @@ function AdminSchedule() {
                   >
                     <p className="text-xs font-semibold">{event.time}</p>
                     <p className="font-semibold">{event.title}</p>
-                    <p className="text-xs text-gray-500 flex items-center mt-1">
+                    <p className="text-xs text-gray-500 mt-1">
                       📍 {event.location}
                     </p>
-                    <p className="text-xs text-gray-500 flex items-center">
+                    <p className="text-xs text-gray-500">
                       👥 {event.participants}
                     </p>
                   </div>
@@ -272,6 +166,12 @@ function AdminSchedule() {
             ))}
           </div>
         </main>
+
+        {/* ✅ Modal */}
+        <AddEventModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+        />
 
         <Footer />
       </div>
