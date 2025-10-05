@@ -122,29 +122,43 @@ const AdminRegister = () => {
     }
 
     setIsSubmitting(true);
+
     try {
-      // TODO: Replace with real API
-      console.log("Admin Registration Data:", formData);
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // simulate network
-      setStatus({ type: "success", message: "Admin registered successfully!" });
-      setFormData({
-        lastName: "",
-        firstName: "",
-        middleName: "",
-        sports: "",
-        experience: "",
-        education: "",
-        specialization: "",
-        achievements: "",
-        password: "",
-        confirmPassword: "",
-        agreedToTerms: false,
-      });
-    } catch (err) {
-      setStatus({
-        type: "error",
-        message: "Registration failed. Please try again.",
-      });
+      const response = await fetch(
+        "http://localhost:5000/adminAccounts/admin-register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus({ type: "success", message: data.message });
+        setFormData({
+          lastName: "",
+          firstName: "",
+          middleName: "",
+          sports: "",
+          experience: "",
+          education: "",
+          specialization: "",
+          achievements: "",
+          password: "",
+          confirmPassword: "",
+          agreedToTerms: false,
+        });
+      } else {
+        setStatus({
+          type: "error",
+          message: data.message || "Registration failed.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      setStatus({ type: "error", message: "Network error. Please try again." });
     } finally {
       setIsSubmitting(false);
     }

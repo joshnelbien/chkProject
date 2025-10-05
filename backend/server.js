@@ -9,6 +9,9 @@ const playerAccountRoutes = require("./routes/playerAccountRoutes");
 const teamSchedule = require("./db/model/teamScheduleDB");
 const teamScheduleRoutes = require("./routes/teamScheduleRoutes");
 
+const adminAccount = require("./db/model/adminAccountDB");
+const adminAccountRoutes = require("./routes/adminAccountRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -21,6 +24,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
     await sequelize.authenticate();
     await playerAccount.sync({ alter: true });
     await teamSchedule.sync({ alter: true });
+    await adminAccount.sync({ alter: true });
 
     // Insert hardcoded data into teamSchedule table
     console.log("Database ready.");
@@ -30,6 +34,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 })();
 
 app.use("/userAccounts", playerAccountRoutes);
+app.use("/adminAccounts", adminAccountRoutes);
 app.use("/teamSchedule", teamScheduleRoutes);
 
 const PORT = process.env.PORT || 5000;
