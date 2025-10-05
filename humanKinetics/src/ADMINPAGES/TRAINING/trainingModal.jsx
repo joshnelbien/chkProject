@@ -14,9 +14,32 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (onSubmit) onSubmit(formData);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/trainingSchedule/training-schedule",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("✅ Schedule added successfully!");
+      } else {
+        alert(`❌ Failed: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      alert("❌ Network error. Please try again.");
+    }
+
+    // Close modal and reset
     onClose();
     setFormData({
       title: "",
