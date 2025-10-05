@@ -14,6 +14,10 @@ const adminAccountRoutes = require("./routes/adminAccountRoutes");
 
 const TrainingSchedule = require("./db/model/trainingSchedulesDB");
 const trainingScheduleRoutes = require("./routes/trainingScheduleRoutes");
+
+const Tournament = require("./db/model/tournamentSchedules");
+const tournamentRoutes = require("./routes/tournamentRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -28,6 +32,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
     await teamSchedule.sync({ alter: true });
     await adminAccount.sync({ alter: true });
     await TrainingSchedule.sync({ alter: true });
+    await Tournament.sync({ alter: true });
 
     // Insert hardcoded data into teamSchedule table
     console.log("Database ready.");
@@ -40,6 +45,7 @@ app.use("/userAccounts", playerAccountRoutes);
 app.use("/adminAccounts", adminAccountRoutes);
 app.use("/teamSchedule", teamScheduleRoutes);
 app.use("/trainingSchedule", trainingScheduleRoutes);
+app.use("/tournament", tournamentRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

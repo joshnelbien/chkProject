@@ -1,8 +1,12 @@
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
+import TournamentModal from "./tournamentModal";
+import React, { useState } from "react";
 
 function AdminTournament() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       {/* Sidebar (fixed on the left) */}
@@ -23,10 +27,23 @@ function AdminTournament() {
               </h2>
               <p className="text-gray-500">Tournament Management</p>
             </div>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow hover:bg-green-700 transition">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow hover:bg-green-700 transition"
+            >
               Add Tournament
             </button>
           </div>
+
+          {/* ✅ Render the modal here, not inside TournamentCard */}
+          <TournamentModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={(data) => {
+              console.log("✅ Tournament Data Submitted:", data);
+              setIsModalOpen(false);
+            }}
+          />
 
           {/* Tournament Status Filter */}
           <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full w-fit mb-6">
@@ -43,7 +60,6 @@ function AdminTournament() {
 
           {/* Tournament Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
-            {/* 🏀 Regional Basketball Championship Card */}
             <TournamentCard
               title="Regional Basketball Championship"
               status="Upcoming"
@@ -79,7 +95,6 @@ function AdminTournament() {
               ]}
             />
 
-            {/* 🏐 Volleyball League Card */}
             <TournamentCard
               title="Inter-University Volleyball League"
               status="Upcoming"
@@ -123,7 +138,7 @@ function AdminTournament() {
   );
 }
 
-/* ✅ Reusable Tournament Card Component */
+/* ✅ Tournament Card Component - clean, no modal here */
 function TournamentCard({
   title,
   status,
@@ -150,7 +165,7 @@ function TournamentCard({
         <div>🧑‍🤝‍🧑 {teams}</div>
       </div>
 
-      {/* Tournament Schedule */}
+      {/* Schedule */}
       <div className="mb-4">
         <p className="font-semibold text-gray-800 mb-2">Tournament Schedule</p>
         <ul className="space-y-2 text-sm">
@@ -165,7 +180,7 @@ function TournamentCard({
         </ul>
       </div>
 
-      {/* Upcoming Matches */}
+      {/* Matches */}
       <div>
         <p className="font-semibold text-gray-800 mb-2">Upcoming Matches</p>
         <div className="space-y-3">
