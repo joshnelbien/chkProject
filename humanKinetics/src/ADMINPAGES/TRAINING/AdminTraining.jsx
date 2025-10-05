@@ -1,8 +1,11 @@
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
+import TrainingModal from "./trainingModal";
+import { useState } from "react";
 
 function AdminTraining() {
+  const [isModalOpen, setModalOpen] = useState(false);
   const weeklySchedule = [
     {
       day: "Monday",
@@ -119,7 +122,10 @@ function AdminTraining() {
                 Pre-Competition Phase (Feb 1 - Feb 28)
               </p>
             </div>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow hover:bg-green-700 transition">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow hover:bg-green-700 transition"
+            >
               Edit Program
             </button>
           </div>
@@ -280,6 +286,15 @@ function AdminTraining() {
             </div>
           </div>
         </main>
+        {/* Training Modal */}
+        <TrainingModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          onSubmit={(data) => {
+            console.log("Submitted Training Data:", data);
+            setModalOpen(false);
+          }}
+        />
 
         {/* Footer - Fixed */}
         <div className="fixed bottom-0 left-64 right-0">
