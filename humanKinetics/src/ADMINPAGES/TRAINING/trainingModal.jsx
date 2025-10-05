@@ -3,6 +3,7 @@ import { useState } from "react";
 export default function TrainingModal({ isOpen, onClose, onSubmit }) {
   const [formData, setFormData] = useState({
     title: "",
+    date: "", // ✅ added date field
     startTime: "",
     endTime: "",
     location: "",
@@ -43,6 +44,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
     onClose();
     setFormData({
       title: "",
+      date: "",
       startTime: "",
       endTime: "",
       location: "",
@@ -80,6 +82,21 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
               value={formData.title}
               onChange={handleChange}
               placeholder="e.g., Physical Training"
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* 📅 Date Picker */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Date
+            </label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
               required
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
             />

@@ -14,7 +14,7 @@ router.post("/tournaments", async (req, res) => {
 });
 
 // 🟡 (Optional) Fetch all tournaments
-router.get("/", async (req, res) => {
+router.get("/tournaments-activities", async (req, res) => {
   try {
     const tournaments = await Tournament.findAll();
     res.json(tournaments);

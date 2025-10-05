@@ -12,7 +12,9 @@ const TrainingSchedule = sequelize.define("TrainingSchedule", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-
+  date: {
+    type: DataTypes.STRING,
+  },
   startTime: {
     type: DataTypes.TIME,
     allowNull: false,

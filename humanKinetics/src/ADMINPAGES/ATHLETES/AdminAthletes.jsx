@@ -6,6 +6,7 @@ import axios from "axios";
 
 function AdminAthletes() {
   const [players, setPlayers] = useState([]);
+
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -84,61 +85,34 @@ function AdminAthletes() {
             </div>
           </div>
 
-          {/* Athlete Cards */}
+          {/* ✅ Athlete Cards (Dynamic) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
-            <AthleteCard
-              name="John Smith"
-              number="23"
-              sport="Basketball"
-              role="Forward"
-              status="Active"
-              attendance="95%"
-              performance="88%"
-              streak="15d"
-              improvement="+12%"
-              metrics={{ Strength: 85, Speed: 90, Agility: 88, Endurance: 92 }}
-              activities={[
-                {
-                  date: "Feb 15 - Training",
-                  desc: "Excellent shooting practice",
-                  score: 92,
-                },
-                {
-                  date: "Feb 14 - Game",
-                  desc: "vs Team Eagles - 18 points",
-                  score: 88,
-                },
-              ]}
-            />
-            <AthleteCard
-              name="Sarah Johnson"
-              number="07"
-              sport="Volleyball"
-              role="Setter"
-              status="Active"
-              attendance="92%"
-              performance="90%"
-              streak="12d"
-              improvement="+8%"
-              metrics={{ Strength: 82, Speed: 88, Agility: 90, Endurance: 85 }}
-              activities={[
-                {
-                  date: "Feb 15 - Training",
-                  desc: "Setting accuracy improved",
-                  score: 90,
-                },
-                {
-                  date: "Feb 14 - Game",
-                  desc: "vs Team Spike - 28 assists",
-                  score: 92,
-                },
-              ]}
-            />
+            {players.length > 0 ? (
+              players.map((player) => (
+                <AthleteCard
+                  key={player.id}
+                  name={`${player.firstName} ${player.lastName}`}
+                  number={player.studentNumber}
+                  sport={player.sport}
+                  role={player.course}
+                  status={player.isVerified ? "Active" : "Pending"}
+                  attendance="--"
+                  performance="--"
+                  streak="--"
+                  improvement="--"
+                  metrics={{ Strength: 0, Speed: 0, Agility: 0, Endurance: 0 }}
+                  activities={[]}
+                />
+              ))
+            ) : (
+              <p className="text-gray-500 italic">No athletes found.</p>
+            )}
           </div>
         </main>
 
-        {/* Footer - fixed at bottom */}
-        <Footer />
+        <div className="fixed bottom-0 left-64 right-0">
+          <Footer />
+        </div>
       </div>
     </div>
   );
@@ -166,7 +140,13 @@ function AthleteCard({
         <div className="ml-4 flex-grow">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold">{name}</h3>
-            <span className="bg-green-200 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
+            <span
+              className={`text-xs font-medium px-2 py-1 rounded-full ${
+                status === "Active"
+                  ? "bg-green-200 text-green-700"
+                  : "bg-yellow-200 text-yellow-700"
+              }`}
+            >
               {status}
             </span>
           </div>
@@ -207,27 +187,26 @@ function AthleteCard({
       {/* Recent Activities */}
       <div>
         <p className="font-semibold text-gray-800 mb-2">Recent Activities</p>
-        <div className="space-y-3">
-          {activities.map((act, i) => (
-            <div key={i} className="flex justify-between items-center text-sm">
-              <div>
-                <p className="font-medium text-gray-800">{act.date}</p>
-                <p className="text-gray-500 text-xs">{act.desc}</p>
-              </div>
-              <span
-                className={`font-bold ${
-                  act.score >= 90
-                    ? "text-green-600"
-                    : act.score >= 85
-                    ? "text-yellow-600"
-                    : "text-red-600"
-                }`}
+        {activities.length > 0 ? (
+          <div className="space-y-3">
+            {activities.map((act, i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center text-sm"
               >
-                {act.score}%
-              </span>
-            </div>
-          ))}
-        </div>
+                <div>
+                  <p className="font-medium text-gray-800">{act.date}</p>
+                  <p className="text-gray-500 text-xs">{act.desc}</p>
+                </div>
+                <span className="font-bold text-green-600">{act.score}%</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-gray-400 italic">
+            No activity records yet.
+          </p>
+        )}
       </div>
     </div>
   );

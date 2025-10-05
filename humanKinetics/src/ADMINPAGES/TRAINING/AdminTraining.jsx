@@ -2,98 +2,70 @@ import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
 import TrainingModal from "./trainingModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+// ✅ FullCalendar imports
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
 
 function AdminTraining() {
   const [isModalOpen, setModalOpen] = useState(false);
-  const weeklySchedule = [
-    {
-      day: "Monday",
-      events: [
-        {
-          title: "Physical Training",
-          time: "8:00 AM - 10:00 AM",
-          location: "Gym",
-          coach: "Coach Mike",
-          focus: [
-            "Shooting mechanics",
-            "Dribbling drills",
-            "Pass combinations",
-          ],
-          color: "bg-blue-100",
-          textColor: "text-blue-800",
-        },
-        {
-          title: "Skills Training",
-          time: "2:00 PM - 4:00 PM",
-          location: "Main Court",
-          coach: "Coach Arius",
-          focus: [
-            "Shooting mechanics",
-            "Dribbling drills",
-            "Pass combinations",
-          ],
-          color: "bg-blue-100",
-          textColor: "text-blue-800",
-        },
-      ],
-    },
-    {
-      day: "Tuesday",
-      events: [
-        {
-          title: "Technical Training",
-          time: "8:00 AM - 10:00 AM",
-          location: "Court 2",
-          coach: "Coach Sarah",
-          focus: ["Offensive patterns", "Defense rotations", "Game situations"],
-          color: "bg-blue-100",
-          textColor: "text-blue-800",
-        },
-        {
-          title: "Conditioning",
-          time: "2:00 PM - 3:00 PM",
-          location: "Track",
-          coach: "Coach Mike",
-          focus: ["Sprint intervals", "Agility ladders", "Plyometrics"],
-          color: "bg-blue-100",
-          textColor: "text-blue-800",
-        },
-      ],
-    },
-  ];
+  const [trainingSchedules, setTrainingSchedules] = useState([]);
 
-  const progressMetrics = [
-    { name: "Physical Fitness", rating: 85, target: 90, improvement: 8 },
-    { name: "Technical Skills", rating: 82, target: 88, improvement: 5 },
-    { name: "Tactical Understanding", rating: 78, target: 85, improvement: 6 },
-    { name: "Team Coordination", rating: 90, target: 85, improvement: 7 },
-  ];
+  // 📝 Event details modal state
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const recentUpdates = [
-    {
-      date: "Feb 15",
-      comment: "Improved team defensive coordination",
-      rating: 85,
+  // ✅ Fetch training schedule from backend
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/trainingSchedule/training-schedule"
+        );
+        console.log("📌 Training Schedules (Frontend):", res.data.schedules);
+        setTrainingSchedules(res.data.schedules);
+      } catch (error) {
+        console.error("❌ Error fetching training schedules:", error);
+      }
+    };
+
+    fetchSchedules();
+  }, []);
+
+  // ✅ Convert training schedules into FullCalendar event format
+  const calendarEvents = trainingSchedules.map((event) => ({
+    id: event.id,
+    title: event.title,
+    start: `${event.date}T${event.startTime}`,
+    end: `${event.date}T${event.endTime}`,
+    extendedProps: {
+      location: event.location,
+      coach: event.coach,
+      focusAreas: event.focusAreas,
     },
-    {
-      date: "Feb 14",
-      comment: "Enhanced shooting accuracy in practice",
-      rating: 88,
-    },
-    { date: "Feb 13", comment: "Good progress in conditioning", rating: 82 },
-  ];
+  }));
 
-  const getProgressColor = (rating, target) => {
-    if (rating >= target) return "bg-green-600";
-    if (rating >= target * 0.9) return "bg-yellow-600";
-    return "bg-red-600";
-  };
+  // ✅ When user clicks on an event in calendar → Open details modal
+  const handleEventClick = (info) => {
+    const { title, extendedProps, start, end } = info.event;
 
-  const getUpdateColor = (rating) => {
-    if (rating >= 85) return "bg-green-100 text-green-800";
-    if (rating >= 80) return "bg-yellow-100 text-yellow-800";
-    return "bg-red-100 text-red-800";
+    setSelectedEvent({
+      title,
+      date: new Date(start).toLocaleDateString(),
+      startTime: new Date(start).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      endTime: new Date(end).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      location: extendedProps.location,
+      coach: extendedProps.coach,
+      focusAreas: extendedProps.focusAreas.split(",").map((a) => a.trim()),
+    });
   };
 
   return (
@@ -113,180 +85,44 @@ function AdminTraining() {
         {/* Scrollable Main Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 mt-16 md:mt-20 mb-16 max-w-7xl mx-auto w-full">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
             <div>
               <h2 className="text-2xl font-semibold text-green-700">
                 Training Program
               </h2>
               <p className="text-gray-500 text-sm sm:text-base">
-                Pre-Competition Phase (Feb 1 - Feb 28)
+                Official Training Calendar
               </p>
             </div>
             <button
               onClick={() => setModalOpen(true)}
               className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow hover:bg-green-700 transition"
             >
-              Edit Program
+              Add Schedule
             </button>
           </div>
 
-          {/* Top Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-            {/* Phase Progress */}
-            <div className="bg-white p-6 rounded-lg shadow-md lg:col-span-2">
-              <p className="font-semibold mb-2">Phase Progress</p>
-              <div className="flex flex-wrap gap-2 mb-4">
-                {["Strength", "Speed", "Agility", "Game Tactics"].map(
-                  (item) => (
-                    <span
-                      key={item}
-                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-full font-medium text-sm"
-                    >
-                      {item}
-                    </span>
-                  )
-                )}
-              </div>
-              <ul className="space-y-2 text-gray-700 text-sm">
-                {[
-                  "Improve team coordination and gameplay",
-                  "Enhance individual skills and techniques",
-                  "Build stamina and endurance",
-                  "Develop tactical awareness",
-                ].map((goal, idx) => (
-                  <li key={idx} className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-green-500 mr-2 flex-shrink-0"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {goal}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Recent Updates */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-lg font-semibold mb-4">Recent Updates</h3>
-              <ul className="space-y-4">
-                {recentUpdates.map((update, index) => (
-                  <li key={index} className="flex justify-between items-center">
-                    <div>
-                      <p className="font-semibold text-gray-800">
-                        {update.date}
-                      </p>
-                      <p className="text-gray-500 text-sm">{update.comment}</p>
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded-full font-medium text-xs ${getUpdateColor(
-                        update.rating
-                      )}`}
-                    >
-                      {update.rating}%
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Weekly Schedule */}
+          {/* 📅 Full Calendar Section */}
           <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-6">
-            <h3 className="text-xl font-semibold mb-4">Weekly Schedule</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {weeklySchedule.map((dayData, dayIndex) => (
-                <div key={dayIndex} className="flex flex-col">
-                  <h4 className="font-semibold mb-2">{dayData.day}</h4>
-                  {dayData.events.map((event, eventIndex) => (
-                    <div
-                      key={eventIndex}
-                      className={`p-4 rounded-lg mb-4 ${event.color} ${event.textColor} shadow-sm`}
-                    >
-                      <p className="font-semibold">{event.title}</p>
-                      <p className="text-xs">{event.time}</p>
-                      <ul className="text-xs mt-2 space-y-1">
-                        <li>
-                          <span className="font-semibold">Location:</span>{" "}
-                          {event.location}
-                        </li>
-                        <li>
-                          <span className="font-semibold">Coach:</span>{" "}
-                          {event.coach}
-                        </li>
-                        <li className="mt-2">
-                          <p className="font-semibold">Focus Areas</p>
-                          <ul className="list-disc list-inside">
-                            {event.focus.map((area, areaIndex) => (
-                              <li key={areaIndex} className="text-xs">
-                                {area}
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+            <h3 className="text-xl font-semibold mb-4">Training Calendar</h3>
 
-          {/* Progress Metrics */}
-          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-4">Progress Metrics</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {progressMetrics.map((metric, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-center text-sm mb-1">
-                    <span className="font-semibold text-gray-800">
-                      {metric.name}
-                    </span>
-                    <span className="text-gray-500">
-                      Target:{" "}
-                      <span className="font-bold">{metric.target}%</span>
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div
-                      className={`${getProgressColor(
-                        metric.rating,
-                        metric.target
-                      )} h-full rounded-full`}
-                      style={{ width: `${metric.rating}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between items-center text-xs mt-1">
-                    <span className="font-bold">{metric.rating}%</span>
-                    <span className="text-green-600 font-bold flex items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 mr-0.5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 9.707a1 1 0 010-1.414L10 3.586l4.707 4.707a1 1 0 01-1.414 1.414L10 6.414l-3.293 3.293a1 1 0 01-1.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {metric.improvement}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {trainingSchedules.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">
+                No training schedules available.
+              </p>
+            ) : (
+              <FullCalendar
+                plugins={[dayGridPlugin, interactionPlugin]}
+                initialView="dayGridMonth"
+                events={calendarEvents}
+                eventClick={handleEventClick}
+                height="auto"
+              />
+            )}
           </div>
         </main>
-        {/* Training Modal */}
+
+        {/* ➕ Training Modal (Add Schedule) */}
         <TrainingModal
           isOpen={isModalOpen}
           onClose={() => setModalOpen(false)}
@@ -295,6 +131,62 @@ function AdminTraining() {
             setModalOpen(false);
           }}
         />
+
+        {/* 📌 Event Details Modal */}
+        {selectedEvent && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-green-700">
+                  📝 {selectedEvent.title}
+                </h2>
+                <button
+                  onClick={() => setSelectedEvent(null)}
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-2 text-gray-700">
+                <p>
+                  <span className="font-semibold">📅 Date:</span>{" "}
+                  {selectedEvent.date}
+                </p>
+                <p>
+                  <span className="font-semibold">⏰ Time:</span>{" "}
+                  {selectedEvent.startTime} - {selectedEvent.endTime}
+                </p>
+                <p>
+                  <span className="font-semibold">📍 Location:</span>{" "}
+                  {selectedEvent.location}
+                </p>
+                <p>
+                  <span className="font-semibold">👨‍🏫 Coach:</span>{" "}
+                  {selectedEvent.coach}
+                </p>
+
+                <div>
+                  <span className="font-semibold">🎯 Focus Areas:</span>
+                  <ul className="list-disc list-inside text-sm mt-1">
+                    {selectedEvent.focusAreas.map((area, i) => (
+                      <li key={i}>{area}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setSelectedEvent(null)}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer - Fixed */}
         <div className="fixed bottom-0 left-64 right-0">

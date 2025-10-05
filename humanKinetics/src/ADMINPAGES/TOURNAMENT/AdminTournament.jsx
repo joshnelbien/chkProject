@@ -2,22 +2,35 @@ import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
 import TournamentModal from "./tournamentModal";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 function AdminTournament() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tournaments, setTournaments] = useState([]);
+
+  // ✅ Fetch tournaments from backend
+  const fetchTournaments = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/tournament/tournaments-activities"
+      );
+      setTournaments(response.data);
+    } catch (error) {
+      console.error("❌ Failed to fetch tournaments:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTournaments();
+  }, []);
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
-      {/* Sidebar (fixed on the left) */}
       <Sidebar />
-
-      {/* Right section: Navbar + Content + Footer */}
       <div className="flex flex-col flex-grow h-full">
-        {/* Navbar (fixed at the top) */}
         <Navbar />
 
-        {/* Main Content - scrollable only here */}
         <main className="flex-grow overflow-y-auto p-6 mt-16 md:mt-20 max-w-7xl mx-auto w-full">
           {/* Header Section */}
           <div className="flex justify-between items-center mb-6">
@@ -35,12 +48,13 @@ function AdminTournament() {
             </button>
           </div>
 
-          {/* ✅ Render the modal here, not inside TournamentCard */}
+          {/* Tournament Modal */}
           <TournamentModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             onSubmit={(data) => {
               console.log("✅ Tournament Data Submitted:", data);
+              fetchTournaments(); // Refresh list after adding
               setIsModalOpen(false);
             }}
           />
@@ -58,87 +72,36 @@ function AdminTournament() {
             </button>
           </div>
 
-          {/* Tournament Cards */}
+          {/* Tournament Cards (Dynamic) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
-            <TournamentCard
-              title="Regional Basketball Championship"
-              status="Upcoming"
-              sport="Basketball"
-              date="Feb 25–28, 2024"
-              location="Main Stadium"
-              teams="12 teams"
-              schedule={[
-                {
-                  label: "Group Stage",
-                  date: "Feb 25–28",
-                  matches: "24 matches",
-                },
-                {
-                  label: "Quarter Finals",
-                  date: "Feb 27",
-                  matches: "4 matches",
-                },
-                { label: "Semi Finals", date: "Feb 27", matches: "2 matches" },
-                { label: "Finals", date: "Feb 28", matches: "1 match" },
-              ]}
-              matches={[
-                {
-                  teams: "PLSP Stallions vs Eagles",
-                  group: "Group A",
-                  date: "Feb 25, 2:00 PM · Main Court",
-                },
-                {
-                  teams: "PLSP Stallions vs Hawks",
-                  group: "Group A",
-                  date: "Feb 26, 4:00 PM · Main Court",
-                },
-              ]}
-            />
-
-            <TournamentCard
-              title="Inter-University Volleyball League"
-              status="Upcoming"
-              sport="Volleyball"
-              date="Mar 10–15, 2024"
-              location="Sports Complex"
-              teams="8 teams"
-              schedule={[
-                {
-                  label: "Preliminaries",
-                  date: "Mar 10–12",
-                  matches: "16 matches",
-                },
-                {
-                  label: "Semi Finals",
-                  date: "Mar 13–14",
-                  matches: "4 matches",
-                },
-                { label: "Finals", date: "Mar 15", matches: "2 matches" },
-              ]}
-              matches={[
-                {
-                  teams: "PLSP Spikers vs Thunder",
-                  group: "Preliminaries",
-                  date: "Mar 10, 1:00 PM · Court 1",
-                },
-                {
-                  teams: "PLSP Spikers vs Lightning",
-                  group: "Preliminaries",
-                  date: "Mar 11, 3:00 PM · Court 2",
-                },
-              ]}
-            />
+            {tournaments.length > 0 ? (
+              tournaments.map((tournament) => (
+                <TournamentCard
+                  key={tournament.id}
+                  title={tournament.tournamentName}
+                  status="Upcoming"
+                  sport={tournament.sport}
+                  date={`${tournament.startDate} - ${tournament.endDate}`}
+                  location={tournament.location}
+                  teams={`${tournament.teams} teams`}
+                  schedule={[]} // You can extend this later
+                  matches={[]} // You can extend this later
+                />
+              ))
+            ) : (
+              <p className="text-gray-500 col-span-2 text-center">
+                No tournaments found.
+              </p>
+            )}
           </div>
         </main>
 
-        {/* Footer (fixed at bottom) */}
         <Footer />
       </div>
     </div>
   );
 }
 
-/* ✅ Tournament Card Component - clean, no modal here */
 function TournamentCard({
   title,
   status,
@@ -165,36 +128,12 @@ function TournamentCard({
         <div>🧑‍🤝‍🧑 {teams}</div>
       </div>
 
-      {/* Schedule */}
-      <div className="mb-4">
-        <p className="font-semibold text-gray-800 mb-2">Tournament Schedule</p>
-        <ul className="space-y-2 text-sm">
-          {schedule.map((item, index) => (
-            <li key={index} className="flex justify-between items-center">
-              <p>
-                {item.label} <span className="text-gray-400">{item.date}</span>
-              </p>
-              <span className="text-blue-600 font-medium">{item.matches}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Matches */}
-      <div>
-        <p className="font-semibold text-gray-800 mb-2">Upcoming Matches</p>
-        <div className="space-y-3">
-          {matches.map((match, index) => (
-            <div key={index} className="bg-gray-50 p-3 rounded-lg">
-              <p className="font-medium text-gray-800">
-                {match.teams}{" "}
-                <span className="text-gray-500 text-xs">{match.group}</span>
-              </p>
-              <p className="text-gray-500 text-xs">{match.date}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Placeholder if no schedule */}
+      {schedule.length === 0 && (
+        <p className="text-sm text-gray-400 italic mb-2">
+          No schedule added yet
+        </p>
+      )}
     </div>
   );
 }
