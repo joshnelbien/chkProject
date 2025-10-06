@@ -20,12 +20,11 @@ router.get("/tournaments-activities", async (req, res) => {
     const tournaments = await Tournament.findAll({
       include: {
         model: TournamentSchedule,
-        as: "schedules", // 👈 must match alias in association
+        as: "schedules",
       },
     });
     res.json(tournaments);
   } catch (error) {
-    console.error("❌ Error fetching tournaments:", error);
     res.status(500).json({ error: "Failed to fetch tournaments" });
   }
 });

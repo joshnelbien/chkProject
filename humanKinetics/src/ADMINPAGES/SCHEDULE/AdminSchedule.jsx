@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
@@ -6,175 +7,222 @@ import AddEventModal from "./addEventModal";
 
 function AdminSchedule() {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [scheduleData, setScheduleData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const scheduleData = {
-    "February 19-23, 2024": [
-      {
-        day: "Monday",
-        date: "19",
-        events: [
-          {
-            time: "8:00 AM - 10:00 AM",
-            title: "Basketball Training",
-            location: "Main Court",
-            participants: "12 athletes",
-            color: "bg-green-100",
-            textColor: "text-green-800",
-          },
-          {
-            time: "10:30 AM - 12:30 PM",
-            title: "Volleyball Practice",
-            location: "Court 2",
-            participants: "14 athletes",
-            color: "bg-gray-100",
-            textColor: "text-gray-800",
-          },
-        ],
-      },
-      {
-        day: "Tuesday",
-        date: "20",
-        events: [
-          {
-            time: "8:00 AM - 10:00 AM",
-            title: "Volleyball Training",
-            location: "Court 2",
-            participants: "14 athletes",
-            color: "bg-gray-100",
-            textColor: "text-gray-800",
-          },
-          {
-            time: "2:00 PM - 4:00 PM",
-            title: "Basketball Game vs Eagles",
-            location: "Main Court",
-            participants: "12 athletes",
-            color: "bg-yellow-100",
-            textColor: "text-yellow-800",
-          },
-        ],
-      },
-    ],
-  };
+  const formatDate = (d) =>
+    d ? new Date(d).toISOString().split("T")[0] : "unknown";
 
-  const currentWeek = scheduleData["February 19-23, 2024"];
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const [trainingRes, tournamentRes] = await Promise.all([
+          axios.get("http://localhost:5000/trainingSchedule/training-schedule"),
+          axios.get("http://localhost:5000/tournament/tournaments-activities"),
+        ]);
+
+        const trainingSchedules = trainingRes.data.schedules || [];
+        const tournaments = Array.isArray(tournamentRes.data)
+          ? tournamentRes.data
+          : tournamentRes.data?.tournaments || [];
+
+        const mergedSchedules = {};
+
+        trainingSchedules.forEach((t) => {
+          const dateKey = formatDate(t.date);
+          if (!mergedSchedules[dateKey]) mergedSchedules[dateKey] = [];
+          mergedSchedules[dateKey].push({
+            time: `${t.startTime} - ${t.endTime}`,
+            title: t.title,
+            location: t.location,
+            participants: `Coach: ${t.coach}`,
+            type: "Training",
+          });
+        });
+
+        tournaments.forEach((tournament) => {
+          const schedules = tournament.schedules || [];
+          schedules.forEach((ts) => {
+            const dateKey = formatDate(ts.date);
+            if (!mergedSchedules[dateKey]) mergedSchedules[dateKey] = [];
+            mergedSchedules[dateKey].push({
+              time: `${ts.startTime} - ${ts.endTime}`,
+              title: `${tournament.tournamentName} vs ${ts.opponent}`,
+              location: tournament.location,
+              participants: `${tournament.teams} Teams`,
+              type: "Tournament",
+            });
+          });
+        });
+
+        setScheduleData(mergedSchedules);
+        setLoading(false);
+      } catch (error) {
+        console.error("❌ Error fetching schedules:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchSchedules();
+  }, []);
+
+  if (loading) return <p className="p-4">Loading schedules...</p>;
+
+  const scheduleKeys = Object.keys(scheduleData).sort(
+    (a, b) => new Date(a) - new Date(b)
+  );
+
+  // Flatten all events for search/filter
+  const allEvents = scheduleKeys.flatMap((date) =>
+    scheduleData[date].map((event) => ({
+      date,
+      ...event,
+    }))
+  );
+
+  const filteredEvents = allEvents.filter(
+    (event) =>
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.participants.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Overview counts
+  const totalEvents = allEvents.length;
+  const totalTrainings = allEvents.filter((e) => e.type === "Training").length;
+  const totalTournaments = allEvents.filter(
+    (e) => e.type === "Tournament"
+  ).length;
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
+    <div className="flex h-screen overflow-hidden bg-gray-100">
       <Sidebar />
 
-      {/* Main Content */}
       <div className="flex flex-col flex-grow">
         <Navbar />
 
-        <main className="flex-grow p-4 sm:p-6 mt-16 md:mt-20">
+        <main className="flex-grow overflow-y-auto p-4 sm:p-6 max-w-7xl mx-auto w-full mt-16 md:mt-20">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
             <div>
               <h2 className="text-2xl font-semibold text-green-700">
                 Schedule
               </h2>
-              <p className="text-gray-500">Training and Events Calendar</p>
+              <p className="text-gray-500 text-sm sm:text-base">
+                Training and Events Calendar
+              </p>
             </div>
             <div className="flex space-x-2">
-              <button className="px-4 py-2 bg-white rounded-full border border-gray-300 text-gray-700">
-                All Teams
-              </button>
               <button
                 onClick={() => setModalOpen(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow hover:bg-green-700 transition"
+                className="px-4 py-2 bg-green-600 text-white rounded-full font-medium shadow hover:bg-green-700 transition"
               >
                 Add Event
               </button>
             </div>
           </div>
 
-          {/* Calendar Navigation */}
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
-            <div className="flex items-center space-x-2">
-              <button className="text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
-              <h3 className="text-xl font-semibold text-gray-800">
-                February 19-23, 2024
-              </h3>
-              <button className="text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full">
-              <button className="px-4 py-2 bg-white text-gray-700 font-semibold rounded-full shadow">
-                Week
-              </button>
-              <button className="px-4 py-2 text-gray-600 font-medium rounded-full">
-                Month
-              </button>
-            </div>
+          {/* Overview Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <OverviewCard label="Total Events" value={totalEvents} />
+            <OverviewCard
+              label="Trainings"
+              value={totalTrainings}
+              color="green"
+            />
+            <OverviewCard
+              label="Tournaments"
+              value={totalTournaments}
+              color="yellow"
+            />
           </div>
 
-          {/* Schedule Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {currentWeek.map((dayData) => (
-              <div key={dayData.day} className="flex flex-col">
-                <div className="text-center pb-2">
-                  <p className="text-sm font-semibold">{dayData.day}</p>
-                  <p className="text-gray-400 text-xs">{dayData.date}</p>
-                </div>
-                {dayData.events.map((event, index) => (
-                  <div
-                    key={index}
-                    className={`p-3 rounded-lg mb-2 ${event.color} ${event.textColor} shadow-sm`}
-                  >
-                    <p className="text-xs font-semibold">{event.time}</p>
-                    <p className="font-semibold">{event.title}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      📍 {event.location}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      👥 {event.participants}
-                    </p>
-                  </div>
-                ))}
+          {/* Search & Table */}
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-3 sm:space-y-0">
+              <h3 className="text-xl font-semibold">Event Records</h3>
+              <div className="relative w-full sm:w-64">
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
               </div>
-            ))}
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {["Date", "Time", "Event", "Location", "Participants"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          {h}
+                        </th>
+                      )
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredEvents.map((event, idx) => (
+                    <tr key={idx}>
+                      <td className="px-4 py-3">{event.date}</td>
+                      <td className="px-4 py-3">{event.time}</td>
+                      <td className="px-4 py-3 font-semibold">{event.title}</td>
+                      <td className="px-4 py-3">{event.location}</td>
+                      <td className="px-4 py-3">{event.participants}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </main>
 
-        {/* ✅ Modal */}
         <AddEventModal
           isOpen={isModalOpen}
           onClose={() => setModalOpen(false)}
         />
-
         <Footer />
       </div>
+    </div>
+  );
+}
+
+/* ✅ Reusable Overview Card */
+function OverviewCard({ label, value, color }) {
+  const colorClass =
+    color === "green"
+      ? "text-green-600"
+      : color === "yellow"
+      ? "text-yellow-600"
+      : color === "red"
+      ? "text-red-600"
+      : "text-gray-900";
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md text-center sm:text-left">
+      <p className="text-gray-500 text-sm">{label}</p>
+      <p className={`text-2xl font-bold ${colorClass}`}>{value}</p>
     </div>
   );
 }
