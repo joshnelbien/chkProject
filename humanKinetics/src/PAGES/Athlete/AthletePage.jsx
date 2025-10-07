@@ -147,9 +147,9 @@ function AthletePage() {
               {filteredAthletes.map((athlete, index) => (
                 <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
                   <div className="h-48 flex items-center justify-center">
-                    <img src={athlete.image} alt={athlete.name} className="w-full h-full object-cover" />
+                    <img src={athlete.image} alt={athlete.name} className="w-full h-auto object-cover" />
                   </div>
-                  <div className="p-4">
+                  <div className="p-8">
                     <h3 className="text-xl font-bold mt-2">{athlete.name}</h3>
                     <p className="text-gray-600">{athlete.sport} • {athlete.year}</p>
                     <p className="text-sm text-gray-500">{athlete.achievements[0]}</p>

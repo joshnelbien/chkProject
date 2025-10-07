@@ -63,7 +63,7 @@ function Footer() {
                 <div>
                   <h4 className="font-medium text-white">Ticzon Building</h4>
                   <p className="text-gray-300">
-                    Combat Sports Training Center<br/>Brgy. Del Remedio, San Pablo City
+                    Combat Sports Training Center<br/>Brgy. San Jose, San Pablo City
                   </p>
                 </div>
               </div>
