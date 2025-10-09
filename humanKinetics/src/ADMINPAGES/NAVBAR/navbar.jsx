@@ -2,11 +2,11 @@ import { Bell, Sun } from "lucide-react"; // Import Bell and Sun icons
 
 function Navbar() {
   return (
-    <div className="ml-64 h-16 bg-green-900 text-white shadow flex items-center justify-between px-6 fixed top-0 left-0 right-0 z-10">
+    <div className="fixed top-0 left-0 right-0 h-16 bg-green-900 text-white shadow flex items-center justify-between px-6 z-40 md:ml-64 transition-all duration-300">
       {/* Left Side - Logo and Title */}
       <div className="flex items-center space-x-3">
-        {/* Placeholder Logo */}
-        <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden">
+         {/* Placeholder Logo */}
+        <div className="w-10 h-10 rounded-full overflow-hidden">
           <img
             src="/plsplogo.png"
             alt="PLSP Logo"
