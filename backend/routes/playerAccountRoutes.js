@@ -3,13 +3,25 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const { Op } = require("sequelize");
 const playerAccounts = require("../db/model/playerAccountsDb");
+require("dotenv").config();
 
+// ✅ Setup Email Transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// ✅ Registration with Email Verification
 router.post("/register", async (req, res) => {
   console.log("📥 Incoming body:", req.body);
 
-  // 1. Destructure and Validate Request Body
   const {
     firstName,
     lastName,
@@ -23,46 +35,33 @@ router.post("/register", async (req, res) => {
     agreedToTerms,
   } = req.body;
 
-  // ✅ Basic Server-Side Validation
   if (password !== confirmPassword) {
     return res.status(400).json({ message: "Passwords do not match." });
   }
 
   if (!firstName || !email || !password || !studentNumber || !agreedToTerms) {
-    return res
-      .status(400)
-      .json({ message: "All required fields must be filled." });
+    return res.status(400).json({ message: "All required fields must be filled." });
   }
 
   try {
-    // 2. Check for Existing User (by email OR student number)
     const existingUser = await playerAccounts.findOne({
       where: {
-        [Op.or]: [
-          // ✅ FIX: Use Op directly
-          { email: email },
-          { studentNumber: studentNumber },
-        ],
+        [Op.or]: [{ email }, { studentNumber }],
       },
     });
 
     if (existingUser) {
-      if (existingUser.email === email) {
-        return res.status(409).json({
-          message: "An account with this email already exists.",
-        });
-      } else if (existingUser.studentNumber === studentNumber) {
-        return res.status(409).json({
-          message: "An account with this student number already exists.",
-        });
-      }
+      if (existingUser.email === email)
+        return res.status(409).json({ message: "An account with this email already exists." });
+      if (existingUser.studentNumber === studentNumber)
+        return res.status(409).json({ message: "An account with this student number already exists." });
     }
 
-    // 3. Hash the Password
+    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4. Create New Account in Database
+    // Create player (not verified yet)
     const newPlayer = await playerAccounts.create({
       firstName,
       lastName,
@@ -75,11 +74,27 @@ router.post("/register", async (req, res) => {
       isVerified: false,
     });
 
-    // 5. Send Success Response (excluding the password)
-    const { password: _, ...playerData } = newPlayer.toJSON();
+    // ✅ Generate Email Verification Token
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const verifyLink = `${process.env.FRONTEND_URL}/verified-success?token=${token}`;
+
+    // ✅ Send Verification Email
+    await transporter.sendMail({
+      from: `"E-Athleta Support" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Verify your E-Athleta Account",
+      html: `
+        <h2>Welcome to E-Athleta, ${firstName}!</h2>
+        <p>Please verify your email address to activate your account.</p>
+        <a href="${verifyLink}" style="background:#166534;color:white;padding:10px 15px;border-radius:5px;text-decoration:none;">Verify Email</a>
+        <p>If the button doesn’t work, click this link:</p>
+        <p>${verifyLink}</p>
+        <p>This link will expire in 24 hours.</p>
+      `,
+    });
+
     res.status(201).json({
-      message: "Player account created successfully!",
-      player: playerData,
+      message: "Registration successful! Please check your email to verify your account.",
     });
   } catch (error) {
     console.error("Registration Error:", error);
@@ -87,27 +102,51 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.get("/players", async (req, res) => {
+// ✅ Email Verification Route
+router.get("/verify-email", async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).send("Invalid verification link.");
+  }
+
   try {
-    // Fetch data from DB
-    const players = await playerAccounts.findAll();
-    res.json(players);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await playerAccounts.findOne({ where: { email: decoded.email } });
+
+    if (!user) return res.status(404).send("User not found.");
+    if (user.isVerified) return res.status(400).send("Email already verified.");
+
+    await user.update({ isVerified: true });
+
+    // Redirect to your frontend confirmation page
+    res.redirect(`${process.env.FRONTEND_URL}/verified-success`);
   } catch (error) {
-    console.error("Error fetching players:", error);
-    res.status(500).json({ error: "Failed to fetch players" });
+    console.error("Verification Error:", error);
+    res.status(400).send("Invalid or expired token.");
   }
 });
 
-// ✅ Login route (for athlete login)
+
 router.post("/player-login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find player by email
+    // 🔍 Find player by email
     const player = await playerAccounts.findOne({ where: { email } });
 
     if (!player) {
-      return res.status(404).json({ message: "No account found with this email." });
+      return res
+        .status(404)
+        .json({ message: "No account found with this email." });
+    }
+
+    // 🚫 Check if account is verified
+    if (!player.isVerified) {
+      return res.status(403).json({
+        message:
+          "Your account has not been verified yet. Please check your email for the verification link.",
+      });
     }
 
     // ✅ Compare entered password with hashed password in DB
@@ -117,12 +156,28 @@ router.post("/player-login", async (req, res) => {
       return res.status(401).json({ message: "Incorrect password." });
     }
 
+    // ✅ (Optional) Generate JWT for session or frontend use
+    const token = jwt.sign(
+      { id: player.id, email: player.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     // ✅ Login successful
     res.json({
       message: "Login successful!",
-      player,
+      token, // optional, include if your frontend uses it
+      player: {
+        id: player.id,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        email: player.email,
+        studentNumber: player.studentNumber,
+        course: player.course,
+        yearLevel: player.yearLevel,
+        sport: player.sport,
+      },
     });
-
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ error: "Server error during login" });
@@ -130,4 +185,8 @@ router.post("/player-login", async (req, res) => {
 });
 
 
+
 module.exports = router;
+
+
+
