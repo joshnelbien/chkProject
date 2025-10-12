@@ -98,4 +98,36 @@ router.get("/players", async (req, res) => {
   }
 });
 
+// ✅ Login route (for athlete login)
+router.post("/player-login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find player by email
+    const player = await playerAccounts.findOne({ where: { email } });
+
+    if (!player) {
+      return res.status(404).json({ message: "No account found with this email." });
+    }
+
+    // ✅ Compare entered password with hashed password in DB
+    const isMatch = await bcrypt.compare(password, player.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect password." });
+    }
+
+    // ✅ Login successful
+    res.json({
+      message: "Login successful!",
+      player,
+    });
+
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "Server error during login" });
+  }
+});
+
+
 module.exports = router;

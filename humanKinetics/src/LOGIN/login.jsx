@@ -2,6 +2,7 @@ import { BarChart2, CheckCircle, Eye, EyeOff, Sun } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import axios from "axios";
 function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -15,14 +16,33 @@ function Login() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
     if (loginType === "athlete") {
-      navigate("/overView");
+const response = await axios.post(
+  "http://localhost:5000/userAccounts/player-login", 
+  formData
+);
+
+      if (response.status === 200) {
+        alert("Login successful!");
+        navigate("/overView");
+      }
     } else {
       navigate("/admin-overview");
     }
-  };
+  } catch (error) {
+    if (error.response) {
+      alert(error.response.data.message || "Login failed!");
+    } else {
+      alert("Server connection error!");
+    }
+  }
+};
+
 
   return (
     <div className="flex flex-col min-h-screen">
