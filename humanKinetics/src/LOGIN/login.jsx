@@ -1,8 +1,8 @@
+import axios from "axios";
 import { BarChart2, CheckCircle, Eye, EyeOff, Sun } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import axios from "axios";
 function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -10,39 +10,64 @@ function Login() {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loginType, setLoginType] = useState("athlete"); // ✅ athlete | admin
+  const [loginType, setLoginType] = useState("athlete"); // athlete | admin
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // ✅ LOGIN HANDLER
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    if (!formData.email || !formData.password) {
+      alert("Please enter both email and password.");
+      return;
+    }
 
-  try {
-    if (loginType === "athlete") {
-const response = await axios.post(
-  "http://localhost:5000/userAccounts/player-login", 
-  formData
-);
+    setLoading(true);
+
+    try {
+      let response;
+
+      if (loginType === "athlete") {
+        // 🔹 Athlete login endpoint
+        response = await axios.post(
+          "http://localhost:5000/userAccounts/player-login",
+          formData
+        );
+      } else {
+        // 🔹 Admin login endpoint
+        response = await axios.post(
+          "http://localhost:5000/adminAccounts/admin-login",
+          formData
+        );
+      }
 
       if (response.status === 200) {
         alert("Login successful!");
-        navigate("/overView");
-      }
-    } else {
-      navigate("/admin-overview");
-    }
-  } catch (error) {
-    if (error.response) {
-      alert(error.response.data.message || "Login failed!");
-    } else {
-      alert("Server connection error!");
-    }
-  }
-};
 
+        // ✅ Save token (optional for protected routes)
+        localStorage.setItem("authToken", response.data.token);
+
+        // ✅ Navigate to correct dashboard
+        if (loginType === "athlete") {
+          navigate("/overView");
+        } else {
+          navigate("/admin-overview");
+        }
+      }
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message || "Login failed!");
+      } else {
+        alert("Unable to connect to the server.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -86,9 +111,7 @@ const response = await axios.post(
                       <CheckCircle size={24} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">
-                        Real-time Updates
-                      </h3>
+                      <h3 className="text-xl font-semibold">Real-time Updates</h3>
                       <p className="text-gray-100">
                         Track live competition scores and instant performance
                         metrics across all sports events.
@@ -114,6 +137,7 @@ const response = await axios.post(
                 </div>
               </div>
             </div>
+
             <div className="mt-8">
               <p className="text-lg text-gray-300 mb-4">
                 Empowering athletes and coaches through excellence in sports
@@ -149,8 +173,7 @@ const response = await axios.post(
               <button
                 type="button"
                 onClick={() => setLoginType("athlete")}
-                className={`flex-1 py-2 font-semibold rounded-l-md border 
-                ${
+                className={`flex-1 py-2 font-semibold rounded-l-md border ${
                   loginType === "athlete"
                     ? "bg-green-700 text-white"
                     : "bg-gray-100 text-gray-700"
@@ -161,8 +184,7 @@ const response = await axios.post(
               <button
                 type="button"
                 onClick={() => setLoginType("admin")}
-                className={`flex-1 py-2 font-semibold rounded-r-md border 
-                ${
+                className={`flex-1 py-2 font-semibold rounded-r-md border ${
                   loginType === "admin"
                     ? "bg-green-700 text-white"
                     : "bg-gray-100 text-gray-700"
@@ -194,6 +216,7 @@ const response = await axios.post(
                 : "Sign in to access the admin dashboard"}
             </p>
 
+            {/* LOGIN FORM */}
             <form onSubmit={handleSubmit} className="w-full max-w-sm">
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-medium mb-1">
@@ -241,28 +264,23 @@ const response = await axios.post(
 
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full bg-green-700 text-white py-3 rounded-md font-semibold hover:bg-green-800 transition-colors"
               >
-                Sign In
+                {loading ? "Signing In..." : "Sign In"}
               </button>
 
-              {/* ✅ Athlete Register Options */}
-              {loginType === "athlete" && (
-                <>
-                  <p className="text-center text-gray-500 mt-4">
-                    Don't have an account?{" "}
-                    <a
-                      href="/register"
-                      className="text-green-700 font-semibold hover:underline"
-                    >
-                      Register Now
-                    </a>
-                  </p>
-                </>
-              )}
-
-              {/* ✅ Admin Register Option */}
-              {loginType === "admin" && (
+              {loginType === "athlete" ? (
+                <p className="text-center text-gray-500 mt-4">
+                  Don't have an account?{" "}
+                  <a
+                    href="/register"
+                    className="text-green-700 font-semibold hover:underline"
+                  >
+                    Register Now
+                  </a>
+                </p>
+              ) : (
                 <p className="text-center text-gray-500 mt-4">
                   Don’t have an admin account?{" "}
                   <a
@@ -278,7 +296,6 @@ const response = await axios.post(
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="w-full py-4 text-center text-gray-500 text-sm bg-white">
         <p className="text-gray-500">
           &copy; 2024 Pamantasan ng Lungsod ng San Pablo - College of Human

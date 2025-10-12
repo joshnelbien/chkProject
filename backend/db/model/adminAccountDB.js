@@ -40,14 +40,23 @@ const Admin = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+  isVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+
   },
   {
     tableName: "adminAccounts",
-    timestamps: true, // ✅ createdAt / updatedAt
+    timestamps: true, 
   }
 );
 

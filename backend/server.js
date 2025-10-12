@@ -36,7 +36,6 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
     await Tournament.sync({ alter: true });
     await TournamentSchedule.sync({ alter: true });
 
-    // Insert hardcoded data into teamSchedule table
     console.log("Database ready.");
   } catch (error) {
     console.error("Database setup or hardcoded insertion failed:", error);

@@ -127,6 +127,16 @@ router.get("/verify-email", async (req, res) => {
   }
 });
 
+router.get("/players", async (req, res) => {
+  try {
+    const players = await playerAccounts.findAll({  });
+
+    res.json(players);
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({ error: "Server error fetching players." });
+  }
+});
 
 router.post("/player-login", async (req, res) => {
   try {
@@ -156,7 +166,6 @@ router.post("/player-login", async (req, res) => {
       return res.status(401).json({ message: "Incorrect password." });
     }
 
-    // ✅ (Optional) Generate JWT for session or frontend use
     const token = jwt.sign(
       { id: player.id, email: player.email },
       process.env.JWT_SECRET,

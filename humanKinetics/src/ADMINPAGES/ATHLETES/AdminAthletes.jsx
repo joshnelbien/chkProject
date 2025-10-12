@@ -1,8 +1,8 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
-import { useEffect, useState } from "react";
-import axios from "axios";
 
 function AdminAthletes() {
   const [players, setPlayers] = useState([]);
@@ -44,9 +44,6 @@ function AdminAthletes() {
                 Athlete Management
               </p>
             </div>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow hover:bg-green-700 transition">
-              Add Athlete
-            </button>
           </div>
 
           {/* Search & Filters */}

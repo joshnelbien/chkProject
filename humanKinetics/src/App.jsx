@@ -8,6 +8,7 @@ import AdminSchedule from "./ADMINPAGES/SCHEDULE/AdminSchedule";
 import AdminTeam from "./ADMINPAGES/TEAMS/AdminTeam";
 import AdminTournament from "./ADMINPAGES/TOURNAMENT/AdminTournament";
 import AdminTraining from "./ADMINPAGES/TRAINING/AdminTraining";
+import AdminVerifyEmail from "./ADMINPAGES/VERIFYPAGE/adminVerifyPage";
 import VerifyEmail from "./ADMINPAGES/VERIFYPAGE/verifyPage";
 import MedalTally from "./INSIDEPAGES/DASHBOARD/MEDALTALLY/medalTally";
 import OverView from "./INSIDEPAGES/DASHBOARD/OVERVIEW/overView";
@@ -58,6 +59,7 @@ function App() {
           <Route path="/sportEvent" element={<SportEvent />} />
           <Route path="/staffs" element={<Staff />} />
           <Route path="/verified-success" element={<VerifyEmail />} />
+          <Route path="/admin-verified-success" element={<AdminVerifyEmail />} />
 
 
           {/* ADMIN PAGES */}

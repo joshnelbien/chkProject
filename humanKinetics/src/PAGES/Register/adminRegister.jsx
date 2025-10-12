@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
+  AlertTriangle,
+  CheckCircle,
   Eye,
   EyeOff,
-  X,
-  CheckCircle,
-  AlertTriangle,
   Loader,
+  X,
 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const PasswordInputWithToggle = ({
   id,
@@ -88,6 +88,7 @@ const AdminRegister = () => {
     education: "",
     specialization: "",
     achievements: "",
+    email: "", // ✅ Added email field
     password: "",
     confirmPassword: "",
     agreedToTerms: false,
@@ -146,6 +147,7 @@ const AdminRegister = () => {
           education: "",
           specialization: "",
           achievements: "",
+          email: "",
           password: "",
           confirmPassword: "",
           agreedToTerms: false,
@@ -298,6 +300,23 @@ const AdminRegister = () => {
                   />
                 </div>
               ))}
+
+              {/* ✅ Email */}
+              <div className="flex flex-col">
+                <label className="text-sm font-medium text-gray-700">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  disabled={isDisabled}
+                  placeholder="example@email.com"
+                  className="mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 text-sm shadow-sm"
+                />
+              </div>
 
               {/* Password */}
               <PasswordInputWithToggle

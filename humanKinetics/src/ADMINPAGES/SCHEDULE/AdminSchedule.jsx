@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
@@ -8,7 +8,6 @@ import AddEventModal from "./addEventModal";
 function AdminSchedule() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [scheduleData, setScheduleData] = useState({});
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   const formatDate = (d) =>
@@ -57,17 +56,13 @@ function AdminSchedule() {
         });
 
         setScheduleData(mergedSchedules);
-        setLoading(false);
       } catch (error) {
         console.error("❌ Error fetching schedules:", error);
-        setLoading(false);
       }
     };
 
     fetchSchedules();
   }, []);
-
-  if (loading) return <p className="p-4">Loading schedules...</p>;
 
   const scheduleKeys = Object.keys(scheduleData).sort(
     (a, b) => new Date(a) - new Date(b)
@@ -111,14 +106,6 @@ function AdminSchedule() {
               <p className="text-gray-500 text-sm sm:text-base">
                 Training and Events Calendar
               </p>
-            </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setModalOpen(true)}
-                className="px-4 py-2 bg-green-600 text-white rounded-full font-medium shadow hover:bg-green-700 transition"
-              >
-                Add Event
-              </button>
             </div>
           </div>
 
