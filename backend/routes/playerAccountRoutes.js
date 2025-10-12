@@ -76,7 +76,7 @@ router.post("/register", async (req, res) => {
 
     // ✅ Generate Email Verification Token
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
-    const verifyLink = `${process.env.FRONTEND_URL}/verified-success?token=${token}`;
+    const verifyLink = `${process.env.BACKEND_URL}/userAccounts/verify-email?token=${token}`;
 
     // ✅ Send Verification Email
     await transporter.sendMail({
