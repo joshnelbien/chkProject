@@ -7,18 +7,22 @@ function HomePage() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
+ 
   const heroContent = [
     {
       title: "Excellence in Athletics",
       subtitle: "Empowering athletes through world-class training and education",
+      image: "/t1.png",
     },
     {
-      title: "Sample Text 2",
+      title: "TAGAAN FESTIVAL",
       subtitle: "This is the second slide for the hero section.",
+      image: "/t2.png",
     },
     {
-      title: "Sample Text 3",
+      title: "5v5 ICE TUBIG",
       subtitle: "The third slide showcases more information.",
+      image: "/t3.png",
     },
   ];
 
@@ -45,6 +49,10 @@ function HomePage() {
     }
   };
 
+  // Get the current content and image
+  const currentSlide = heroContent[currentIndex];
+  const currentImage = currentSlide.image;
+
   return (
     <div className="flex flex-col min-h-screen">
       <NavigationBar />
@@ -54,12 +62,32 @@ function HomePage() {
           className="relative bg-gray-600 h-[60vh] flex items-center justify-center p-8 transition-opacity duration-500 ease-in-out"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
+          style={{
+            // Add the background image style here
+            backgroundImage: `url(${currentImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            // Optional: Add a subtle overlay to make text readable
+            '::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.4)', // Dark overlay
+              zIndex: 1,
+            },
+          }}
         >
-          <div className="text-white text-center">
-            <h1 className="text-6xl font-bold mb-4">{heroContent[currentIndex].title}</h1>
-            <p className="text-xl">{heroContent[currentIndex].subtitle}</p>
+          {/* Text content with a higher z-index to be on top of the overlay */}
+          <div className="text-white text-center relative z-10">
+            <h1 className="text-6xl font-bold mb-4">{currentSlide.title}</h1>
+            <p className="text-xl">{currentSlide.subtitle}</p>
           </div>
-          <div className="absolute bottom-4 flex space-x-2">
+          
+          {/* Navigation dots */}
+          <div className="absolute bottom-4 flex space-x-2 z-10">
             {heroContent.map((_, index) => (
               <div
                 key={index}
