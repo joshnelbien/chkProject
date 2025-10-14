@@ -46,10 +46,7 @@ function AdminTeam() {
 
             <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full self-start sm:self-auto">
               <button className="px-3 sm:px-4 py-1 sm:py-2 bg-white text-green-700 font-semibold rounded-full shadow text-sm sm:text-base">
-                Basketball Team
-              </button>
-              <button className="px-3 sm:px-4 py-1 sm:py-2 text-gray-600 font-medium rounded-full text-sm sm:text-base">
-                Volleyball Team
+                Build Team
               </button>
             </div>
           </div>
@@ -64,16 +61,6 @@ function AdminTeam() {
                   11 active
                 </span>
               </p>
-            </div>
-
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md text-center sm:text-left">
-              <p className="text-gray-500 text-sm">Avg Attendance</p>
-              <p className="text-2xl font-bold">92%</p>
-            </div>
-
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md text-center sm:text-left">
-              <p className="text-gray-500 text-sm">Avg Performance</p>
-              <p className="text-2xl font-bold">88%</p>
             </div>
 
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md text-center sm:text-left">
@@ -197,7 +184,7 @@ function AdminTeam() {
             {/* Recent Results Section */}
             <div>
               <h3 className="text-lg sm:text-xl font-semibold mb-4">
-                Recent Results
+                Recent Match Result
               </h3>
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
                 <ul className="space-y-4">

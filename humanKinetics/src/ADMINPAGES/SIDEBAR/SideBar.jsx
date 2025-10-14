@@ -188,6 +188,18 @@ function Sidebar() {
                 Training
               </NavLink>
             </li>
+
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `block px-4 py-2 rounded-lg transition-colors ${
+                  isActive ? "bg-green-700 font-semibold" : "hover:bg-green-700"
+                }`
+              }
+              onClick={() => setIsOpen(false)}
+            >
+              Logout
+            </NavLink>
           </ul>
         </div>
 

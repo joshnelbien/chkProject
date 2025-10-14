@@ -31,15 +31,6 @@ function Navbar({ toggleSidebar }) {
           <p className="text-sm text-gray-300">College of Human Kinetics</p>
         </div>
       </div>
-
-      <div className="flex items-center space-x-3">
-        <button className="w-10 h-10 flex items-center justify-center bg-green-700 hover:bg-green-800 rounded-lg shadow-md transition-colors">
-          <Bell size={24} />
-        </button>
-        <button className="w-10 h-10 flex items-center justify-center bg-green-700 hover:bg-green-800 rounded-lg shadow-md transition-colors">
-          <Sun size={24} />
-        </button>
-      </div>
     </div>
   );
 }

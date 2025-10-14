@@ -85,13 +85,6 @@ function NavigationBar() {
                 {route.name}
               </a>
             ))}
-            <button
-              onClick={handleDarkModeToggle}
-              className="p-2 rounded-full text-white hover:text-gray-300 transition-colors duration-300"
-              aria-label="Toggle dark mode"
-            >
-              {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
-            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -143,24 +136,6 @@ function NavigationBar() {
               {route.name}
             </a>
           ))}
-          <button
-            onClick={handleDarkModeToggle}
-            className="mt-2 w-full flex justify-center p-2 rounded-lg transition-colors duration-300 text-sm font-medium"
-            style={{
-              backgroundColor: isDarkMode ? "#374151" : "#e5e7eb",
-              color: isDarkMode ? "#f9fafb" : "#111827",
-            }}
-          >
-            {isDarkMode ? (
-              <>
-                <Sun size={18} className="mr-1" /> Light Mode
-              </>
-            ) : (
-              <>
-                <Moon size={18} className="mr-1" /> Dark Mode
-              </>
-            )}
-          </button>
         </div>
       </div>
     </nav>

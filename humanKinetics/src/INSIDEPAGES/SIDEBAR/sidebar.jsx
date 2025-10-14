@@ -62,6 +62,10 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <SidebarLink to="/staffs" label="Staffs" />
         </SidebarSection>
 
+        <SidebarSection>
+          <SidebarLink to="/" label="Logout" />
+        </SidebarSection>
+
         {/* Spacer */}
         <div className="flex-grow"></div>
 
