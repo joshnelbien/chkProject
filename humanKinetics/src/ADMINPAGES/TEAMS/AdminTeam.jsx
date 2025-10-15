@@ -5,12 +5,33 @@ import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
 import BuildTeamModal from "./buildTeamModal";
+import TeamDetailsModal from "./TeamDetailsModal";
 
 function AdminTeam() {
   const { id } = useParams(); // ✅ Admin/User ID from route
   const [teams, setTeams] = useState([]);
   const [playersByTeam, setPlayersByTeam] = useState({});
   const [openModal, setOpenModal] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const handleViewDetails = (team) => {
+    console.log("🟢 Selected Team ID:", team.id);
+    setSelectedTeam(team);
+    setDetailsOpen(true);
+  };
+
+  // ✅ Handle closing
+  const handleCloseDetails = () => {
+    setDetailsOpen(false);
+    setSelectedTeam(null);
+  };
+
+  // ✅ When “Add Player” clicked
+  const handleAddPlayer = () => {
+    alert(`Add player to team: ${selectedTeam.teamName}`);
+    // You can open another modal or redirect to player form here
+  };
 
   // ✅ Fetch all teams for this admin/user
   useEffect(() => {
@@ -19,13 +40,13 @@ function AdminTeam() {
         const res = await axios.get(
           `http://localhost:5000/teams/getTeams/${id}`
         );
-        console.log("📌 Teams fetched:", res.data);
+        console.log(" Teams fetched:", res.data);
         setTeams(res.data);
 
         // After teams are fetched, fetch players for each team
         res.data.forEach((team) => fetchPlayersForTeam(team.id));
       } catch (err) {
-        console.error("❌ Error fetching teams:", err);
+        console.error(" Error fetching teams:", err);
       }
     };
     fetchTeams();
@@ -37,20 +58,20 @@ function AdminTeam() {
       const res = await axios.get(
         `http://localhost:5000/teams/player/${teamId}`
       );
-      console.log(`📌 Players for team ${teamId}:`, res.data);
+      console.log(` Players for team ${teamId}:`, res.data);
 
       setPlayersByTeam((prev) => ({
         ...prev,
         [teamId]: res.data,
       }));
     } catch (err) {
-      console.error(`❌ Error fetching players for team ${teamId}:`, err);
+      console.error(` Error fetching players for team ${teamId}:`, err);
     }
   };
 
   // ✅ When new team is created, update state
   const handleTeamCreated = (newTeam) => {
-    console.log("🏀 New Team Created:", newTeam);
+    console.log(" New Team Created:", newTeam);
     setTeams((prev) => [...prev, newTeam]);
   };
 
@@ -62,7 +83,6 @@ function AdminTeam() {
       {/* Main Section */}
       <div className="flex flex-col flex-grow">
         <Navbar />
-
         <main className="flex-grow p-6 max-w-7xl mx-auto w-full mt-20">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
@@ -96,9 +116,11 @@ function AdminTeam() {
 
           {/* Teams Section */}
           <section>
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">
-              My Teams
-            </h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold mb-4 text-gray-800">
+                My Teams
+              </h3>
+            </div>
 
             {teams.length === 0 ? (
               <p className="text-gray-500 italic">
@@ -156,7 +178,10 @@ function AdminTeam() {
                         )}
                       </div>
 
-                      <button className="w-full py-2 mt-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                      <button
+                        onClick={() => handleViewDetails(team)} // ✅ open modal
+                        className="w-full py-2 mt-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                      >
                         View Team Details
                       </button>
                     </div>
@@ -165,6 +190,14 @@ function AdminTeam() {
               </div>
             )}
           </section>
+
+          <TeamDetailsModal
+            open={detailsOpen}
+            onClose={handleCloseDetails}
+            team={selectedTeam}
+            players={selectedTeam ? playersByTeam[selectedTeam.id] || [] : []}
+            onAddPlayer={handleAddPlayer}
+          />
         </main>
 
         <Footer />

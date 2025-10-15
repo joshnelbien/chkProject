@@ -25,16 +25,16 @@ function AdminAthletes() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar - fixed on the left */}
+      {/* Sidebar */}
       <Sidebar />
 
-      {/* Right section: Navbar + Scrollable Main + Footer */}
+      {/* Right section */}
       <div className="flex flex-col flex-grow">
         <Navbar />
 
-        {/* ✅ Main Content — scrollable */}
+        {/* Main Content */}
         <main className="flex-grow overflow-y-auto p-4 sm:p-6 max-w-7xl mx-auto w-full mt-16 md:mt-20">
-          {/* Header Section */}
+          {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
             <div>
               <h2 className="text-2xl font-semibold text-green-700">
@@ -48,7 +48,7 @@ function AdminAthletes() {
 
           {/* Search & Filters */}
           <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-6">
-            {/* Search bar */}
+            {/* Search */}
             <div className="relative w-full md:flex-grow">
               <input
                 type="text"
@@ -82,7 +82,7 @@ function AdminAthletes() {
             </div>
           </div>
 
-          {/* ✅ Athlete Cards (Dynamic) */}
+          {/* Athlete Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
             {players.length > 0 ? (
               players.map((player) => (
@@ -92,12 +92,17 @@ function AdminAthletes() {
                   number={player.studentNumber}
                   sport={player.sport}
                   role={player.course}
-                  status={player.isVerified ? "Active" : "Pending"}
+                  status={player.status}
                   attendance="--"
                   performance="--"
                   streak="--"
                   improvement="--"
-                  metrics={{ Strength: 0, Speed: 0, Agility: 0, Endurance: 0 }}
+                  metrics={{
+                    Strength: 0,
+                    Speed: 0,
+                    Agility: 0,
+                    Endurance: 0,
+                  }}
                   activities={[]}
                 />
               ))
@@ -139,7 +144,7 @@ function AthleteCard({
             <h3 className="text-xl font-semibold">{name}</h3>
             <span
               className={`text-xs font-medium px-2 py-1 rounded-full ${
-                status === "Active"
+                status === "In Team"
                   ? "bg-green-200 text-green-700"
                   : "bg-yellow-200 text-yellow-700"
               }`}

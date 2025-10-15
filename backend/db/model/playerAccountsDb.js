@@ -45,6 +45,10 @@ const playerAccounts = sequelize.define("playerAccounts", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: "Pending",
+  },
   profilePicture: {
     type: DataTypes.BLOB("long"),
     allowNull: true,
