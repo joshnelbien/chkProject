@@ -28,10 +28,6 @@ function AdminTeam() {
   };
 
   // ✅ When “Add Player” clicked
-  const handleAddPlayer = () => {
-    alert(`Add player to team: ${selectedTeam.teamName}`);
-    // You can open another modal or redirect to player form here
-  };
 
   // ✅ Fetch all teams for this admin/user
   useEffect(() => {
@@ -196,7 +192,6 @@ function AdminTeam() {
             onClose={handleCloseDetails}
             team={selectedTeam}
             players={selectedTeam ? playersByTeam[selectedTeam.id] || [] : []}
-            onAddPlayer={handleAddPlayer}
           />
         </main>
 
