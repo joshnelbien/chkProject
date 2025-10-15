@@ -46,16 +46,30 @@ function Login() {
       }
 
       if (response.status === 200) {
-        alert("Login successful!");
+        console.log("✅ Server Response:", response.data);
 
-        // ✅ Save token (optional for protected routes)
-        localStorage.setItem("authToken", response.data.token);
+        // Extract ID depending on login type
+        const id =
+          response.data.player?.id ||
+          response.data.admin?.id ||
+          response.data.user?.id ||
+          response.data.id ||
+          response.data.user_id ||
+          null;
+
+        if (!id) {
+          alert("User ID not found in response!");
+          return;
+        }
+
+        alert("Login successful!");
+        console.log("👤 Logged in user ID:", id);
 
         // ✅ Navigate to correct dashboard
         if (loginType === "athlete") {
-          navigate("/overView");
+          navigate(`/overView/${id}`);
         } else {
-          navigate("/admin-overview");
+          navigate(`/admin-overview/${id}`);
         }
       }
     } catch (error) {
@@ -111,7 +125,9 @@ function Login() {
                       <CheckCircle size={24} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-semibold">Real-time Updates</h3>
+                      <h3 className="text-xl font-semibold">
+                        Real-time Updates
+                      </h3>
                       <p className="text-gray-100">
                         Track live competition scores and instant performance
                         metrics across all sports events.

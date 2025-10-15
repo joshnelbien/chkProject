@@ -5,7 +5,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const playerAccounts = require("../db/model/playerAccountsDb");
 require("dotenv").config();
 
@@ -40,7 +40,9 @@ router.post("/register", async (req, res) => {
   }
 
   if (!firstName || !email || !password || !studentNumber || !agreedToTerms) {
-    return res.status(400).json({ message: "All required fields must be filled." });
+    return res
+      .status(400)
+      .json({ message: "All required fields must be filled." });
   }
 
   try {
@@ -52,9 +54,13 @@ router.post("/register", async (req, res) => {
 
     if (existingUser) {
       if (existingUser.email === email)
-        return res.status(409).json({ message: "An account with this email already exists." });
+        return res
+          .status(409)
+          .json({ message: "An account with this email already exists." });
       if (existingUser.studentNumber === studentNumber)
-        return res.status(409).json({ message: "An account with this student number already exists." });
+        return res.status(409).json({
+          message: "An account with this student number already exists.",
+        });
     }
 
     // Hash password
@@ -75,7 +81,9 @@ router.post("/register", async (req, res) => {
     });
 
     // ✅ Generate Email Verification Token
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
     const verifyLink = `${process.env.BACKEND_URL}/userAccounts/verify-email?token=${token}`;
 
     // ✅ Send Verification Email
@@ -94,7 +102,8 @@ router.post("/register", async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Registration successful! Please check your email to verify your account.",
+      message:
+        "Registration successful! Please check your email to verify your account.",
     });
   } catch (error) {
     console.error("Registration Error:", error);
@@ -112,7 +121,9 @@ router.get("/verify-email", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await playerAccounts.findOne({ where: { email: decoded.email } });
+    const user = await playerAccounts.findOne({
+      where: { email: decoded.email },
+    });
 
     if (!user) return res.status(404).send("User not found.");
     if (user.isVerified) return res.status(400).send("Email already verified.");
@@ -129,7 +140,7 @@ router.get("/verify-email", async (req, res) => {
 
 router.get("/players", async (req, res) => {
   try {
-    const players = await playerAccounts.findAll({  });
+    const players = await playerAccounts.findAll({});
 
     res.json(players);
   } catch (error) {
@@ -193,9 +204,4 @@ router.post("/player-login", async (req, res) => {
   }
 });
 
-
-
 module.exports = router;
-
-
-

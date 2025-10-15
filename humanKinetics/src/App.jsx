@@ -30,8 +30,7 @@ import HomePage from "./PAGES/HomePage/HomePage";
 import ProgramPage from "./PAGES/Programs/ProgramPage";
 import Register from "./PAGES/Register/Register";
 import AdminRegister from "./PAGES/Register/adminRegister";
-import './index.css';
-
+import "./index.css";
 
 function App() {
   return (
@@ -46,33 +45,35 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/athletes" element={<AthletePage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/overView" element={<OverView />} />
+          <Route path="/overView/:id" element={<OverView />} />
           <Route path="/register" element={<Register />} />
           <Route path="/adminRegister" element={<AdminRegister />} />
 
           {/* ATHLETE PAGES */}
-          <Route path="/medal-tally" element={<MedalTally />} />
-          <Route path="/training-program" element={<TrainProgram />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/nutrition" element={<Nutrition />} />
-          <Route path="/schedule" element={<Schedule />} />
-          <Route path="/member" element={<Member />} />
-          <Route path="/medicalRecord" element={<MedicalRecord />} />
-          <Route path="/sportEvent" element={<SportEvent />} />
-          <Route path="/staffs" element={<Staff />} />
-          <Route path="/verified-success" element={<VerifyEmail />} />
-          <Route path="/admin-verified-success" element={<AdminVerifyEmail />} />
-
+          <Route path="/medal-tally/:id" element={<MedalTally />} />
+          <Route path="/training-program/:id" element={<TrainProgram />} />
+          <Route path="/analytics/:id" element={<Analytics />} />
+          <Route path="/nutrition/:id" element={<Nutrition />} />
+          <Route path="/schedule/:id" element={<Schedule />} />
+          <Route path="/member/:id" element={<Member />} />
+          <Route path="/medicalRecord/:id" element={<MedicalRecord />} />
+          <Route path="/sportEvent/:id" element={<SportEvent />} />
+          <Route path="/staffs/:id" element={<Staff />} />
+          <Route path="/verified-success/:id" element={<VerifyEmail />} />
+          <Route
+            path="/admin-verified-success"
+            element={<AdminVerifyEmail />}
+          />
 
           {/* ADMIN PAGES */}
-          <Route path="/admin-overview" element={<AdminOverView />} />
-          <Route path="/admin-team" element={<AdminTeam />} />
-          <Route path="/admin-athletes" element={<AdminAthletes />} />
-          <Route path="/admin-performance" element={<AdminPerformance />} />
-          <Route path="/admin-schedule" element={<AdminSchedule />} />
-          <Route path="/admin-training" element={<AdminTraining />} />
-          <Route path="/admin-tournament" element={<AdminTournament />} />
-          <Route path="/admin-attendance" element={<AdminAttendance />} />
+          <Route path="/admin-overview/:id" element={<AdminOverView />} />
+          <Route path="/admin-team/:id" element={<AdminTeam />} />
+          <Route path="/admin-athletes/:id" element={<AdminAthletes />} />
+          <Route path="/admin-performance/:id" element={<AdminPerformance />} />
+          <Route path="/admin-schedule/:id" element={<AdminSchedule />} />
+          <Route path="/admin-training/:id" element={<AdminTraining />} />
+          <Route path="/admin-tournament/:id" element={<AdminTournament />} />
+          <Route path="/admin-attendance/:id" element={<AdminAttendance />} />
         </Routes>
       </BrowserRouter>
     </>

@@ -1,243 +1,191 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import BuildTeamModal from "./buildTeamModal";
 
 function AdminTeam() {
-  const [players, setPlayers] = useState([]);
+  const { id } = useParams(); // ✅ Admin/User ID from route
+  const [teams, setTeams] = useState([]);
+  const [playersByTeam, setPlayersByTeam] = useState({});
+  const [openModal, setOpenModal] = useState(false);
+
+  // ✅ Fetch all teams for this admin/user
   useEffect(() => {
-    const fetchPlayers = async () => {
+    const fetchTeams = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/userAccounts/players"
+          `http://localhost:5000/teams/getTeams/${id}`
         );
-        console.log("📌 Fetched Players (Frontend):", res.data);
-        setPlayers(res.data);
-      } catch (error) {
-        console.error("❌ Error fetching players (Frontend):", error);
+        console.log("📌 Teams fetched:", res.data);
+        setTeams(res.data);
+
+        // After teams are fetched, fetch players for each team
+        res.data.forEach((team) => fetchPlayersForTeam(team.id));
+      } catch (err) {
+        console.error("❌ Error fetching teams:", err);
       }
     };
+    fetchTeams();
+  }, [id]);
 
-    fetchPlayers();
-  }, []);
+  // ✅ Fetch players for a specific team
+  const fetchPlayersForTeam = async (teamId) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/teams/player/${teamId}`
+      );
+      console.log(`📌 Players for team ${teamId}:`, res.data);
+
+      setPlayersByTeam((prev) => ({
+        ...prev,
+        [teamId]: res.data,
+      }));
+    } catch (err) {
+      console.error(`❌ Error fetching players for team ${teamId}:`, err);
+    }
+  };
+
+  // ✅ When new team is created, update state
+  const handleTeamCreated = (newTeam) => {
+    console.log("🏀 New Team Created:", newTeam);
+    setTeams((prev) => [...prev, newTeam]);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar on the left */}
+      {/* Sidebar */}
       <Sidebar />
 
-      {/* Right section: Navbar + Content */}
+      {/* Main Section */}
       <div className="flex flex-col flex-grow">
         <Navbar />
 
-        {/* Main Content */}
-        <main className="flex-grow p-4 sm:p-6 max-w-7xl mx-auto w-full mt-16 md:mt-20">
-          {/* Header Section */}
+        <main className="flex-grow p-6 max-w-7xl mx-auto w-full mt-20">
+          {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
             <div>
               <h2 className="text-2xl font-semibold text-green-700">
-                Basketball Team
+                Team Management
               </h2>
               <p className="text-gray-500 text-sm sm:text-base">
-                Team Management
+                Manage your teams and players
               </p>
             </div>
 
-            <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full self-start sm:self-auto">
-              <button className="px-3 sm:px-4 py-1 sm:py-2 bg-white text-green-700 font-semibold rounded-full shadow text-sm sm:text-base">
-                Build Team
-              </button>
-            </div>
+            <button
+              onClick={() => setOpenModal(true)}
+              className="px-4 py-2 bg-green-700 text-white rounded-full shadow-md hover:bg-green-800 transition font-medium"
+            >
+              + Build New Team
+            </button>
           </div>
 
-          {/* Performance Overview Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md text-center sm:text-left">
-              <p className="text-gray-500 text-sm">Total Players</p>
-              <p className="text-2xl font-bold">
-                12
-                <span className="text-sm font-normal text-gray-500 ml-1">
-                  11 active
-                </span>
-              </p>
-            </div>
-
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md text-center sm:text-left">
-              <p className="text-gray-500 text-sm">Next Match</p>
-              <p className="text-lg sm:text-xl font-bold text-gray-800">
-                Team Eagles
-              </p>
-              <p className="text-gray-400 text-sm">Feb 20, 2024 • 2:00 PM</p>
-            </div>
+          {/* Overview */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <OverviewCard label="Total Teams" value={teams.length} />
+            <OverviewCard
+              label="Total Players"
+              value={Object.values(playersByTeam).flat().length}
+            />
+            <OverviewCard label="Active Sports" value="3" />
+            <OverviewCard label="Upcoming Matches" value="2" />
           </div>
 
-          {/* Team Roster + Recent Results */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Team Roster Section */}
-            <div className="lg:col-span-2">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
-                <h3 className="text-lg sm:text-xl font-semibold">
-                  Team Roster
-                </h3>
-                <button className="bg-green-600 text-white px-4 py-2 rounded-full font-medium shadow text-sm sm:text-base">
-                  Add Player
-                </button>
-              </div>
+          {/* Teams Section */}
+          <section>
+            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+              My Teams
+            </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                {[
-                  {
-                    name: "John Smith",
-                    status: "Active",
-                    num: "23",
-                    role: "Forward",
-                    att: "95%",
-                    perf: "88%",
-                  },
-                  {
-                    name: "Mike Johnson",
-                    status: "Active",
-                    num: "11",
-                    role: "Guard",
-                    att: "92%",
-                    perf: "85%",
-                  },
-                  {
-                    name: "Chris Davis",
-                    status: "Injured",
-                    num: "15",
-                    role: "Center",
-                    att: "88%",
-                    perf: "82%",
-                    injured: true,
-                  },
-                  {
-                    name: "James Wilson",
-                    status: "Active",
-                    num: "07",
-                    role: "Guard",
-                    att: "94%",
-                    perf: "87%",
-                  },
-                  {
-                    name: "Robert Lee",
-                    status: "Active",
-                    num: "32",
-                    role: "Forward",
-                    att: "91%",
-                    perf: "86%",
-                  },
-                  {
-                    name: "David Brown",
-                    status: "Active",
-                    num: "21",
-                    role: "Center",
-                    att: "93%",
-                    perf: "89%",
-                  },
-                ].map((player, i) => (
-                  <div key={i} className="bg-white p-4 rounded-lg shadow-md">
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="font-semibold text-gray-800">
-                        {player.name}
+            {teams.length === 0 ? (
+              <p className="text-gray-500 italic">
+                No teams have been created yet.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {teams.map((team) => {
+                  const players = playersByTeam[team.id] || [];
+                  return (
+                    <div
+                      key={team.id}
+                      className="bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition"
+                    >
+                      <h4 className="text-lg font-bold text-green-700 mb-2">
+                        {team.teamName}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="font-semibold">Sport:</span>{" "}
+                        {team.sport}
                       </p>
-                      <span
-                        className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          player.injured
-                            ? "bg-red-200 text-red-700"
-                            : "bg-green-200 text-green-700"
-                        }`}
-                      >
-                        {player.status}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      <span className="font-bold text-lg">{player.num}</span>{" "}
-                      {player.role}
-                    </p>
-                    <div className="flex justify-between my-2 text-sm">
-                      <div>
-                        <p className="text-gray-500">Attendance</p>
-                        <p className="font-bold">{player.att}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Performance</p>
-                        <p className="font-bold">{player.perf}</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500 mb-1">
-                      Recent Performance
-                    </p>
-                    <div className="flex space-x-1">
-                      <div className="w-1/5 h-2 bg-green-400 rounded-sm"></div>
-                      <div className="w-1/5 h-2 bg-yellow-400 rounded-sm"></div>
-                      <div className="w-1/5 h-2 bg-green-400 rounded-sm"></div>
-                      <div className="w-1/5 h-2 bg-green-400 rounded-sm"></div>
-                      <div className="w-1/5 h-2 bg-green-400 rounded-sm"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+                      <p className="text-sm text-gray-600 mb-1">
+                        <span className="font-semibold">Coach:</span>{" "}
+                        {team.coach}
+                      </p>
+                      <p className="text-sm text-gray-600 mb-3">
+                        {team.description || "No description provided."}
+                      </p>
 
-            {/* Recent Results Section */}
-            <div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-4">
-                Recent Match Result
-              </h3>
-              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-                <ul className="space-y-4">
-                  {[
-                    {
-                      team: "Team Hawks",
-                      date: "Feb 15",
-                      score: "91-85",
-                      win: true,
-                    },
-                    {
-                      team: "Team Lions",
-                      date: "Feb 12",
-                      score: "88-82",
-                      win: true,
-                    },
-                    {
-                      team: "Team Tigers",
-                      date: "Feb 8",
-                      score: "78-80",
-                      win: false,
-                    },
-                  ].map((res, i) => (
-                    <li key={i} className="flex justify-between items-center">
-                      <div>
-                        <p className="font-semibold text-gray-800">
-                          vs {res.team}
+                      {/* ✅ Player List */}
+                      <div className="border-t pt-3 mt-3">
+                        <p className="font-semibold text-gray-700 mb-2">
+                          Players ({players.length})
                         </p>
-                        <p className="text-gray-400 text-sm">{res.date}</p>
+                        {players.length === 0 ? (
+                          <p className="text-gray-400 text-sm italic">
+                            No players assigned.
+                          </p>
+                        ) : (
+                          <ul className="space-y-1 text-sm">
+                            {players.map((p) => (
+                              <li
+                                key={p.id}
+                                className="flex justify-between items-center bg-gray-50 p-2 rounded-md"
+                              >
+                                <span className="font-medium text-gray-800">
+                                  {p.firstName} {p.lastName}
+                                </span>
+                                <span className="text-xs text-green-700 font-semibold">
+                                  #{p.jerseyNumber || "N/A"}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <p className="font-bold text-gray-800">{res.score}</p>
-                        <span
-                          className={`text-xs font-medium px-2 py-1 rounded-full ${
-                            res.win
-                              ? "bg-green-200 text-green-700"
-                              : "bg-red-200 text-red-700"
-                          }`}
-                        >
-                          {res.win ? "W" : "L"}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+
+                      <button className="w-full py-2 mt-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        View Team Details
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-          </div>
+            )}
+          </section>
         </main>
 
-        {/* Footer */}
         <Footer />
       </div>
+
+      {/* Build Team Modal */}
+      <BuildTeamModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        onTeamCreated={handleTeamCreated}
+      />
+    </div>
+  );
+}
+
+/* ✅ Reusable Card for Overview Stats */
+function OverviewCard({ label, value }) {
+  return (
+    <div className="bg-white p-5 rounded-lg shadow-md text-center">
+      <p className="text-gray-500 text-sm">{label}</p>
+      <p className="text-2xl font-bold text-green-700">{value}</p>
     </div>
   );
 }

@@ -7,6 +7,9 @@ const playerAccounts = sequelize.define("playerAccounts", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
+  teamId: {
+    type: DataTypes.STRING,
+  },
 
   firstName: {
     type: DataTypes.STRING,

@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { Menu, X } from "lucide-react"; // for toggle icons
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
+
+  // ✅ Get the ID from the URL (e.g., /admin-overview/:id)
+  const { id } = useParams();
 
   return (
     <>
@@ -54,7 +57,7 @@ function Sidebar() {
           <ul className="space-y-1">
             <li>
               <NavLink
-                to="/admin-overview"
+                to={`/admin-overview/${id}`}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
@@ -69,7 +72,7 @@ function Sidebar() {
             </li>
             <li>
               <NavLink
-                to="/admin-team"
+                to={`/admin-team/${id}`}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
@@ -84,7 +87,7 @@ function Sidebar() {
             </li>
             <li>
               <NavLink
-                to="/admin-athletes"
+                to={`/admin-athletes/${id}`}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
@@ -108,7 +111,7 @@ function Sidebar() {
           <ul className="space-y-1">
             <li>
               <NavLink
-                to="/admin-schedule"
+                to={`/admin-schedule/${id}`}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
@@ -123,7 +126,7 @@ function Sidebar() {
             </li>
             <li>
               <NavLink
-                to="/admin-attendance"
+                to={`/admin-attendance/${id}`}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
@@ -138,7 +141,7 @@ function Sidebar() {
             </li>
             <li>
               <NavLink
-                to="/admin-performance"
+                to={`/admin-performance/${id}`}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
@@ -160,7 +163,7 @@ function Sidebar() {
           <ul className="space-y-1">
             <li>
               <NavLink
-                to="/admin-tournament"
+                to={`/admin-tournament/${id}`}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
@@ -175,7 +178,7 @@ function Sidebar() {
             </li>
             <li>
               <NavLink
-                to="/admin-training"
+                to={`/admin-training/${id}`}
                 className={({ isActive }) =>
                   `block px-4 py-2 rounded-lg transition-colors ${
                     isActive
@@ -188,18 +191,21 @@ function Sidebar() {
                 Training
               </NavLink>
             </li>
-
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `block px-4 py-2 rounded-lg transition-colors ${
-                  isActive ? "bg-green-700 font-semibold" : "hover:bg-green-700"
-                }`
-              }
-              onClick={() => setIsOpen(false)}
-            >
-              Logout
-            </NavLink>
+            <li>
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `block px-4 py-2 rounded-lg transition-colors ${
+                    isActive
+                      ? "bg-green-700 font-semibold"
+                      : "hover:bg-green-700"
+                  }`
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                Logout
+              </NavLink>
+            </li>
           </ul>
         </div>
 

@@ -1,7 +1,10 @@
 import { NavLink } from "react-router-dom";
 import { Search } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 function Sidebar({ isOpen, toggleSidebar }) {
+  const { id } = useParams(); // ✅ get the :id from the URL
+
   return (
     <>
       {/* Sidebar */}
@@ -41,25 +44,28 @@ function Sidebar({ isOpen, toggleSidebar }) {
 
         {/* Navigation Sections */}
         <SidebarSection title="Dashboard">
-          <SidebarLink to="/overview" label="Overview" />
-          <SidebarLink to="/medal-tally" label="Medal Tally" />
-          <SidebarLink to="/training-program" label="Training Program" />
+          <SidebarLink to={`/overview/${id}`} label="Overview" />
+          <SidebarLink to={`/medal-tally/${id}`} label="Medal Tally" />
+          <SidebarLink
+            to={`/training-program/${id}`}
+            label="Training Program"
+          />
         </SidebarSection>
 
         <SidebarSection title="Performance">
-          <SidebarLink to="/analytics" label="Analytics" />
-          <SidebarLink to="/nutrition" label="Nutrition" />
-          <SidebarLink to="/schedule" label="Schedule" />
+          <SidebarLink to={`/analytics/${id}`} label="Analytics" />
+          <SidebarLink to={`/nutrition/${id}`} label="Nutrition" />
+          <SidebarLink to={`/schedule/${id}`} label="Schedule" />
         </SidebarSection>
 
         <SidebarSection title="Team">
-          <SidebarLink to="/member" label="Members" />
-          <SidebarLink to="/medicalRecord" label="Medical Records" />
+          <SidebarLink to={`/member/${id}`} label="Members" />
+          <SidebarLink to={`/medicalRecord/${id}`} label="Medical Records" />
         </SidebarSection>
 
         <SidebarSection title="School">
-          <SidebarLink to="/sportEvent" label="Sports Events" />
-          <SidebarLink to="/staffs" label="Staffs" />
+          <SidebarLink to={`/sportEvent/${id}`} label="Sports Events" />
+          <SidebarLink to={`/staffs/${id}`} label="Staffs" />
         </SidebarSection>
 
         <SidebarSection>
@@ -94,7 +100,9 @@ function Sidebar({ isOpen, toggleSidebar }) {
 function SidebarSection({ title, children }) {
   return (
     <div className="mb-4">
-      <h2 className="uppercase text-gray-400 text-sm mb-2 pl-2">{title}</h2>
+      {title && (
+        <h2 className="uppercase text-gray-400 text-sm mb-2 pl-2">{title}</h2>
+      )}
       <ul className="space-y-1">{children}</ul>
     </div>
   );
