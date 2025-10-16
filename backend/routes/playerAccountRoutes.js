@@ -173,31 +173,23 @@ router.put(
   "/players-update/:id",
   upload.single("profilePicture"),
   async (req, res) => {
-    const { id } = req.params;
-    const { firstName, lastName, email, course, yearLevel, sport } = req.body;
-
     try {
+      const { id } = req.params;
+
       const player = await playerAccounts.findByPk(id);
       if (!player) {
         return res.status(404).json({ message: "Player not found" });
       }
 
-      // Create an object for update fields
-      const updatedData = {
-        firstName,
-        lastName,
-        email,
-        course,
-        yearLevel,
-        sport,
-      };
+      // Create a copy of all fields from req.body
+      const updatedData = { ...req.body };
 
-      // If an image was uploaded, include it
+      // If image uploaded, attach it
       if (req.file) {
         updatedData.profilePicture = req.file.buffer;
       }
 
-      // Perform the update
+      // Perform update
       await player.update(updatedData);
 
       res.status(200).json({
