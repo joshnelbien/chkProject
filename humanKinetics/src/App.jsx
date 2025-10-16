@@ -31,6 +31,7 @@ import ProgramPage from "./PAGES/Programs/ProgramPage";
 import Register from "./PAGES/Register/Register";
 import AdminRegister from "./PAGES/Register/adminRegister";
 import "./index.css";
+import ManageAccount from "./INSIDEPAGES/MANAGEACCOUNT/ManageAccount";
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
           <Route path="/medicalRecord/:id" element={<MedicalRecord />} />
           <Route path="/sportEvent/:id" element={<SportEvent />} />
           <Route path="/staffs/:id" element={<Staff />} />
+          <Route path="/manageAccount/:id" element={<ManageAccount />} />
           <Route path="/verified-success/:id" element={<VerifyEmail />} />
           <Route
             path="/admin-verified-success"

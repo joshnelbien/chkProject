@@ -1,46 +1,91 @@
-import { NavLink } from "react-router-dom";
-import { Search } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-function Sidebar({ isOpen, toggleSidebar }) {
-  const { id } = useParams(); // ✅ get the :id from the URL
+function Sidebar({ isOpen }) {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [player, setPlayer] = useState(null);
+  const [profileSrc, setProfileSrc] = useState("/lexi.jpg");
+
+  // ✅ Fetch player profile
+  const fetchPlayer = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/userAccounts/players-profile/${id}`
+      );
+      const data = res.data;
+      setPlayer(data);
+
+      // ✅ If a profile picture exists, use backend image route
+      if (data?.id && data?.profilePicture) {
+        setProfileSrc(
+          `http://localhost:5000/userAccounts/player-photo/${data.id}`
+        );
+      } else {
+        setProfileSrc("/lexi.jpg");
+      }
+    } catch (err) {
+      console.error("Error fetching player:", err);
+      setProfileSrc("/lexi.jpg");
+    }
+  };
+
+  useEffect(() => {
+    if (id) fetchPlayer();
+  }, [id]);
+
+  // ✅ Handle "Manage Account" navigation
+  const handleManageAccount = () => {
+    navigate(`/manageAccount/${id}`);
+  };
 
   return (
     <>
-      {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-screen w-64 text-white flex flex-col p-4 z-40 transform transition-transform duration-300
-          ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-          md:translate-x-0 md:static md:h-auto`}
-        style={{ backgroundColor: "#006837" }}
+        ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+        md:translate-x-0 md:static md:h-auto`}
+        style={{ backgroundColor: "#006837", overflowY: "auto" }}
       >
-        {/* Logo / Title */}
-        <div className="flex items-center mb-6 pl-4 pt-4">
-          <div className="h-12 w-12 rounded-full mr-4 overflow-hidden">
-            <img
-              src="/lexi.jpg"
-              alt="PLSP Logo"
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="flex flex-col">
-            <h1 className="text-lg font-bold text-white">PLSP MYNAS</h1>
-            <p className="text-sm text-gray-300">Athletic Division</p>
+        {/* ✅ Player Info */}
+        <div className="p-4 mx-2 bg-green-700 rounded-2xl flex flex-col items-center text-center space-y-2 shadow-md">
+          <img
+            src={profileSrc}
+            alt="Profile"
+            className="h-16 w-16 rounded-full object-cover border-2 border-white shadow-sm"
+            onError={() => setProfileSrc("/lexi.jpg")} // fallback if image fails
+          />
+
+          <div className="w-full">
+            <p
+              className="font-bold text-white uppercase text-sm truncate"
+              title={
+                player ? `${player.firstName} ${player.lastName}` : "Loading..."
+              }
+            >
+              {player ? `${player.firstName} ${player.lastName}` : "Loading..."}
+            </p>
+            <p className="text-xs text-gray-300 tracking-wide">
+              {player
+                ? player.sport
+                  ? player.sport.toUpperCase()
+                  : "NO SPORT ASSIGNED"
+                : ""}
+            </p>
+
+            {/* ✅ Manage Account Button */}
+            <button
+              onClick={handleManageAccount}
+              className="mt-2 text-xs font-semibold bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded-lg shadow-sm transition-all duration-200"
+            >
+              Manage Account
+            </button>
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-6 mx-2">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg bg-green-700 placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-green-500 text-white"
-          />
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
-            size={20}
-          />
-        </div>
+        {/* Divider */}
+        <hr className="my-4 border-t border-gray-400/40 mx-4" />
 
         {/* Navigation Sections */}
         <SidebarSection title="Dashboard">
@@ -72,26 +117,8 @@ function Sidebar({ isOpen, toggleSidebar }) {
           <SidebarLink to="/" label="Logout" />
         </SidebarSection>
 
-        {/* Spacer */}
         <div className="flex-grow"></div>
-
-        {/* User Container */}
-        <div className="p-4 mx-2 bg-green-700 rounded-lg flex items-center">
-          <div className="h-10 w-10 bg-gray-200 rounded-full mr-4"></div>
-          <div className="flex flex-col">
-            <p className="font-semibold text-white">Airus Cosico</p>
-            <p className="text-sm text-gray-300">Basketball Team</p>
-          </div>
-        </div>
       </div>
-
-      {/* Overlay when sidebar is open on mobile */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-40 z-30 md:hidden"
-          onClick={toggleSidebar}
-        ></div>
-      )}
     </>
   );
 }

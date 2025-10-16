@@ -6,8 +6,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const { Op, where } = require("sequelize");
+const multer = require("multer");
 const playerAccounts = require("../db/model/playerAccountsDb");
 require("dotenv").config();
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // ✅ Setup Email Transporter
 const transporter = nodemailer.createTransport({
@@ -146,6 +150,84 @@ router.get("/players", async (req, res) => {
   } catch (error) {
     console.error("Error fetching players:", error);
     res.status(500).json({ error: "Server error fetching players." });
+  }
+});
+
+router.get("/players-profile/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const player = await playerAccounts.findByPk(id);
+
+    if (!player) {
+      return res.status(404).json({ error: "Player not found" });
+    }
+
+    res.json(player);
+  } catch (error) {
+    console.error("Error fetching player:", error);
+    res.status(500).json({ error: "Server error fetching player." });
+  }
+});
+
+router.put(
+  "/players-update/:id",
+  upload.single("profilePicture"),
+  async (req, res) => {
+    const { id } = req.params;
+    const { firstName, lastName, email, course, yearLevel, sport } = req.body;
+
+    try {
+      const player = await playerAccounts.findByPk(id);
+      if (!player) {
+        return res.status(404).json({ message: "Player not found" });
+      }
+
+      // Create an object for update fields
+      const updatedData = {
+        firstName,
+        lastName,
+        email,
+        course,
+        yearLevel,
+        sport,
+      };
+
+      // If an image was uploaded, include it
+      if (req.file) {
+        updatedData.profilePicture = req.file.buffer;
+      }
+
+      // Perform the update
+      await player.update(updatedData);
+
+      res.status(200).json({
+        message: "Player updated successfully",
+        player,
+      });
+    } catch (error) {
+      console.error("Error updating player:", error);
+      res.status(500).json({
+        message: "Failed to update player",
+        error: error.message,
+      });
+    }
+  }
+);
+
+router.get("/player-photo/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const player = await playerAccounts.findByPk(id);
+
+    if (!player || !player.profilePicture) {
+      return res.status(404).send("No profile picture found.");
+    }
+
+    res.setHeader("Content-Type", "image/jpeg");
+    res.send(player.profilePicture);
+  } catch (error) {
+    console.error("Error fetching profile picture:", error);
+    res.status(500).send("Server error fetching profile picture.");
   }
 });
 
