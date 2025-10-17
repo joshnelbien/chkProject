@@ -9,7 +9,7 @@ import { useParams } from "react-router-dom";
 function AdminTournament() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tournaments, setTournaments] = useState([]);
-  const { adminId } = useParams();
+  const { id } = useParams();
   const [filterStatus, setFilterStatus] = useState("All");
 
   // 📝 For Set Schedule Modal
@@ -20,7 +20,7 @@ function AdminTournament() {
     startTime: "",
     endTime: "",
     opponent: "",
-    teamId: adminId,
+    teamId: id,
   });
 
   // ✅ Fetch tournaments from backend (with schedules)
@@ -29,8 +29,9 @@ function AdminTournament() {
       const response = await axios.get(
         "http://localhost:5000/tournament/tournaments-activities"
       );
-      console.log("📌 Tournaments from backend:", response.data);
-      setTournaments(response.data); // ✅ use backend schedules directly
+
+      console.log("📌 All Tournaments from backend:", response.data);
+      setTournaments(response.data);
     } catch (error) {
       console.error("❌ Failed to fetch tournaments:", error);
     }
@@ -56,7 +57,7 @@ function AdminTournament() {
         `http://localhost:5000/tournament/tournaments/${selectedTournament.id}/schedule`,
         {
           ...scheduleForm,
-          teamId: adminId,
+          teamId: id,
         }
       );
 
@@ -68,7 +69,7 @@ function AdminTournament() {
         startTime: "",
         endTime: "",
         opponent: "",
-        teamId: adminId,
+        teamId: id,
       });
       setSelectedTournament(null);
     } catch (error) {
@@ -85,6 +86,8 @@ function AdminTournament() {
     if (filterStatus === "Ongoing")
       return today >= startDate && today <= endDate;
     if (filterStatus === "Completed") return today > endDate;
+    if (filterStatus === "My Tournament")
+      return String(t.teamId) === String(id);
     return true; // "All"
   });
 
@@ -124,19 +127,21 @@ function AdminTournament() {
 
           {/* Tournament Status Filter */}
           <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full w-fit mb-6">
-            {["All", "Upcoming", "Ongoing", "Completed"].map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilterStatus(status)}
-                className={`px-4 py-2 rounded-full font-semibold shadow ${
-                  filterStatus === status
-                    ? "bg-white text-green-700"
-                    : "text-gray-600"
-                }`}
-              >
-                {status}
-              </button>
-            ))}
+            {["All", "Upcoming", "Ongoing", "Completed", "My Tournament"].map(
+              (status) => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`px-4 py-2 rounded-full font-semibold shadow ${
+                    filterStatus === status
+                      ? "bg-white text-green-700"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {status}
+                </button>
+              )
+            )}
           </div>
 
           {/* Tournament Cards (Dynamic) */}
@@ -150,6 +155,8 @@ function AdminTournament() {
                     setSelectedTournament(tournament);
                     setIsScheduleModalOpen(true);
                   }}
+                  filterStatus={filterStatus} // 👈 add this
+                  userId={id} // 👈 and this
                 />
               ))
             ) : (
@@ -266,7 +273,7 @@ function AdminTournament() {
 }
 
 // 🎯 Tournament Card Component
-function TournamentCard({ tournament, onSetSchedule }) {
+function TournamentCard({ tournament, onSetSchedule, filterStatus, userId }) {
   // Convert dates to Date objects for comparison
   const today = new Date();
   const startDate = new Date(tournament.startDate);
@@ -326,12 +333,15 @@ function TournamentCard({ tournament, onSetSchedule }) {
         </p>
       )}
 
-      <button
-        onClick={onSetSchedule}
-        className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition"
-      >
-        ➕ Set Schedule
-      </button>
+      {filterStatus === "My Tournament" &&
+        String(tournament.teamId) === String(userId) && (
+          <button
+            onClick={onSetSchedule}
+            className="bg-green-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-green-700 transition"
+          >
+            ➕ Set Schedule
+          </button>
+        )}
     </div>
   );
 }

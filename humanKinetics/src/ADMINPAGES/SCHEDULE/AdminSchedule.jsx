@@ -9,6 +9,8 @@ function AdminSchedule() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [scheduleData, setScheduleData] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1); // Pagination
+  const itemsPerPage = 20;
 
   const formatDate = (d) =>
     d ? new Date(d).toISOString().split("T")[0] : "unknown";
@@ -70,16 +72,20 @@ function AdminSchedule() {
 
   // Flatten all events for search/filter
   const allEvents = scheduleKeys.flatMap((date) =>
-    scheduleData[date].map((event) => ({
-      date,
-      ...event,
-    }))
+    scheduleData[date].map((event) => ({ date, ...event }))
   );
 
   const filteredEvents = allEvents.filter(
     (event) =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.participants.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
+  const paginatedEvents = filteredEvents.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   // Overview counts
@@ -92,7 +98,6 @@ function AdminSchedule() {
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
       <Sidebar />
-
       <div className="flex flex-col flex-grow">
         <Navbar />
 
@@ -111,14 +116,14 @@ function AdminSchedule() {
 
           {/* Overview Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <OverviewCard label="Total Events" value={totalEvents} />
+            <OverviewCard label="Total Events Scheduled" value={totalEvents} />
             <OverviewCard
-              label="Trainings"
+              label="Trainings Scheduled"
               value={totalTrainings}
               color="green"
             />
             <OverviewCard
-              label="Tournaments"
+              label="Tournaments Matches"
               value={totalTournaments}
               color="yellow"
             />
@@ -133,7 +138,10 @@ function AdminSchedule() {
                   type="text"
                   placeholder="Search events..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1); // Reset page on search
+                  }}
                   className="w-full px-4 py-2 pl-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
                 <svg
@@ -170,7 +178,7 @@ function AdminSchedule() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredEvents.map((event, idx) => (
+                  {paginatedEvents.map((event, idx) => (
                     <tr key={idx}>
                       <td className="px-4 py-3">{event.date}</td>
                       <td className="px-4 py-3">{event.time}</td>
@@ -182,6 +190,27 @@ function AdminSchedule() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Buttons */}
+            {filteredEvents.length > itemsPerPage && (
+              <div className="flex justify-center mt-4 space-x-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded-full border ${
+                        page === currentPage
+                          ? "bg-green-600 text-white border-green-600"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+              </div>
+            )}
           </div>
         </main>
 
@@ -195,7 +224,7 @@ function AdminSchedule() {
   );
 }
 
-/* ✅ Reusable Overview Card */
+/* Reusable Overview Card */
 function OverviewCard({ label, value, color }) {
   const colorClass =
     color === "green"
