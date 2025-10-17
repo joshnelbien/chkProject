@@ -112,9 +112,7 @@ function AdminAthletes() {
           </div>
         </main>
 
-        <div className="fixed bottom-0 left-64 right-0">
-          <Footer />
-        </div>
+        <Footer />
       </div>
     </div>
   );

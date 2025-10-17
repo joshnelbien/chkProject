@@ -75,7 +75,7 @@ function EditAccountModal({ open, onClose, player, onSave }) {
         yearLevel: player.yearLevel || "",
         sport: player.sport || "",
 
-        // 🩺 Basic Health Info
+        //  Basic Health Info
         height: player.height || "",
         weight: player.weight || "",
         bmi: player.bmi || "",
@@ -84,14 +84,14 @@ function EditAccountModal({ open, onClose, player, onSave }) {
         bloodPressure: player.bloodPressure || "",
         allergies: player.allergies || "",
 
-        // 📜 Medical History
+        //  Medical History
         chronicIllness: player.chronicIllness || "",
         hospitalization: player.hospitalization || "",
         surgery: player.surgery || "",
         familyHistory: player.familyHistory || "",
         vaccineRecord: player.vaccineRecord || "",
 
-        // 💊 Current Health Status
+        //  Current Health Status
         medications: player.medications || "",
         injuries: player.injuries || "",
         illnesses: player.illnesses || "",
@@ -104,11 +104,11 @@ function EditAccountModal({ open, onClose, player, onSave }) {
         clearedForActivity: player.clearedForActivity || "",
         doctorInfo: player.doctorInfo || "",
 
-        // ⚽ Sports Related Health Data
+        //  Sports Related Health Data
         sportsInjuries: player.sportsInjuries || "",
         therapyRecords: player.therapyRecords || "",
 
-        // 🚨 Emergency Info
+        //  Emergency Info
         emergencyName: player.emergencyName || "",
         emergencyRelation: player.emergencyRelation || "",
         emergencyAddress: player.emergencyAddress || "",
@@ -166,16 +166,16 @@ function EditAccountModal({ open, onClose, player, onSave }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm px-4  overflow-y-auto">
       <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl my-8 transform transition-all animate-fade-in-up">
         {/* Header */}
         <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4">
-          <h2 className="text-2xl font-semibold text-green-800">
+          <h2 className="text-2xl font-semibold text-green-800 mt-20">
             Edit Account Information
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+            className="text-gray-500 hover:text-gray-700 text-2xl font-bold mt-20"
           >
             ×
           </button>
@@ -202,7 +202,7 @@ function EditAccountModal({ open, onClose, player, onSave }) {
             className="hidden"
           />
         </div>
-
+        <hr className="my-4 border-t border-gray-400/40 mx-4" />
         {/* Scrollable Content */}
         <div className="p-6 space-y-8 overflow-y-auto max-h-[70vh]">
           {/* 🧍 Basic Info */}
