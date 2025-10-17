@@ -71,18 +71,17 @@ function AdminTraining() {
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       {/* Sidebar - Fixed */}
-
       <Sidebar />
 
       {/* Main Section */}
-      <div className="flex flex-col flex-1 ml-64">
+      <div className="flex flex-col flex-1">
         {/* Navbar - Fixed */}
-        <div className="fixed top-0 left-64 right-0 z-10">
+        <div className="fixed top-0 left-0 right-0 z-10">
           <Navbar />
         </div>
 
         {/* Scrollable Main Content */}
-        <main className="flex-grow overflow-y-auto p-4 sm:p-6 max-w-7xl mx-auto w-full mt-16 md:mt-20">
+        <main className="flex-grow overflow-y-auto p-6 mt-16 md:mt-20 max-w-7xl mx-auto w-full">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
             <div>
