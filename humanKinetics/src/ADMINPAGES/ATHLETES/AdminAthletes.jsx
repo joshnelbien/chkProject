@@ -88,6 +88,11 @@ function AdminAthletes() {
               players.map((player) => (
                 <AthleteCard
                   key={player.id}
+                  profileUrl={
+                    player.id
+                      ? `http://localhost:5000/userAccounts/player-photo/${player.id}`
+                      : "/lexi.jpg" // fallback
+                  }
                   name={`${player.firstName} ${player.lastName}`}
                   number={player.studentNumber}
                   sport={player.sport}
@@ -120,6 +125,7 @@ function AdminAthletes() {
 
 /* ✅ Athlete Card */
 function AthleteCard({
+  profileUrl,
   name,
   number,
   sport,
@@ -136,7 +142,14 @@ function AthleteCard({
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
       {/* Header */}
       <div className="flex items-center mb-4">
-        <div className="w-16 h-16 bg-gray-200 rounded-full flex-shrink-0"></div>
+        <img
+          src={profileUrl || "/lexi.jpg"} // fallback if profileUrl is null
+          alt={name}
+          className="w-16 h-16 rounded-full object-cover border-2 border-green-600"
+          onError={(e) => {
+            e.currentTarget.src = "/lexi.jpg"; // fallback if server URL fails
+          }}
+        />
         <div className="ml-4 flex-grow">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold">{name}</h3>

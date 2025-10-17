@@ -213,10 +213,6 @@ router.get("/player-photo/:id", async (req, res) => {
     const { id } = req.params;
     const player = await playerAccounts.findByPk(id);
 
-    if (!player || !player.profilePicture) {
-      return res.status(404).send("No profile picture found.");
-    }
-
     res.setHeader("Content-Type", "image/jpeg");
     res.send(player.profilePicture);
   } catch (error) {

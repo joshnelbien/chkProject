@@ -10,6 +10,7 @@ function AdminTournament() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tournaments, setTournaments] = useState([]);
   const { adminId } = useParams();
+  const [filterStatus, setFilterStatus] = useState("All");
 
   // 📝 For Set Schedule Modal
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -75,6 +76,17 @@ function AdminTournament() {
       alert("Failed to save schedule");
     }
   };
+  const filteredTournaments = tournaments.filter((t) => {
+    const today = new Date();
+    const startDate = new Date(t.startDate);
+    const endDate = new Date(t.endDate);
+
+    if (filterStatus === "Upcoming") return today < startDate;
+    if (filterStatus === "Ongoing")
+      return today >= startDate && today <= endDate;
+    if (filterStatus === "Completed") return today > endDate;
+    return true; // "All"
+  });
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
@@ -112,21 +124,25 @@ function AdminTournament() {
 
           {/* Tournament Status Filter */}
           <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full w-fit mb-6">
-            <button className="px-4 py-2 bg-white text-green-700 font-semibold rounded-full shadow">
-              Upcoming
-            </button>
-            <button className="px-4 py-2 text-gray-600 font-medium rounded-full">
-              Completed
-            </button>
-            <button className="px-4 py-2 text-gray-600 font-medium rounded-full">
-              All
-            </button>
+            {["All", "Upcoming", "Ongoing", "Completed"].map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                className={`px-4 py-2 rounded-full font-semibold shadow ${
+                  filterStatus === status
+                    ? "bg-white text-green-700"
+                    : "text-gray-600"
+                }`}
+              >
+                {status}
+              </button>
+            ))}
           </div>
 
           {/* Tournament Cards (Dynamic) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-20">
-            {tournaments.length > 0 ? (
-              tournaments.map((tournament) => (
+            {filteredTournaments.length > 0 ? (
+              filteredTournaments.map((tournament) => (
                 <TournamentCard
                   key={tournament.id}
                   tournament={tournament}
@@ -251,21 +267,42 @@ function AdminTournament() {
 
 // 🎯 Tournament Card Component
 function TournamentCard({ tournament, onSetSchedule }) {
+  // Convert dates to Date objects for comparison
+  const today = new Date();
+  const startDate = new Date(tournament.startDate);
+  const endDate = new Date(tournament.endDate);
+
+  let status = "";
+  let statusClasses = "";
+
+  if (today < startDate) {
+    status = "Upcoming";
+    statusClasses = "bg-blue-200 text-blue-700";
+  } else if (today >= startDate && today <= endDate) {
+    status = "Ongoing";
+    statusClasses = "bg-yellow-200 text-yellow-700";
+  } else {
+    status = "Completed";
+    statusClasses = "bg-gray-200 text-gray-600";
+  }
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold text-gray-800">
           {tournament.tournamentName}
         </h3>
-        <span className="bg-blue-200 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
-          Upcoming
+        <span
+          className={`text-xs font-medium px-3 py-1 rounded-full ${statusClasses}`}
+        >
+          {status}
         </span>
       </div>
 
       <p className="text-gray-500 text-sm mb-4">{tournament.sport}</p>
       <div className="flex flex-wrap items-center gap-4 text-gray-500 text-sm mb-4">
         <div>
-          📅 {tournament.startDate} - {tournament.endDate}
+          📅 {tournament.startDate} to {tournament.endDate}
         </div>
         <div>📍 {tournament.location}</div>
         <div>🧑‍🤝‍🧑 {tournament.teams || 0} teams</div>
