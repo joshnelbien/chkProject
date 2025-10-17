@@ -39,6 +39,7 @@ const TrainingSchedule = sequelize.define("TrainingSchedule", {
     type: DataTypes.TEXT, // we use TEXT to allow longer comma-separated lists
     allowNull: false,
   },
+  teamId: { type: DataTypes.STRING },
 });
 
 module.exports = TrainingSchedule;

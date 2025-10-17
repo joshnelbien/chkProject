@@ -36,6 +36,18 @@ const playerAccounts = sequelize.define("playerAccounts", {
     type: DataTypes.STRING,
   },
 
+  bDay: {
+    type: DataTypes.STRING,
+  },
+
+  jerseyNo: {
+    type: DataTypes.STRING,
+  },
+
+  position: {
+    type: DataTypes.STRING,
+  },
+
   // 🩺 Basic Health Info
   height: {
     type: DataTypes.STRING,

@@ -117,6 +117,7 @@ const Register = () => {
     sport: "",
     password: "",
     confirmPassword: "",
+    bDay: "",
     agreedToTerms: false,
   });
 
@@ -219,6 +220,7 @@ const Register = () => {
           course: "",
           yearLevel: "",
           sport: "",
+          bDay: "",
           password: "",
           confirmPassword: "",
           agreedToTerms: false,
@@ -414,6 +416,27 @@ const Register = () => {
                     value={formData.studentNumber}
                     onChange={handleInputChange}
                     placeholder="e.g., 2024-0001"
+                    required
+                    disabled={isDisabled}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col mt-4">
+                <label
+                  htmlFor="bDay"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Birthday <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    type="date"
+                    id="bDay"
+                    name="bDay"
+                    value={formData.bDay}
+                    onChange={handleInputChange}
                     required
                     disabled={isDisabled}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"

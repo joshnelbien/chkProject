@@ -34,8 +34,14 @@ router.post("/tournaments/:id/schedule", async (req, res) => {
     const { id } = req.params;
     const { date, startTime, endTime, opponent } = req.body;
 
+    // ✅ Fetch tournament to get the correct teamId
+    const tournament = await Tournament.findByPk(id);
+    if (!tournament)
+      return res.status(404).json({ error: "Tournament not found" });
+
     const schedule = await TournamentSchedule.create({
       tournamentId: id,
+      teamId: tournament.teamId, // use tournament's teamId
       date,
       startTime,
       endTime,

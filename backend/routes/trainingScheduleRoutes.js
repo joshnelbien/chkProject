@@ -5,8 +5,16 @@ const TrainingSchedule = require("../db/model/trainingSchedulesDB");
 // ✅ POST /api/training — Add a new training schedule
 router.post("/training-schedule", async (req, res) => {
   try {
-    const { title, startTime, endTime, location, coach, focusAreas, date } =
-      req.body;
+    const {
+      title,
+      startTime,
+      endTime,
+      location,
+      coach,
+      focusAreas,
+      date,
+      teamId,
+    } = req.body;
 
     // 🛑 Basic validation
     if (
@@ -29,6 +37,7 @@ router.post("/training-schedule", async (req, res) => {
       coach,
       focusAreas,
       date,
+      teamId,
     });
 
     return res.status(201).json({

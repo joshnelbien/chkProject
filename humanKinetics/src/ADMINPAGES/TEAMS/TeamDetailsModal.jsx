@@ -4,6 +4,24 @@ import AddPlayerModal from "./AddPlayerModal";
 function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
   const [showAddModal, setShowAddModal] = useState(false);
 
+  const calculateAge = (bDay) => {
+    if (!bDay) return "—"; // fallback if no date
+
+    const birthDate = new Date(bDay);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    const dayDiff = today.getDate() - birthDate.getDate();
+
+    // If birthday hasn’t occurred yet this year, subtract 1
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      age--;
+    }
+
+    return age;
+  };
+
   if (!open || !team) return null;
 
   return (
@@ -81,7 +99,7 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
                         <td className="py-2 px-3">
                           #{p.jerseyNumber || "N/A"}
                         </td>
-                        <td className="py-2 px-3">{p.age || "—"}</td>
+                        <td className="py-2 px-3">{calculateAge(p.bDay)}</td>
                         <td className="py-2 px-3">
                           <button className="bg-green-700 hover:bg-green-600 text-white font-medium px-4 py-1 rounded-full transition">
                             Update

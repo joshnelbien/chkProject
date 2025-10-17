@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
 export default function TrainingModal({ isOpen, onClose, onSubmit }) {
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     title: "",
     date: "", // ✅ added date field
@@ -9,6 +11,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
     location: "",
     coach: "",
     focusAreas: "",
+    teamId: id,
   });
 
   const handleChange = (e) => {

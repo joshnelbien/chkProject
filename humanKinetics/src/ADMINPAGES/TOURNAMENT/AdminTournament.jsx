@@ -4,10 +4,12 @@ import Sidebar from "../SIDEBAR/SideBar";
 import TournamentModal from "./tournamentModal";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 function AdminTournament() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tournaments, setTournaments] = useState([]);
+  const { adminId } = useParams();
 
   // 📝 For Set Schedule Modal
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -17,6 +19,7 @@ function AdminTournament() {
     startTime: "",
     endTime: "",
     opponent: "",
+    teamId: adminId,
   });
 
   // ✅ Fetch tournaments from backend (with schedules)
@@ -41,6 +44,7 @@ function AdminTournament() {
     e.preventDefault();
 
     const { date, startTime, endTime, opponent } = scheduleForm;
+
     if (!date || !startTime || !endTime || !opponent) {
       alert("Please complete all fields");
       return;
@@ -49,13 +53,22 @@ function AdminTournament() {
     try {
       await axios.post(
         `http://localhost:5000/tournament/tournaments/${selectedTournament.id}/schedule`,
-        scheduleForm
+        {
+          ...scheduleForm,
+          teamId: adminId,
+        }
       );
 
       alert("✅ Schedule saved successfully!");
-      fetchTournaments(); // refresh tournaments to include new schedule
+      fetchTournaments();
       setIsScheduleModalOpen(false);
-      setScheduleForm({ date: "", startTime: "", endTime: "", opponent: "" });
+      setScheduleForm({
+        date: "",
+        startTime: "",
+        endTime: "",
+        opponent: "",
+        teamId: adminId,
+      });
       setSelectedTournament(null);
     } catch (error) {
       console.error("❌ Failed to save schedule:", error);

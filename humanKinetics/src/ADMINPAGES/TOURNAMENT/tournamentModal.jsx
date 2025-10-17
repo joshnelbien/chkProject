@@ -1,7 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 export default function TournamentModal({ isOpen, onClose, onSubmit }) {
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     tournamentName: "",
     sport: "",
@@ -9,6 +11,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
     startDate: "",
     endDate: "",
     teams: "",
+    teamId: id,
   });
 
   const handleChange = (e) => {

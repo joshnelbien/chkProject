@@ -38,6 +38,8 @@ const Tournament = sequelize.define("tournaments", {
     allowNull: false,
   },
 
+  teamId: { type: DataTypes.STRING, allowNull: false },
+
   isCompleted: {
     type: DataTypes.BOOLEAN,
     defaultValue: false, // 👈 You can update this after the tournament ends
