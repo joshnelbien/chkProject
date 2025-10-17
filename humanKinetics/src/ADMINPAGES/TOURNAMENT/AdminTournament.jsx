@@ -10,7 +10,7 @@ function AdminTournament() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tournaments, setTournaments] = useState([]);
   const { id } = useParams();
-  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("My Tournament");
 
   // 📝 For Set Schedule Modal
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -127,7 +127,7 @@ function AdminTournament() {
 
           {/* Tournament Status Filter */}
           <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full w-fit mb-6">
-            {["All", "Upcoming", "Ongoing", "Completed", "My Tournament"].map(
+            {["My Tournament", "All", "Upcoming", "Ongoing", "Completed"].map(
               (status) => (
                 <button
                   key={status}
