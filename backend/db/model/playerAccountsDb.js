@@ -108,7 +108,7 @@ const playerAccounts = sequelize.define("playerAccounts", {
     type: DataTypes.STRING,
   },
   lastCheckup: {
-    type: DataTypes.DATE,
+    type: DataTypes.STRING,
   },
   clearedForActivity: {
     type: DataTypes.STRING,

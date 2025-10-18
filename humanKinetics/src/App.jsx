@@ -13,6 +13,7 @@ import VerifyEmail from "./ADMINPAGES/VERIFYPAGE/verifyPage";
 import MedalTally from "./INSIDEPAGES/DASHBOARD/MEDALTALLY/medalTally";
 import OverView from "./INSIDEPAGES/DASHBOARD/OVERVIEW/overView";
 import TrainProgram from "./INSIDEPAGES/DASHBOARD/TRAINPROGRAM/trainProgram";
+import ManageAccount from "./INSIDEPAGES/MANAGEACCOUNT/ManageAccount";
 import Analytics from "./INSIDEPAGES/PERFORMANCE/ANALYTICS/analytics";
 import Nutrition from "./INSIDEPAGES/PERFORMANCE/NUTRITION/nutrition";
 import Schedule from "./INSIDEPAGES/PERFORMANCE/SCHEDULE/schedule";
@@ -31,7 +32,6 @@ import ProgramPage from "./PAGES/Programs/ProgramPage";
 import Register from "./PAGES/Register/Register";
 import AdminRegister from "./PAGES/Register/adminRegister";
 import "./index.css";
-import ManageAccount from "./INSIDEPAGES/MANAGEACCOUNT/ManageAccount";
 
 function App() {
   return (
@@ -61,7 +61,7 @@ function App() {
           <Route path="/sportEvent/:id" element={<SportEvent />} />
           <Route path="/staffs/:id" element={<Staff />} />
           <Route path="/manageAccount/:id" element={<ManageAccount />} />
-          <Route path="/verified-success/:id" element={<VerifyEmail />} />
+          <Route path="/verified-success" element={<VerifyEmail />} />
           <Route
             path="/admin-verified-success"
             element={<AdminVerifyEmail />}
