@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BarChart2, CheckCircle, Eye, EyeOff, Sun } from "lucide-react";
+import { BarChart2, CheckCircle, Eye, EyeOff, Sun, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -12,9 +12,140 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loginType, setLoginType] = useState("athlete"); // athlete | admin
   const [loading, setLoading] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [showNoAccountModal, setShowNoAccountModal] = useState(false);
+  const [showMissingFieldsModal, setShowMissingFieldsModal] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const VerificationModal = ({ isOpen, onClose, onOpenGmail }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">Email Verification Required</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition duration-150"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <p className="text-gray-600 mb-2">
+            Please verify your email address before signing in.
+          </p>
+          <p className="text-gray-600 mb-6">
+            Check your inbox for the verification link we sent you.
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={onOpenGmail}
+              className="flex-1 bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-150 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Open Gmail
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-400 transition duration-150 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const NoAccountModal = ({ isOpen, onClose, loginType }) => {
+    if (!isOpen) return null;
+
+    const registerPath = loginType === "athlete" ? "/register" : "/adminRegister";
+    const registerText = loginType === "athlete" ? "Register as Athlete" : "Register as Admin";
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">Account Not Found</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition duration-150"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <p className="text-gray-600 mb-2">
+            No account found with this email address.
+          </p>
+          <p className="text-gray-600 mb-6">
+            Would you like to create a new {loginType === "athlete" ? "athlete" : "admin"} account?
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate(registerPath)}
+              className="flex-1 bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-green-800 transition duration-150 focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              {registerText}
+            </button>
+            <button
+              onClick={onClose}
+              className="flex-1 bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-400 transition duration-150 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const MissingFieldsModal = ({ isOpen, onClose }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">Missing Information</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition duration-150"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <p className="text-gray-600 mb-2">
+            Please enter both email and password to continue.
+          </p>
+          <p className="text-gray-600 mb-6">
+            Both fields are required for signing in.
+          </p>
+
+          <div className="flex justify-end">
+            <button
+              onClick={onClose}
+              className="bg-green-700 text-white py-2.5 px-6 rounded-lg font-medium hover:bg-green-800 transition duration-150 focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const handleOpenGmail = () => {
+    setShowVerificationModal(false);
+    window.open("https://mail.google.com", "_blank");
   };
 
   // ✅ LOGIN HANDLER
@@ -22,7 +153,7 @@ function Login() {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
-      alert("Please enter both email and password.");
+      setShowMissingFieldsModal(true);
       return;
     }
 
@@ -73,8 +204,80 @@ function Login() {
         }
       }
     } catch (error) {
+      console.log("🔴 Login Error Details:", {
+        loginType,
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.response?.data?.message,
+        config: error.config
+      });
+      
       if (error.response) {
-        alert(error.response.data.message || "Login failed!");
+        const errorMessage = error.response.data.message?.toLowerCase() || "";
+        const fullErrorText = JSON.stringify(error.response.data).toLowerCase();
+        const statusCode = error.response.status;
+        
+        console.log("🔍 Error Analysis:", {
+          errorMessage,
+          fullErrorText,
+          statusCode,
+          loginType
+        });
+        
+        // More comprehensive verification error detection
+        const isVerificationError = 
+          errorMessage.includes("verify") ||
+          errorMessage.includes("verification") ||
+          errorMessage.includes("unverified") ||
+          errorMessage.includes("not verified") ||
+          errorMessage.includes("confirm your email") ||
+          errorMessage.includes("email not verified") ||
+          errorMessage.includes("pending verification") ||
+          fullErrorText.includes("verify") ||
+          fullErrorText.includes("verification") ||
+          fullErrorText.includes("unverified") ||
+          fullErrorText.includes("not verified") ||
+          // Check for specific status codes that might indicate verification needed
+          statusCode === 403 && (errorMessage.includes("email") || fullErrorText.includes("email"));
+        
+        // More comprehensive account not found detection
+        const isNoAccountError = 
+          errorMessage.includes("no account") || 
+          errorMessage.includes("not found") ||
+          errorMessage.includes("does not exist") ||
+          errorMessage.includes("invalid credentials") ||
+          errorMessage.includes("incorrect") ||
+          errorMessage.includes("wrong") ||
+          errorMessage.includes("no user") ||
+          errorMessage.includes("no admin") ||
+          errorMessage.includes("user not found") ||
+          errorMessage.includes("admin not found") ||
+          errorMessage.includes("invalid email") ||
+          errorMessage.includes("invalid password") ||
+          fullErrorText.includes("no account") ||
+          fullErrorText.includes("not found") ||
+          fullErrorText.includes("does not exist") ||
+          // Common HTTP status codes for authentication failures
+          statusCode === 401 ||
+          statusCode === 404;
+        
+        console.log("🔍 Error Classification:", {
+          isVerificationError,
+          isNoAccountError,
+          loginType
+        });
+        
+        if (isVerificationError) {
+          console.log("🔄 Showing verification modal for:", loginType);
+          setShowVerificationModal(true);
+        } else if (isNoAccountError) {
+          console.log("🔄 Showing no account modal for:", loginType);
+          setShowNoAccountModal(true);
+        } else {
+          console.log("❌ Falling back to alert for:", loginType);
+          // If no specific condition matches, show the actual error message
+          alert(error.response.data.message || "Login failed!");
+        }
       } else {
         alert("Unable to connect to the server.");
       }
@@ -193,7 +396,7 @@ function Login() {
                   loginType === "athlete"
                     ? "bg-green-700 text-white"
                     : "bg-gray-100 text-gray-700"
-                }`}
+                  }`}
               >
                 Athlete
               </button>
@@ -204,7 +407,7 @@ function Login() {
                   loginType === "admin"
                     ? "bg-green-700 text-white"
                     : "bg-gray-100 text-gray-700"
-                }`}
+                  }`}
               >
                 Admin
               </button>
@@ -318,6 +521,23 @@ function Login() {
           Kinetics. All rights reserved.
         </p>
       </footer>
+
+      <VerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        onOpenGmail={handleOpenGmail}
+      />
+
+      <NoAccountModal
+        isOpen={showNoAccountModal}
+        onClose={() => setShowNoAccountModal(false)}
+        loginType={loginType}
+      />
+
+      <MissingFieldsModal
+        isOpen={showMissingFieldsModal}
+        onClose={() => setShowMissingFieldsModal(false)}
+      />
     </div>
   );
 }
