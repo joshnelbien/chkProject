@@ -6,7 +6,7 @@ import {
   Loader,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const PasswordInputWithToggle = ({
@@ -77,6 +77,70 @@ const StatusMessage = ({ type, message, onClose }) => {
   );
 };
 
+const SuccessModal = ({ isOpen, onClose, onLoginRedirect, onOpenGmail }) => {
+  const [countdown, setCountdown] = useState(60); 
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          onLoginRedirect();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOpen, onLoginRedirect]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900">Registration Successful!</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition duration-150"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <p className="text-gray-600 mb-2">
+          Your admin account has been created successfully.
+        </p>
+        <p className="text-gray-600 mb-2">
+          Kindly check your email for the verification link.
+        </p>
+        <p className="text-gray-600 mb-6">
+          Redirecting to login in <span className="font-semibold text-green-700">{countdown}</span> seconds...
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onLoginRedirect}
+            className="flex-1 bg-green-900 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-green-800 transition duration-150 focus:ring-2 focus:ring-green-700 focus:ring-offset-2"
+          >
+            Go to Login
+          </button>
+          <button
+            onClick={onOpenGmail}
+            className="flex-1 bg-blue-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-150 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Open Gmail
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AdminRegister = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -96,6 +160,7 @@ const AdminRegister = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState({ type: null, message: null });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -104,6 +169,17 @@ const AdminRegister = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
     setStatus({ type: null, message: null });
+  };
+
+  const handleLoginRedirect = () => {
+    setShowSuccessModal(false);
+    navigate("/login");
+  };
+
+  const handleOpenGmail = () => {
+    setShowSuccessModal(false);
+    window.open("https://mail.google.com", "_blank");
+    navigate("/login");
   };
 
   const handleSubmit = async (e) => {
@@ -152,6 +228,7 @@ const AdminRegister = () => {
           confirmPassword: "",
           agreedToTerms: false,
         });
+        setShowSuccessModal(true);
       } else {
         setStatus({
           type: "error",
@@ -389,6 +466,13 @@ const AdminRegister = () => {
           </div>
         </div>
       </div>
+
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        onLoginRedirect={handleLoginRedirect}
+        onOpenGmail={handleOpenGmail}
+      />
     </div>
   );
 };
