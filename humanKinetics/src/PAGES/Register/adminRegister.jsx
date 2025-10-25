@@ -116,7 +116,7 @@ const SuccessModal = ({ isOpen, onClose, onLoginRedirect, onOpenGmail }) => {
           Your admin account has been created successfully.
         </p>
         <p className="text-gray-600 mb-2">
-          Kindly check your email for the verification link.
+          Please check your email for verification.
         </p>
         <p className="text-gray-600 mb-6">
           Redirecting to login in <span className="font-semibold text-green-700">{countdown}</span> seconds...
