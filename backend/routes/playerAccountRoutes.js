@@ -22,6 +22,29 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Assuming you're using Express + Sequelize
+router.put("/update-performance/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body; // object sent from frontend
+
+    // Find the player
+    const player = await playerAccounts.findByPk(id);
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+
+    // Update the player
+    await player.update(updates);
+
+    return res.json({ message: "Player updated successfully!", player });
+  } catch (error) {
+    console.error("Error updating performance:", error);
+    return res.status(500).json({ message: "Server error updating performance" });
+  }
+});
+
+
 // ✅ Registration with Email Verification
 router.post("/register", async (req, res) => {
   console.log("📥 Incoming body:", req.body);

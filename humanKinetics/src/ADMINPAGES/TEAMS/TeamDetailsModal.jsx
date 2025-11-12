@@ -102,7 +102,7 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
                       Position: {p.position || "N/A"}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Jersey: #{p.jerseyNumber || "N/A"}
+                      Jersey: #{p.jerseyNo || "N/A"}
                     </p>
                     <p className="text-sm text-gray-500">
                       Age: {calculateAge(p.bDay) || "—"}

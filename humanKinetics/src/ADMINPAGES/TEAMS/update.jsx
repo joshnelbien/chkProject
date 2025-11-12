@@ -65,15 +65,12 @@ function PlayersUpdate({ player, onClose }) {
 
   const handleUpdate = async () => {
     try {
-      await fetch(`http://localhost:5000/player/update/${player.id}`, {
+      await fetch(`http://localhost:5000/userAccounts/update-performance/${player.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
-      alert("✅ Player updated successfully!");
-      onClose();
-      window.location.reload();
+      alert("✅ Player updated successfully");
     } catch (err) {
       alert("❌ Update failed");
       console.log(err);
