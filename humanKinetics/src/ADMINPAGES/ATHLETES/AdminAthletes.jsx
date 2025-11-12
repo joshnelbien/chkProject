@@ -103,10 +103,10 @@ function AdminAthletes() {
                   streak="--"
                   improvement="--"
                   metrics={{
-                    Strength: 0,
-                    Speed: 0,
-                    Agility: 0,
-                    Endurance: 0,
+                    Strength: `${player.strength || 0}`,
+                    Speed: `${player.speed || 0}`,
+                    Agility: `${player.agility || 0}`,
+                    Endurance: `${player.endurance || 0}`,
                   }}
                   activities={[]}
                 />

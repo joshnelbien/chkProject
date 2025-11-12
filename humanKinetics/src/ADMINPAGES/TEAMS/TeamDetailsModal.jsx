@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import AddPlayerModal from "./AddPlayerModal";
+import PlayersUpdate from "./update";
 
 function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   const calculateAge = (bDay) => {
     if (!bDay) return "—"; // fallback if no date
@@ -26,12 +29,10 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={onClose}
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center overflow-auto p-4"
     >
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-3xl mx-4 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+        className="bg-white w-full max-w-3xl rounded-2xl p-6 shadow-lg" 
       >
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
@@ -73,42 +74,118 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
             {!players || players.length === 0 ? (
               <p className="text-gray-500 italic">No players yet.</p>
             ) : (
-              <div className="overflow-x-auto border rounded-lg">
-                <table className="min-w-full text-sm text-left border-collapse">
-                  <thead className="bg-green-700 text-white">
-                    <tr>
-                      <th className="py-2 px-3">#</th>
-                      <th className="py-2 px-3">Name</th>
-                      <th className="py-2 px-3">Position</th>
-                      <th className="py-2 px-3">Jersey</th>
-                      <th className="py-2 px-3">Age</th>
-                      <th className="py-2 px-3">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {players.map((p, index) => (
-                      <tr
-                        key={p.id}
-                        className="odd:bg-white even:bg-gray-50 border-b border-gray-200"
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-5">
+                {players.map((p) => (
+                  <div
+                    key={p.id}
+                    className="bg-white border rounded-xl shadow-md p-4 flex flex-col items-center"
+                  >
+                    {/* Player Image */}
+                    <img
+                      src={
+                        p.id
+                          ? `http://localhost:5000/userAccounts/player-photo/${p.id}`
+                          : "/lexi.jpg"
+                      }
+                      alt={`${p.firstName} ${p.lastName}`}
+                      className="w-20 h-20 rounded-full object-cover border-2 border-green-600 mb-3"
+                      onError={(e) => (e.currentTarget.src = "/lexi.jpg")}
+                    />
+
+                    {/* Name */}
+                    <h4 className="text-lg font-bold text-gray-800">
+                      {p.firstName.toUpperCase()} {p.lastName.toUpperCase()}
+                    </h4>
+
+                    {/* Details */}
+                    <p className="text-sm text-gray-500">
+                      Position: {p.position || "N/A"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Jersey: #{p.jerseyNumber || "N/A"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Age: {calculateAge(p.bDay) || "—"}
+                    </p>
+                    <div className="w-full mt-3 space-y-2">
+                      {/* Strength */}
+                      <div>
+                        <div className="flex justify-between text-xs font-medium text-gray-600">
+                          <span>Strength</span>
+                          <span>{p.strength || 0}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="h-2 rounded-full bg-green-600"
+                            style={{ width: `${p.strength || 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Speed */}
+                      <div>
+                        <div className="flex justify-between text-xs font-medium text-gray-600">
+                          <span>Speed</span>
+                          <span>{p.speed || 0}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="h-2 rounded-full bg-green-600"
+                            style={{ width: `${p.speed || 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Agility */}
+                      <div>
+                        <div className="flex justify-between text-xs font-medium text-gray-600">
+                          <span>Agility</span>
+                          <span>{p.agility || 0}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="h-2 rounded-full bg-green-600"
+                            style={{ width: `${p.agility || 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Endurance */}
+                      <div>
+                        <div className="flex justify-between text-xs font-medium text-gray-600">
+                          <span>Endurance</span>
+                          <span>{p.endurance || 0}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="h-2 rounded-full bg-green-600"
+                            style={{ width: `${p.endurance || 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={() => {
+                          setSelectedPlayer(p);
+                          setShowUpdateModal(true);
+                        }}
+                        className="px-3 py-1 text-xs bg-green-600 text-white rounded-full hover:bg-green-700"
                       >
-                        <td className="py-2 px-3">{index + 1}</td>
-                        <td className="py-2 px-3">
-                          {p.firstName} {p.lastName}
-                        </td>
-                        <td className="py-2 px-3">{p.position || "—"}</td>
-                        <td className="py-2 px-3">
-                          #{p.jerseyNumber || "N/A"}
-                        </td>
-                        <td className="py-2 px-3">{calculateAge(p.bDay)}</td>
-                        <td className="py-2 px-3">
-                          <button className="bg-green-700 hover:bg-green-600 text-white font-medium px-4 py-1 rounded-full transition">
-                            Update
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        Update
+                      </button>
+                      <button
+                        onClick={() =>
+                          alert("Performance feature coming soon!")
+                        }
+                        className="px-3 py-1 text-xs bg-green-600 text-white rounded-full hover:bg-green-700"
+                      >
+                        Performance
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -130,7 +207,12 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
           </button>
         </div>
       </div>
-
+      {showUpdateModal && selectedPlayer && (
+        <PlayersUpdate
+          player={selectedPlayer}
+          onClose={() => setShowUpdateModal(false)}
+        />
+      )}
       {/* ✅ Player Selection Modal */}
       {showAddModal && (
         <AddPlayerModal

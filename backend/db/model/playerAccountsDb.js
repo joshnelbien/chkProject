@@ -154,12 +154,28 @@ const playerAccounts = sequelize.define("playerAccounts", {
     type: DataTypes.STRING,
     defaultValue: "Pending",
   },
-
+strength:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
+  speed:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
+  agility:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
+  endurance:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
   // 🖼️ Profile Picture
   profilePicture: {
     type: DataTypes.BLOB("long"),
     allowNull: true,
   },
 });
+
 
 module.exports = playerAccounts;

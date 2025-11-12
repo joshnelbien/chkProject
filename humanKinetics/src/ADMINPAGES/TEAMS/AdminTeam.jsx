@@ -1,6 +1,6 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
@@ -132,18 +132,18 @@ function AdminTeam() {
                       className="bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition"
                     >
                       <h4 className="text-lg font-bold text-green-700 mb-2">
-                        {team.teamName}
+                        {team.teamName.toUpperCase()}
                       </h4>
                       <p className="text-sm text-gray-600 mb-1">
                         <span className="font-semibold">Sport:</span>{" "}
-                        {team.sport}
+                        {team.sport.toUpperCase()}
                       </p>
                       <p className="text-sm text-gray-600 mb-1">
                         <span className="font-semibold">Coach:</span>{" "}
-                        {team.coach}
+                        {team.coach.toUpperCase()}
                       </p>
                       <p className="text-sm text-gray-600 mb-3">
-                        {team.description || "No description provided."}
+                        {team.description.toUpperCase() || "No description provided."}
                       </p>
 
                       {/* ✅ Player List */}
