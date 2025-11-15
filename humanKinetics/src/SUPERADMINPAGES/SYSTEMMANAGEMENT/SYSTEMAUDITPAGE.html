@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Audit - PLSP MYNAS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <div class="md:hidden flex items-center p-4 bg-primary text-white fixed top-0 left-0 w-full z-50 shadow-md">
+        <button id="toggleBtn" class="focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <h1 class="ml-3 font-bold text-lg">PLSP MYNAS - Super Admin</h1>
+    </div>
+
+    <!-- Overlay for mobile -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden hidden"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed left-0 top-0 h-screen w-64 text-white flex flex-col p-4 z-50 transform -translate-x-full md:translate-x-0 bg-primary transition-transform duration-300">
+        <!-- Logo / Title -->
+        <div class="flex items-center mb-6 pl-4 pt-4">
+            <div class="h-12 w-12 rounded-full mr-4 overflow-hidden">
+                <img src="https://via.placeholder.com/150" alt="PLSP Logo" class="h-full w-full object-cover">
+            </div>
+            <div class="flex flex-col">
+                <h1 class="text-lg font-bold text-white">PLSP MYNAS</h1>
+                <p class="text-sm text-gray-300">Super Admin</p>
+            </div>
+        </div>
+
+        <!-- Main Menu -->
+        <div class="mb-4">
+            <h2 class="uppercase text-gray-400 text-sm mb-2 pl-2">Main Menu</h2>
+            <ul class="space-y-1">
+                <li>
+                    <a href="../MAINMENU/ADMINOVERVIEW.html" class="flex items-center px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        Overview
+                    </a>
+                </li>
+                <li>
+                    <a href="../MAINMENU/ADMINLOGSPAGE.html" class="flex items-center px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                        <i class="fas fa-shield-alt mr-3"></i>
+                        Admin Logs
+                    </a>
+                </li>
+                <li>
+                    <a href="../MAINMENU/USERLOGSPAGE.html" class="flex items-center px-4 py-2 rounded-lg transition-colors bg-blue-700 font-semibold">
+                        <i class="fas fa-users mr-3"></i>
+                        User Logs
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- System Management -->
+        <div class="mb-4">
+            <h2 class="uppercase text-gray-400 text-sm mb-2 pl-2">System Management</h2>
+            <ul class="space-y-1">
+                <li>
+                    <a href="../SYSTEMMANAGEMENT/MANAGEADMINPAGE.html" class="flex items-center px-4 py-2 rounded-lg transition-colors bg-blue-700 font-semibold">
+                        <i class="fas fa-user-cog mr-3"></i>
+                        Manage Admins
+                    </a>
+                </li>
+                <li>
+                    <a href="../SYSTEMMANAGEMENT/SYSTEMAUDITPAGE.html" class="flex items-center px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                        <i class="fas fa-clipboard-list mr-3"></i>
+                        System Audit
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Spacer -->
+        <div class="flex-grow"></div>
+
+        <!-- Logout Button -->
+        <div class="p-2">
+            <button id="logoutBtn" class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-red-700 hover:text-white text-gray-200">
+                Logout
+            </button>
+        </div>
+
+        <!-- User Info -->
+        <div class="p-4 mx-2 bg-blue-700 rounded-lg flex items-center">
+            <div class="h-10 w-10 bg-gray-200 rounded-full mr-4"></div>
+            <div class="flex flex-col">
+                <p class="font-semibold text-white">Super Admin</p>
+                <p class="text-sm text-gray-300">System Administrator</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex flex-col items-center text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Confirm Logout</h3>
+                <p class="text-gray-600 mb-2">Are you sure you want to logout?</p>
+                <p class="text-gray-500 text-sm mb-6">You will need to sign in again to access the super admin dashboard.</p>
+
+                <div class="flex gap-3 w-full">
+                    <button id="cancelLogout" class="flex-1 bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-400 transition duration-150">
+                        Cancel
+                    </button>
+                    <button id="confirmLogout" class="flex-1 bg-red-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-red-700 transition duration-150">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-0 md:ml-64 p-4 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">System Audit</h1>
+                <p class="text-gray-600">Comprehensive system monitoring and security audit logs</p>
+            </div>
+
+            <!-- Audit Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Security Events</p>
+                            <p class="text-2xl font-semibold text-gray-900">1,248</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center text-sm text-red-600">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>8% increase</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">From last week</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">System Health</p>
+                            <p class="text-2xl font-semibold text-gray-900">98%</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center text-sm text-green-600">
+                            <i class="fas fa-check mr-1"></i>
+                            <span>Optimal</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">All systems normal</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Warnings</p>
+                            <p class="text-2xl font-semibold text-gray-900">12</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center text-sm text-yellow-600">
+                            <i class="fas fa-arrow-down mr-1"></i>
+                            <span>3 resolved</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">From yesterday</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Critical Issues</p>
+                            <p class="text-2xl font-semibold text-gray-900">2</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center text-sm text-red-600">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            <span>Needs attention</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Immediate action required</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                    <div class="flex flex-col md:flex-row gap-4 flex-1">
+                        <!-- Search -->
+                        <div class="relative flex-1 md:max-w-md">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input
+                                type="text"
+                                id="searchInput"
+                                placeholder="Search audit logs..."
+                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                        </div>
+
+                        <!-- Filter -->
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-filter text-gray-400"></i>
+                                <select
+                                    id="filterSeverity"
+                                    class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="all">All Severity</option>
+                                    <option value="critical">Critical</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="info">Info</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-calendar text-gray-400"></i>
+                                <select
+                                    id="filterDate"
+                                    class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                >
+                                    <option value="all">All Time</option>
+                                    <option value="today">Today</option>
+                                    <option value="week">This Week</option>
+                                    <option value="month">This Month</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Button -->
+                    <button
+                        id="exportBtn"
+                        class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                        <i class="fas fa-download"></i>
+                        Export Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Audit Logs Table -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User/IP</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="auditTableBody">
+                            <!-- Audit logs will be populated here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noAuditMessage" class="text-center py-12 hidden">
+                    <i class="fas fa-clipboard-list mx-auto h-12 w-12 text-gray-400"></i>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No audit logs found</h3>
+                    <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+                </div>
+            </div>
+
+            <!-- System Health Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                <!-- Recent Security Events -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Security Events</h3>
+                    <div class="space-y-4" id="securityEvents">
+                        <!-- Security events will be populated here -->
+                    </div>
+                </div>
+
+                <!-- System Performance -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">System Performance</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                <span>CPU Usage</span>
+                                <span>65%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                <span>Memory Usage</span>
+                                <span>78%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-600 h-2 rounded-full" style="width: 78%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                <span>Disk Usage</span>
+                                <span>45%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-yellow-600 h-2 rounded-full" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm text-gray-600 mb-1">
+                                <span>Network I/O</span>
+                                <span>32%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-600 h-2 rounded-full" style="width: 32%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Mock data - replace with actual API calls
+        const mockAuditLogs = [
+            {
+                id: 1,
+                timestamp: "2024-01-20T14:25:00Z",
+                eventType: "User Authentication",
+                severity: "info",
+                description: "Successful login from admin account",
+                user: "john.doe@plsp.edu",
+                ipAddress: "192.168.1.100",
+                status: "resolved"
+            },
+            {
+                id: 2,
+                timestamp: "2024-01-20T13:45:00Z",
+                eventType: "Security Alert",
+                severity: "warning",
+                description: "Multiple failed login attempts detected",
+                user: "unknown",
+                ipAddress: "203.0.113.45",
+                status: "investigating"
+            },
+            {
+                id: 3,
+                timestamp: "2024-01-20T12:30:00Z",
+                eventType: "System Backup",
+                severity: "info",
+                description: "Automated system backup completed successfully",
+                user: "system",
+                ipAddress: "127.0.0.1",
+                status: "resolved"
+            },
+            {
+                id: 4,
+                timestamp: "2024-01-20T11:15:00Z",
+                eventType: "Database Error",
+                severity: "critical",
+                description: "Database connection timeout - service interruption",
+                user: "system",
+                ipAddress: "127.0.0.1",
+                status: "resolved"
+            },
+            {
+                id: 5,
+                timestamp: "2024-01-20T10:00:00Z",
+                eventType: "Permission Change",
+                severity: "info",
+                description: "User permissions updated for basketball team",
+                user: "jane.smith@plsp.edu",
+                ipAddress: "192.168.1.101",
+                status: "resolved"
+            },
+            {
+                id: 6,
+                timestamp: "2024-01-20T09:30:00Z",
+                eventType: "Security Alert",
+                severity: "critical",
+                description: "Unauthorized access attempt to admin panel",
+                user: "unknown",
+                ipAddress: "198.51.100.23",
+                status: "investigating"
+            }
+        ];
+
+        const mockSecurityEvents = [
+            {
+                id: 1,
+                type: "Failed Login",
+                count: 3,
+                time: "2 minutes ago",
+                severity: "warning"
+            },
+            {
+                id: 2,
+                type: "New Admin Created",
+                count: 1,
+                time: "15 minutes ago",
+                severity: "info"
+            },
+            {
+                id: 3,
+                type: "Database Backup",
+                count: 1,
+                time: "1 hour ago",
+                severity: "info"
+            },
+            {
+                id: 4,
+                type: "System Update",
+                count: 1,
+                time: "2 hours ago",
+                severity: "info"
+            }
+        ];
+
+        // DOM Elements
+        const toggleBtn = document.getElementById('toggleBtn');
+        const overlay = document.getElementById('overlay');
+        const sidebar = document.getElementById('sidebar');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutModal = document.getElementById('logoutModal');
+        const cancelLogout = document.getElementById('cancelLogout');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const searchInput = document.getElementById('searchInput');
+        const filterSeverity = document.getElementById('filterSeverity');
+        const filterDate = document.getElementById('filterDate');
+        const exportBtn = document.getElementById('exportBtn');
+        const auditTableBody = document.getElementById('auditTableBody');
+        const noAuditMessage = document.getElementById('noAuditMessage');
+        const securityEvents = document.getElementById('securityEvents');
+
+        // State
+        let auditLogs = [...mockAuditLogs];
+        let filteredLogs = [...mockAuditLogs];
+        let searchTerm = '';
+        let currentFilterSeverity = 'all';
+        let currentFilterDate = 'all';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderAuditLogs();
+            renderSecurityEvents();
+            initializeEventListeners();
+        });
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // Toggle sidebar on mobile
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            });
+
+            // Close sidebar when clicking overlay
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+
+            // Show logout modal
+            logoutBtn.addEventListener('click', () => {
+                logoutModal.classList.remove('hidden');
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+
+            // Cancel logout
+            cancelLogout.addEventListener('click', () => {
+                logoutModal.classList.add('hidden');
+            });
+
+            // Confirm logout
+            confirmLogout.addEventListener('click', () => {
+                logoutModal.classList.add('hidden');
+                alert('Logged out successfully!');
+            });
+
+            // Search functionality
+            searchInput.addEventListener('input', (e) => {
+                searchTerm = e.target.value.toLowerCase();
+                filterLogs();
+            });
+
+            // Filter functionality
+            filterSeverity.addEventListener('change', (e) => {
+                currentFilterSeverity = e.target.value;
+                filterLogs();
+            });
+
+            filterDate.addEventListener('change', (e) => {
+                currentFilterDate = e.target.value;
+                filterLogs();
+            });
+
+            // Export functionality
+            exportBtn.addEventListener('click', exportAuditReport);
+        }
+
+        // Filter logs based on search and filter criteria
+        function filterLogs() {
+            filteredLogs = auditLogs.filter(log => {
+                const matchesSearch = 
+                    log.eventType.toLowerCase().includes(searchTerm) ||
+                    log.description.toLowerCase().includes(searchTerm) ||
+                    log.user.toLowerCase().includes(searchTerm);
+                
+                const matchesSeverity = currentFilterSeverity === "all" || log.severity === currentFilterSeverity;
+                
+                // Date filtering logic would be more complex in a real app
+                const matchesDate = currentFilterDate === "all" || true;
+                
+                return matchesSearch && matchesSeverity && matchesDate;
+            });
+            
+            renderAuditLogs();
+        }
+
+        // Render audit logs to the table
+        function renderAuditLogs() {
+            auditTableBody.innerHTML = '';
+            
+            if (filteredLogs.length === 0) {
+                noAuditMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noAuditMessage.classList.add('hidden');
+            
+            filteredLogs.forEach(log => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar h-4 w-4 text-gray-400 mr-2"></i>
+                            ${formatDate(log.timestamp)}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${log.eventType}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(log.severity)}">
+                            <i class="fas ${getSeverityIcon(log.severity)} mr-1"></i>
+                            ${log.severity}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        ${log.description}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div>${log.user}</div>
+                        <div class="text-xs">${log.ipAddress}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(log.status)}">
+                            ${log.status}
+                        </span>
+                    </td>
+                `;
+                auditTableBody.appendChild(row);
+            });
+        }
+
+        // Render security events
+        function renderSecurityEvents() {
+            securityEvents.innerHTML = '';
+            
+            mockSecurityEvents.forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.className = 'flex items-center justify-between p-3 border border-gray-200 rounded-lg';
+                
+                eventItem.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 ${getSeverityBgColor(event.severity)} rounded-full flex items-center justify-center">
+                                <i class="${getSeverityIcon(event.severity)} text-white text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">${event.type}</p>
+                            <p class="text-xs text-gray-500">${event.time}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-900">${event.count}</p>
+                        <p class="text-xs text-gray-500">events</p>
+                    </div>
+                `;
+                
+                securityEvents.appendChild(eventItem);
+            });
+        }
+
+        // Get severity color
+        function getSeverityColor(severity) {
+            switch (severity) {
+                case "critical": return "bg-red-100 text-red-800";
+                case "warning": return "bg-yellow-100 text-yellow-800";
+                case "info": return "bg-blue-100 text-blue-800";
+                default: return "bg-gray-100 text-gray-800";
+            }
+        }
+
+        // Get severity background color
+        function getSeverityBgColor(severity) {
+            switch (severity) {
+                case "critical": return "bg-red-500";
+                case "warning": return "bg-yellow-500";
+                case "info": return "bg-blue-500";
+                default: return "bg-gray-500";
+            }
+        }
+
+        // Get severity icon
+        function getSeverityIcon(severity) {
+            switch (severity) {
+                case "critical": return "fa-exclamation-circle";
+                case "warning": return "fa-exclamation-triangle";
+                case "info": return "fa-info-circle";
+                default: return "fa-circle";
+            }
+        }
+
+        // Get status color
+        function getStatusColor(status) {
+            switch (status) {
+                case "resolved": return "bg-green-100 text-green-800";
+                case "investigating": return "bg-yellow-100 text-yellow-800";
+                case "pending": return "bg-gray-100 text-gray-800";
+                default: return "bg-gray-100 text-gray-800";
+            }
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString();
+        }
+
+        // Export audit report
+        function exportAuditReport() {
+            const headers = ["Timestamp", "Event Type", "Severity", "Description", "User", "IP Address", "Status"];
+            const csvContent = [
+                headers.join(","),
+                ...filteredLogs.map(log => 
+                    [
+                        log.timestamp, 
+                        log.eventType, 
+                        log.severity, 
+                        log.description, 
+                        log.user, 
+                        log.ipAddress, 
+                        log.status
+                    ].join(",")
+                )
+            ].join("\n");
+            
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "system-audit-report.csv";
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            alert('Audit report exported successfully!');
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // Add a new random audit log
+            const eventTypes = ["User Authentication", "Security Alert", "System Backup", "Permission Change"];
+            const severities = ["info", "warning", "critical"];
+            const users = ["john.doe@plsp.edu", "jane.smith@plsp.edu", "system", "unknown"];
+            
+            const newLog = {
+                id: auditLogs.length + 1,
+                timestamp: new Date().toISOString(),
+                eventType: eventTypes[Math.floor(Math.random() * eventTypes.length)],
+                severity: severities[Math.floor(Math.random() * severities.length)],
+                description: "Automated system event",
+                user: users[Math.floor(Math.random() * users.length)],
+                ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`,
+                status: "resolved"
+            };
+            
+            auditLogs.unshift(newLog);
+            if (auditLogs.length > 50) auditLogs.pop(); // Keep only last 50 logs
+            
+            filterLogs();
+        }, 30000); // Add new log every 30 seconds
+    </script>
+</body>
+</html>

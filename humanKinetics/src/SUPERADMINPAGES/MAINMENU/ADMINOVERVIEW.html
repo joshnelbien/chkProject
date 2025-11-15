@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Overview - PLSP MYNAS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Header -->
+    <div class="md:hidden flex items-center p-4 bg-primary text-white fixed top-0 left-0 w-full z-50 shadow-md">
+        <button id="toggleBtn" class="focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+        <h1 class="ml-3 font-bold text-lg">PLSP MYNAS - Super Admin</h1>
+    </div>
+
+    <!-- Overlay for mobile -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden hidden"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed left-0 top-0 h-screen w-64 text-white flex flex-col p-4 z-50 transform -translate-x-full md:translate-x-0 bg-primary transition-transform duration-300">
+        <!-- Logo / Title -->
+        <div class="flex items-center mb-6 pl-4 pt-4">
+            <div class="h-12 w-12 rounded-full mr-4 overflow-hidden">
+                <img src="https://via.placeholder.com/150" alt="PLSP Logo" class="h-full w-full object-cover">
+            </div>
+            <div class="flex flex-col">
+                <h1 class="text-lg font-bold text-white">PLSP MYNAS</h1>
+                <p class="text-sm text-gray-300">Super Admin</p>
+            </div>
+        </div>
+
+        <!-- Main Menu -->
+        <div class="mb-4">
+            <h2 class="uppercase text-gray-400 text-sm mb-2 pl-2">Main Menu</h2>
+            <ul class="space-y-1">
+                <li>
+                    <a href="../MAINMENU/ADMINOVERVIEW.html" class="flex items-center px-4 py-2 rounded-lg transition-colors bg-blue-700 font-semibold">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        Overview
+                    </a>
+                </li>
+                <li>
+                    <a href="../MAINMENU/ADMINLOGSPAGE.html" class="flex items-center px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                        <i class="fas fa-shield-alt mr-3"></i>
+                        Admin Logs
+                    </a>
+                </li>
+                <li>
+                    <a href="../MAINMENU/USERLOGSPAGE.html" class="flex items-center px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                        <i class="fas fa-users mr-3"></i>
+                        User Logs
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- System Management -->
+        <div class="mb-4">
+            <h2 class="uppercase text-gray-400 text-sm mb-2 pl-2">System Management</h2>
+            <ul class="space-y-1">
+                <li>
+                    <a href="../SYSTEMMANAGEMENT/MANAGEADMINPAGE.html" class="block px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                        Manage Admins
+                    </a>
+                </li>
+                <li>
+                    <a href="../SYSTEMMANAGEMENT/SYSTEMAUDITPAGE.html" class="block px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                        System Audit
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Spacer -->
+        <div class="flex-grow"></div>
+
+        <!-- Logout Button -->
+        <div class="p-2">
+            <button id="logoutBtn" class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-red-700 hover:text-white text-gray-200">
+                Logout
+            </button>
+        </div>
+
+        <!-- User Info -->
+        <div class="p-4 mx-2 bg-blue-700 rounded-lg flex items-center">
+            <div class="h-10 w-10 bg-gray-200 rounded-full mr-4"></div>
+            <div class="flex flex-col">
+                <p class="font-semibold text-white">Super Admin</p>
+                <p class="text-sm text-gray-300">System Administrator</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex flex-col items-center text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Confirm Logout</h3>
+                <p class="text-gray-600 mb-2">Are you sure you want to logout?</p>
+                <p class="text-gray-500 text-sm mb-6">You will need to sign in again to access the super admin dashboard.</p>
+
+                <div class="flex gap-3 w-full">
+                    <button id="cancelLogout" class="flex-1 bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-400 transition duration-150">
+                        Cancel
+                    </button>
+                    <button id="confirmLogout" class="flex-1 bg-red-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-red-700 transition duration-150">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-0 md:ml-64 p-4 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Admin Overview</h1>
+                <p class="text-gray-600">Welcome to the PLSP MYNAS Super Admin Dashboard</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Users Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Total Users</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="totalUsers">1,248</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center text-sm text-green-600">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>12% increase</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">From last month</p>
+                    </div>
+                </div>
+
+                <!-- Active Admins Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-shield-alt text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Active Admins</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="activeAdmins">24</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center text-sm text-green-600">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            <span>8% increase</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">From last month</p>
+                    </div>
+                </div>
+
+                <!-- Pending Approvals Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">Pending Approvals</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="pendingApprovals">18</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center text-sm text-red-600">
+                            <i class="fas fa-arrow-down mr-1"></i>
+                            <span>5% decrease</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">From last week</p>
+                    </div>
+                </div>
+
+                <!-- System Health Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-heartbeat text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-600">System Health</p>
+                            <p class="text-2xl font-semibold text-gray-900" id="systemHealth">98%</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex items-center text-sm text-green-600">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span>All systems operational</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Last checked 5 min ago</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- User Registration Chart -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">User Registration Trend</h3>
+                    <div class="h-64">
+                        <canvas id="userRegistrationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Admin Activity Chart -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Admin Activity Distribution</h3>
+                    <div class="h-64">
+                        <canvas id="adminActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity & Quick Actions -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Recent Activity -->
+                <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                        <button class="text-sm text-blue-600 hover:text-blue-800 font-medium">View All</button>
+                    </div>
+                    <div class="space-y-4" id="recentActivity">
+                        <!-- Activity items will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <button class="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-user-plus text-blue-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">Add New Admin</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+                        
+                        <button class="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-file-export text-green-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">Generate Reports</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+                        
+                        <button class="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-cog text-purple-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">System Settings</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+                        
+                        <button class="w-full flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-bell text-red-600"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">Notification Settings</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // DOM Elements
+        const toggleBtn = document.getElementById('toggleBtn');
+        const overlay = document.getElementById('overlay');
+        const sidebar = document.getElementById('sidebar');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutModal = document.getElementById('logoutModal');
+        const cancelLogout = document.getElementById('cancelLogout');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const recentActivity = document.getElementById('recentActivity');
+
+        // Mock data
+        const activityData = [
+            {
+                id: 1,
+                user: "John Doe",
+                action: "created new admin account",
+                target: "Sarah Wilson",
+                time: "2 minutes ago",
+                type: "admin"
+            },
+            {
+                id: 2,
+                user: "Jane Smith",
+                action: "approved user registration",
+                target: "Mike Johnson",
+                time: "15 minutes ago",
+                type: "user"
+            },
+            {
+                id: 3,
+                user: "System",
+                action: "performed system backup",
+                target: "Database",
+                time: "1 hour ago",
+                type: "system"
+            },
+            {
+                id: 4,
+                user: "Robert Brown",
+                action: "updated user permissions",
+                target: "Basketball Team",
+                time: "2 hours ago",
+                type: "permissions"
+            },
+            {
+                id: 5,
+                user: "Alice Johnson",
+                action: "exported admin logs",
+                target: "CSV Report",
+                time: "3 hours ago",
+                type: "export"
+            }
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            renderRecentActivity();
+            initializeEventListeners();
+        });
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // Toggle sidebar on mobile
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            });
+
+            // Close sidebar when clicking overlay
+            overlay.addEventListener('click', () => {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+
+            // Show logout modal
+            logoutBtn.addEventListener('click', () => {
+                logoutModal.classList.remove('hidden');
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+
+            // Cancel logout
+            cancelLogout.addEventListener('click', () => {
+                logoutModal.classList.add('hidden');
+            });
+
+            // Confirm logout
+            confirmLogout.addEventListener('click', () => {
+                logoutModal.classList.add('hidden');
+                alert('Logged out successfully!');
+                // In a real app, you would redirect to login page
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // User Registration Chart
+            const userRegCtx = document.getElementById('userRegistrationChart').getContext('2d');
+            new Chart(userRegCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    datasets: [{
+                        label: 'New Users',
+                        data: [65, 78, 90, 81, 86, 95, 110],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Admin Activity Chart
+            const adminActivityCtx = document.getElementById('adminActivityChart').getContext('2d');
+            new Chart(adminActivityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['User Management', 'System Settings', 'Reports', 'Audit Logs'],
+                    datasets: [{
+                        data: [35, 25, 20, 20],
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#10b981',
+                            '#f59e0b',
+                            '#8b5cf6'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Render recent activity
+        function renderRecentActivity() {
+            recentActivity.innerHTML = '';
+            
+            activityData.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'flex items-start space-x-3';
+                
+                const iconClass = getActivityIcon(activity.type);
+                const iconColor = getActivityColor(activity.type);
+                
+                activityItem.innerHTML = `
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 ${iconColor} rounded-full flex items-center justify-center">
+                            <i class="${iconClass} text-white text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-900">
+                            <span class="font-medium">${activity.user}</span> ${activity.action}
+                            <span class="font-medium">${activity.target}</span>
+                        </p>
+                        <p class="text-xs text-gray-500">${activity.time}</p>
+                    </div>
+                `;
+                
+                recentActivity.appendChild(activityItem);
+            });
+        }
+
+        // Get activity icon based on type
+        function getActivityIcon(type) {
+            switch(type) {
+                case 'admin': return 'fas fa-user-shield';
+                case 'user': return 'fas fa-user-check';
+                case 'system': return 'fas fa-server';
+                case 'permissions': return 'fas fa-key';
+                case 'export': return 'fas fa-file-export';
+                default: return 'fas fa-info-circle';
+            }
+        }
+
+        // Get activity color based on type
+        function getActivityColor(type) {
+            switch(type) {
+                case 'admin': return 'bg-blue-500';
+                case 'user': return 'bg-green-500';
+                case 'system': return 'bg-purple-500';
+                case 'permissions': return 'bg-yellow-500';
+                case 'export': return 'bg-indigo-500';
+                default: return 'bg-gray-500';
+            }
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // Update stats with random variations
+            const totalUsers = document.getElementById('totalUsers');
+            const activeAdmins = document.getElementById('activeAdmins');
+            const pendingApprovals = document.getElementById('pendingApprovals');
+            
+            // Simulate small fluctuations
+            const currentUsers = parseInt(totalUsers.textContent.replace(',', ''));
+            const newUsers = currentUsers + Math.floor(Math.random() * 3);
+            totalUsers.textContent = newUsers.toLocaleString();
+            
+            const currentAdmins = parseInt(activeAdmins.textContent);
+            const newAdmins = Math.max(20, Math.min(30, currentAdmins + Math.floor(Math.random() * 3) - 1));
+            activeAdmins.textContent = newAdmins;
+            
+            const currentPending = parseInt(pendingApprovals.textContent);
+            const newPending = Math.max(10, Math.min(25, currentPending + Math.floor(Math.random() * 5) - 2));
+            pendingApprovals.textContent = newPending;
+        }, 10000); // Update every 10 seconds
+    </script>
+</body>
+</html>

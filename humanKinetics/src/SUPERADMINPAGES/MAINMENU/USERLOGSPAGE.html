@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>User Logs - PLSP MYNAS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                    }
+                }
+            }
+        }
+    </script>
+    </head>
+    <body class="bg-gray-50 min-h-screen">
+        <!-- Mobile Header -->
+        <div
+            class="md:hidden flex items-center p-4 bg-primary text-white fixed top-0 left-0 w-full z-50 shadow-md">
+            <button id="toggleBtn" class="focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <h1 class="ml-3 font-bold text-lg">PLSP MYNAS - Super Admin</h1>
+        </div>
+
+        <!-- Overlay for mobile -->
+        <div id="overlay"
+            class="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden hidden"></div>
+
+        <!-- Sidebar -->
+        <div id="sidebar"
+            class="fixed left-0 top-0 h-screen w-64 text-white flex flex-col p-4 z-50 transform -translate-x-full md:translate-x-0 bg-primary transition-transform duration-300">
+            <!-- Logo / Title -->
+            <div class="flex items-center mb-6 pl-4 pt-4">
+                <div class="h-12 w-12 rounded-full mr-4 overflow-hidden">
+                    <img src="https://via.placeholder.com/150" alt="PLSP Logo"
+                        class="h-full w-full object-cover">
+                </div>
+                <div class="flex flex-col">
+                    <h1 class="text-lg font-bold text-white">PLSP MYNAS</h1>
+                    <p class="text-sm text-gray-300">Super Admin</p>
+                </div>
+            </div>
+
+            <!-- Main Menu -->
+            <div class="mb-4">
+                <h2 class="uppercase text-gray-400 text-sm mb-2 pl-2">Main
+                    Menu</h2>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="../MAINMENU/ADMINOVERVIEW.html"
+                            class="flex items-center px-4 py-2 rounded-lg transition-colors bg-blue-700 font-semibold">
+                            <i class="fas fa-chart-line mr-3"></i>
+                            Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../MAINMENU/ADMINLOGSPAGE.html"
+                            class="flex items-center px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                            <i class="fas fa-shield-alt mr-3"></i>
+                            Admin Logs
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../MAINMENU/USERLOGSPAGE.html"
+                            class="flex items-center px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                            <i class="fas fa-users mr-3"></i>
+                            User Logs
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- System Management -->
+            <div class="mb-4">
+                <h2 class="uppercase text-gray-400 text-sm mb-2 pl-2">System
+                    Management</h2>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="../SYSTEMMANAGEMENT/MANAGEADMINPAGE.html"
+                            class="flex items-center px-4 py-2 rounded-lg transition-colors bg-blue-700 font-semibold">
+                            <i class="fas fa-user-cog mr-3"></i>
+                            Manage Admins
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../SYSTEMMANAGEMENT/SYSTEMAUDITPAGE.html"
+                            class="flex items-center px-4 py-2 rounded-lg transition-colors hover:bg-blue-700">
+                            <i class="fas fa-clipboard-list mr-3"></i>
+                            System Audit
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Spacer -->
+            <div class="flex-grow"></div>
+
+            <!-- Logout Button -->
+            <div class="p-2">
+                <button id="logoutBtn"
+                    class="w-full text-left px-4 py-2 rounded-lg transition-colors hover:bg-red-700 hover:text-white text-gray-200">
+                    Logout
+                </button>
+            </div>
+
+            <!-- User Info -->
+            <div class="p-4 mx-2 bg-blue-700 rounded-lg flex items-center">
+                <div class="h-10 w-10 bg-gray-200 rounded-full mr-4"></div>
+                <div class="flex flex-col">
+                    <p class="font-semibold text-white">Super Admin</p>
+                    <p class="text-sm text-gray-300">System Administrator</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logout Confirmation Modal -->
+        <div id="logoutModal"
+            class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+                <div class="flex flex-col items-center text-center">
+                    <div
+                        class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                        <i
+                            class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Confirm
+                        Logout</h3>
+                    <p class="text-gray-600 mb-2">Are you sure you want to
+                        logout?</p>
+                    <p class="text-gray-500 text-sm mb-6">You will need to sign
+                        in again to access the super admin dashboard.</p>
+
+                    <div class="flex gap-3 w-full">
+                        <button id="cancelLogout"
+                            class="flex-1 bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-400 transition duration-150">
+                            Cancel
+                        </button>
+                        <button id="confirmLogout"
+                            class="flex-1 bg-red-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-red-700 transition duration-150">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-0 md:ml-64 p-4 md:p-8">
+            <div class="max-w-7xl mx-auto">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">User
+                        Registration Logs</h1>
+                    <p class="text-gray-600">Monitor all user registrations and
+                        account activities</p>
+                </div>
+
+                <!-- Controls -->
+                <div
+                    class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <div
+                        class="flex flex-col md:flex-row gap-4 justify-between">
+                        <div class="flex flex-col md:flex-row gap-4 flex-1">
+                            <!-- Search -->
+                            <div class="relative flex-1 md:max-w-md">
+                                <i
+                                    class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input
+                                    type="text"
+                                    id="searchInput"
+                                    placeholder="Search users, emails, or sports..."
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+
+                            <!-- Filter -->
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-filter text-gray-400"></i>
+                                <select
+                                    id="filterStatus"
+                                    class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="all">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="suspended">Suspended</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Export Button -->
+                        <button
+                            id="exportBtn"
+                            class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-download"></i>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Logs Table -->
+                <div
+                    class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role
+                                        & Sport</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered
+                                        By</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registration
+                                        Date</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last
+                                        Login</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200"
+                                id="logsTableBody">
+                                <!-- Logs will be populated here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="noLogsMessage" class="text-center py-12 hidden">
+                        <i
+                            class="fas fa-users mx-auto h-12 w-12 text-gray-400"></i>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No
+                            user logs found</h3>
+                        <p class="mt-1 text-sm text-gray-500">Try adjusting your
+                            search or filter criteria.</p>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i
+                                    class="fas fa-users h-8 w-8 text-purple-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p
+                                    class="text-sm font-medium text-gray-600">Total
+                                    Users</p>
+                                <p class="text-2xl font-semibold text-gray-900"
+                                    id="totalUsers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i
+                                    class="fas fa-check-circle h-8 w-8 text-green-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p
+                                    class="text-sm font-medium text-gray-600">Active
+                                    Users</p>
+                                <p class="text-2xl font-semibold text-gray-900"
+                                    id="activeUsers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i
+                                    class="fas fa-clock h-8 w-8 text-yellow-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p
+                                    class="text-sm font-medium text-gray-600">Pending
+                                    Users</p>
+                                <p class="text-2xl font-semibold text-gray-900"
+                                    id="pendingUsers">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i
+                                    class="fas fa-sign-in-alt h-8 w-8 text-blue-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p
+                                    class="text-sm font-medium text-gray-600">Today's
+                                    Logins</p>
+                                <p class="text-2xl font-semibold text-gray-900"
+                                    id="todayLogins">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script>
+        // Mock data - replace with actual API calls
+        const mockLogs = [
+            {
+                id: 1,
+                userName: "Alice Johnson",
+                email: "alice.johnson@student.plsp.edu",
+                role: "Student Athlete",
+                sport: "Basketball",
+                status: "active",
+                registeredBy: "John Doe",
+                registrationDate: "2024-01-15T08:30:00Z",
+                lastLogin: "2024-01-20T14:25:00Z"
+            },
+            {
+                id: 2,
+                userName: "Bob Wilson",
+                email: "bob.wilson@student.plsp.edu",
+                role: "Student Athlete",
+                sport: "Swimming",
+                status: "pending",
+                registeredBy: "Jane Smith",
+                registrationDate: "2024-01-15T11:20:00Z",
+                lastLogin: null
+            },
+            {
+                id: 3,
+                userName: "Carol Davis",
+                email: "carol.davis@student.plsp.edu",
+                role: "Student Athlete",
+                sport: "Track & Field",
+                status: "active",
+                registeredBy: "Mike Johnson",
+                registrationDate: "2024-01-14T09:45:00Z",
+                lastLogin: "2024-01-20T16:30:00Z"
+            },
+            {
+                id: 4,
+                userName: "David Miller",
+                email: "david.miller@student.plsp.edu",
+                role: "Student Athlete",
+                sport: "Basketball",
+                status: "suspended",
+                registeredBy: "John Doe",
+                registrationDate: "2024-01-10T13:15:00Z",
+                lastLogin: "2024-01-18T11:20:00Z"
+            },
+            {
+                id: 5,
+                userName: "Eva Garcia",
+                email: "eva.garcia@student.plsp.edu",
+                role: "Student Athlete",
+                sport: "Swimming",
+                status: "active",
+                registeredBy: "Jane Smith",
+                registrationDate: "2024-01-20T10:00:00Z",
+                lastLogin: "2024-01-20T15:45:00Z"
+            }
+        ];
+
+        // DOM Elements
+        const toggleBtn = document.getElementById('toggleBtn');
+        const overlay = document.getElementById('overlay');
+        const sidebar = document.getElementById('sidebar');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutModal = document.getElementById('logoutModal');
+        const cancelLogout = document.getElementById('cancelLogout');
+        const confirmLogout = document.getElementById('confirmLogout');
+        const searchInput = document.getElementById('searchInput');
+        const filterStatus = document.getElementById('filterStatus');
+        const exportBtn = document.getElementById('exportBtn');
+        const logsTableBody = document.getElementById('logsTableBody');
+        const noLogsMessage = document.getElementById('noLogsMessage');
+        const totalUsers = document.getElementById('totalUsers');
+        const activeUsers = document.getElementById('activeUsers');
+        const pendingUsers = document.getElementById('pendingUsers');
+        const todayLogins = document.getElementById('todayLogins');
+
+        // State
+        let logs = [...mockLogs];
+        let filteredLogs = [...mockLogs];
+        let searchTerm = '';
+        let currentFilterStatus = 'all';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            renderLogs();
+        });
+
+        // Toggle sidebar on mobile
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+
+        // Close sidebar when clicking overlay
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+
+        // Show logout modal
+        logoutBtn.addEventListener('click', () => {
+            logoutModal.classList.remove('hidden');
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+
+        // Cancel logout
+        cancelLogout.addEventListener('click', () => {
+            logoutModal.classList.add('hidden');
+        });
+
+        // Confirm logout
+        confirmLogout.addEventListener('click', () => {
+            logoutModal.classList.add('hidden');
+            alert('Logged out successfully!');
+            // In a real app, you would redirect to login page
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            searchTerm = e.target.value.toLowerCase();
+            filterLogs();
+        });
+
+        // Filter functionality
+        filterStatus.addEventListener('change', (e) => {
+            currentFilterStatus = e.target.value;
+            filterLogs();
+        });
+
+        // Export functionality
+        exportBtn.addEventListener('click', exportToCSV);
+
+        // Filter logs based on search and filter criteria
+        function filterLogs() {
+            filteredLogs = logs.filter(log => {
+                const matchesSearch = 
+                    log.userName.toLowerCase().includes(searchTerm) ||
+                    log.email.toLowerCase().includes(searchTerm) ||
+                    log.sport.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = currentFilterStatus === "all" || log.status === currentFilterStatus;
+                
+                return matchesSearch && matchesStatus;
+            });
+            
+            renderLogs();
+            updateStats();
+        }
+
+        // Render logs to the table
+        function renderLogs() {
+            logsTableBody.innerHTML = '';
+            
+            if (filteredLogs.length === 0) {
+                noLogsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noLogsMessage.classList.add('hidden');
+            
+            filteredLogs.forEach(log => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-purple-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${log.userName}</div>
+                                <div class="text-sm text-gray-500 flex items-center">
+                                    <i class="fas fa-envelope h-3 w-3 mr-1"></i>
+                                    ${log.email}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${log.role}</div>
+                        <div class="text-sm text-gray-500">${log.sport}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(log.status)}">
+                            ${log.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${log.registeredBy}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar h-4 w-4 text-gray-400 mr-2"></i>
+                            ${formatDate(log.registrationDate)}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${log.lastLogin ? formatDate(log.lastLogin) : "Never"}
+                    </td>
+                `;
+                logsTableBody.appendChild(row);
+            });
+        }
+
+        // Update statistics
+        function updateStats() {
+            totalUsers.textContent = logs.length;
+            
+            const activeUsersCount = logs.filter(log => log.status === 'active').length;
+            activeUsers.textContent = activeUsersCount;
+            
+            const pendingUsersCount = logs.filter(log => log.status === 'pending').length;
+            pendingUsers.textContent = pendingUsersCount;
+            
+            const today = new Date().toDateString();
+            const todayLoginsCount = logs.filter(log => 
+                log.lastLogin && new Date(log.lastLogin).toDateString() === today
+            ).length;
+            todayLogins.textContent = todayLoginsCount;
+        }
+
+        // Get color class based on status
+        function getStatusColor(status) {
+            switch (status) {
+                case "active": return "bg-green-100 text-green-800";
+                case "pending": return "bg-yellow-100 text-yellow-800";
+                case "suspended": return "bg-red-100 text-red-800";
+                default: return "bg-gray-100 text-gray-800";
+            }
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString();
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            const headers = ["User Name", "Email", "Role", "Sport", "Status", "Registered By", "Registration Date", "Last Login"];
+            const csvContent = [
+                headers.join(","),
+                ...filteredLogs.map(log => 
+                    [
+                        log.userName, 
+                        log.email, 
+                        log.role, 
+                        log.sport, 
+                        log.status, 
+                        log.registeredBy, 
+                        log.registrationDate, 
+                        log.lastLogin || "Never"
+                    ].join(",")
+                )
+            ].join("\n");
+            
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "user-logs.csv";
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+    </body>
+</html>
