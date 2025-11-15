@@ -52,6 +52,8 @@ function EditAccountModal({ open, onClose, player, onSave }) {
 
   const [profilePreview, setProfilePreview] = useState("/lexi.jpg");
   const [profileFile, setProfileFile] = useState(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const fileInputRef = useRef(null);
 
   // 🧮 Auto-calculate BMI
@@ -140,7 +142,13 @@ function EditAccountModal({ open, onClose, player, onSave }) {
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveClick = () => {
+    setShowConfirmationModal(true);
+  };
+
+  const handleConfirmSave = async () => {
+    setShowConfirmationModal(false);
+    
     try {
       const data = new FormData();
       Object.entries(formData).forEach(([key, value]) =>
@@ -154,13 +162,88 @@ function EditAccountModal({ open, onClose, player, onSave }) {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
+      setShowSuccessModal(true);
+      
       onSave(formData);
-      window.location.reload();
-      onClose();
+      
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        onClose();
+      }, 5000);
+
     } catch (error) {
       console.error("Error updating player:", error);
       alert("Failed to update player info.");
     }
+  };
+
+  const handleCancelSave = () => {
+    setShowConfirmationModal(false);
+  };
+
+  const ConfirmationModal = () => {
+    if (!showConfirmationModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+          <div className="flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Confirm Changes</h3>
+            <p className="text-gray-600 mb-2">
+              Are you sure you want to save these changes?
+            </p>
+            <p className="text-gray-500 text-sm mb-6">
+              This will update your account information.
+            </p>
+
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={handleCancelSave}
+                className="flex-1 bg-gray-300 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-400 transition duration-150 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmSave}
+                className="flex-1 bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-green-600 transition duration-150 focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                Confirm Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const SuccessModal = () => {
+    if (!showSuccessModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+          <div className="flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Changes Saved Successfully!</h3>
+            <p className="text-gray-600 mb-2">
+              Your account information has been updated.
+            </p>
+            <p className="text-gray-500 text-sm">
+              Closing this window...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (!open) return null;
@@ -492,13 +575,19 @@ function EditAccountModal({ open, onClose, player, onSave }) {
             Cancel
           </button>
           <button
-            onClick={handleSave}
+            onClick={handleSaveClick}
             className="px-5 py-2 bg-green-700 hover:bg-green-600 text-white rounded-lg shadow-sm transition font-medium"
           >
             Save Changes
           </button>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal />
+
+      {/* Success Modal */}
+      <SuccessModal />
     </div>
   );
 }
