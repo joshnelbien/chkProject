@@ -33,7 +33,11 @@ const TeamSchedule = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+     teamId:{
+    type: DataTypes.STRING,
   },
+  },
+ 
   {
     tableName: "teamSchedules",
     timestamps: false,

@@ -40,14 +40,17 @@ router.post("/addSchedule", async (req, res) => {
 });
 
 // 🟡 GET All Schedules
-router.get("/", async (req, res) => {
+router.get("/team-schedule", async (req, res) => {
   try {
-    const schedules = await TeamSchedule.findAll();
+    const schedules = await TeamSchedule.findAll({
+      attributes: ["id", "teamId", "title", "date", "startTime", "endTime", "location" ,"teamId"]
+    });
     res.json(schedules);
   } catch (error) {
     console.error("❌ Error fetching schedules:", error);
     res.status(500).json({ message: "Failed to fetch team schedules." });
   }
 });
+
 
 module.exports = router;

@@ -166,7 +166,7 @@ function AdminTeam() {
                                   {p.firstName} {p.lastName}
                                 </span>
                                 <span className="text-xs text-green-700 font-semibold">
-                                  #{p.jerseyNumber || "N/A"}
+                                  #{p.jerseyNo || "N/A"}
                                 </span>
                               </li>
                             ))}

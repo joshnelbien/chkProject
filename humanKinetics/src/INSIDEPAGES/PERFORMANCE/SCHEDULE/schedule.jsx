@@ -1,221 +1,283 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Footer from "../../FOOTER/footer";
 import Navbar from "../../NAVBAR/navbar";
 import Sidebar from "../../SIDEBAR/sidebar";
 
 function Schedule() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [scheduleData, setScheduleData] = useState({});
+  const [myTeamSchedules, setMyTeamSchedules] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { id } = useParams(); // get from URL
 
-  const daysOfWeek = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
+  const formatDate = (d) =>
+    d ? new Date(d).toISOString().split("T")[0] : null;
 
-  const dailySchedule = [
-    {
-      time: "07:00",
-      title: "Morning Workout",
-      duration: "",
-      color: "bg-green-100",
-      textColor: "text-green-700",
-    },
-    {
-      time: "08:30",
-      title: "Breakfast",
-      duration: "30m",
-      color: "bg-yellow-100",
-      textColor: "text-yellow-700",
-    },
-    {
-      time: "10:00",
-      title: "Team Training",
-      duration: "2h",
-      color: "bg-blue-100",
-      textColor: "text-blue-700",
-    },
-    {
-      time: "13:00",
-      title: "Lunch",
-      duration: "1h",
-      color: "bg-gray-200",
-      textColor: "text-gray-700",
-    },
-    {
-      time: "15:30",
-      title: "Recovery Session",
-      duration: "1h",
-      color: "bg-orange-100",
-      textColor: "text-orange-700",
-    },
-    {
-      time: "18:00",
-      title: "Evening Nutrition",
-      duration: "1h",
-      color: "bg-purple-100",
-      textColor: "text-purple-700",
-    },
-  ];
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        // Fetch training and tournament schedules
+        const [trainingRes, tournamentRes] = await Promise.all([
+          axios.get("http://localhost:5000/trainingSchedule/training-schedule"),
+          axios.get("http://localhost:5000/tournament/tournaments-activities"),
+        ]);
 
-  const summaryCards = [
-    {
-      title: "Today's Schedule",
-      content: dailySchedule.map((item, idx) => (
-        <li key={idx} className="flex items-start">
-          <div className="flex-1">
-            <p className="font-semibold text-gray-800">{item.time}</p>
-            <p className="text-sm text-gray-600">{item.title}</p>
-            {item.duration && (
-              <p className="text-xs text-gray-500">{item.duration}</p>
-            )}
-          </div>
-        </li>
-      )),
-    },
-    {
-      title: "Weekly Overview",
-      content: [
-        { label: "Training Sessions", value: 12 },
-        { label: "Nutrition Plans", value: 21 },
-        { label: "Recovery Sessions", value: 5 },
-      ].map((item, idx) => (
-        <li
-          key={idx}
-          className="flex justify-between items-center text-gray-700"
-        >
-          <p>{item.label}</p>
-          <p className="font-semibold">{item.value}</p>
-        </li>
-      )),
-    },
-    {
-      title: "Schedule Completion",
-      content: [
-        { label: "This Week", value: 92 },
-        { label: "Last Week", value: 88 },
-      ].map((item, idx) => (
-        <div key={idx}>
-          <li className="flex justify-between items-center text-gray-700">
-            <p>{item.label}</p>
-            <p className="font-semibold">{item.value}%</p>
-          </li>
-          <div className="h-1 bg-gray-200 rounded-full mb-2">
-            <div
-              className="h-full bg-green-500 rounded-full"
-              style={{ width: `${item.value}%` }}
-            ></div>
-          </div>
-        </div>
-      )),
-    },
-  ];
+        console.log("Training Response:", trainingRes.data); // Log full training data
+        console.log("Tournament Response:", tournamentRes.data); // Log tournaments
+
+        const trainingSchedules = trainingRes.data.schedules || [];
+        const tournaments = Array.isArray(tournamentRes.data)
+          ? tournamentRes.data
+          : tournamentRes.data?.tournaments || [];
+
+        const merged = {};
+
+        // Merge training schedules
+        trainingSchedules.forEach((t) => {
+          const key = formatDate(t.date);
+          if (!merged[key]) merged[key] = [];
+          merged[key].push({
+            time: `${t.startTime} - ${t.endTime}`,
+            title: t.title,
+            location: t.location,
+            participants: `Coach: ${t.coach}`,
+            type: "Training",
+          });
+        });
+
+        // Merge tournament schedules
+        tournaments.forEach((t) => {
+          t.schedules?.forEach((s) => {
+            const key = formatDate(s.date);
+            if (!merged[key]) merged[key] = [];
+            merged[key].push({
+              time: `${s.startTime} - ${s.endTime}`,
+              title: `${t.tournamentName} vs ${s.opponent}`,
+              location: t.location,
+              participants: `${t.teams} Teams`,
+              type: "Tournament",
+            });
+          });
+        });
+
+        setScheduleData(merged);
+      } catch (e) {
+        console.error("Error loading schedules:", e);
+      }
+    };
+
+    const fetchMyTeamSchedules = async () => {
+      try {
+        // Get logged user details
+        const res = await axios.get(
+          `http://localhost:5000/userAccounts/players-profile/${id}`
+        );
+
+        console.log("Player details:", res.data);
+        const teamId = res.data.teamId;
+        console.log("Logged User Team ID:", teamId);
+
+        // Fetch all training schedules
+        const trainingRes = await axios.get(
+          "http://localhost:5000/trainingSchedule/training-schedule"
+        );
+        const trainingSchedules = trainingRes.data.schedules || [];
+
+        // Filter training schedules by teamId
+        const myTrainingSchedules = trainingSchedules.filter(
+          (sched) => sched.teamId === teamId
+        );
+
+        console.log("Filtered Training Schedules:", myTrainingSchedules);
+
+        // Fetch all tournament schedules
+        const tournamentRes = await axios.get(
+          "http://localhost:5000/tournament/tournaments-activities"
+        );
+        const tournaments = Array.isArray(tournamentRes.data)
+          ? tournamentRes.data
+          : tournamentRes.data?.tournaments || [];
+
+        // Filter tournament schedules by teamId
+        const myTournamentSchedules = [];
+        tournaments.forEach((t) => {
+          t.schedules?.forEach((s) => {
+            if (s.teamId === teamId) {
+              myTournamentSchedules.push({
+                ...s,
+                title: `${t.tournamentName} vs ${s.opponent}`,
+                location: t.location,
+                type: "Tournament",
+              });
+            }
+          });
+        });
+
+        console.log("Filtered Tournament Schedules:", myTournamentSchedules);
+
+        // Merge both training and tournament schedules
+        const combinedSchedules = [
+          ...myTrainingSchedules,
+          ...myTournamentSchedules,
+        ];
+
+        setMyTeamSchedules(combinedSchedules);
+      } catch (err) {
+        console.error("Error fetching team schedule:", err);
+      }
+    };
+
+    fetchSchedules();
+    fetchMyTeamSchedules();
+  }, [id]);
+
+  // CALENDAR GENERATION
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
+  const monthName = currentMonth.toLocaleString("default", { month: "long" });
+  const year = currentMonth.getFullYear();
+  const firstDayIndex = currentMonth.getDay();
+  const lastDate = new Date(year, currentMonth.getMonth() + 1, 0).getDate();
+
+  const daysArray = [];
+  for (let i = 0; i < firstDayIndex; i++) daysArray.push(null);
+  for (let i = 1; i <= lastDate; i++)
+    daysArray.push(new Date(year, currentMonth.getMonth(), i));
+
+  const handlePrev = () =>
+    setCurrentMonth(new Date(year, currentMonth.getMonth() - 1, 1));
+  const handleNext = () =>
+    setCurrentMonth(new Date(year, currentMonth.getMonth() + 1, 1));
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* Main container */}
       <div
         className={`flex flex-col flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        {/* Navbar */}
         <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto mt-16 p-4 md:p-6">
-          <h1 className="text-2xl font-bold text-green-700 mb-6">
-            Schedule Dashboard
-          </h1>
-
-          {/* Controls */}
-          <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-            <div className="flex space-x-2">
-              {["Weekly View", "Monthly View"].map((btn, idx) => (
-                <button
-                  key={idx}
-                  className={`px-4 py-2 rounded-lg font-semibold shadow ${
-                    idx === 0
-                      ? "bg-green-700 text-white"
-                      : "bg-white border border-gray-300 text-gray-600"
-                  }`}
-                >
-                  {btn}
-                </button>
-              ))}
+        <main className="flex-1 p-4 md:p-6 mt-16">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-green-700">Schedule</h1>
+              <p className="text-gray-500">Training & Events Calendar</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex gap-2">
               <input
                 type="text"
                 placeholder="Search events..."
-                className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500"
               />
-              <button className="px-4 py-2 rounded-lg bg-green-700 text-white font-semibold shadow">
-                Add Event
-              </button>
             </div>
           </div>
 
-          {/* Weekly Calendar */}
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <div className="grid grid-cols-7 gap-px text-center bg-gray-200 rounded-lg overflow-hidden">
-              {/* Day headers */}
-              {daysOfWeek.map((day) => (
-                <div
-                  key={day}
-                  className="py-2 bg-gray-50 text-gray-700 font-semibold text-sm"
-                >
-                  {day}
-                </div>
-              ))}
-              {/* Calendar cells */}
-              {Array.from({ length: 7 }).map((_, dayIndex) => (
-                <div key={dayIndex} className="bg-white p-2">
-                  <div className="text-sm font-bold text-gray-800 mb-2">
-                    {dayIndex + 1}
-                  </div>
-                  <div className="space-y-2">
-                    {dailySchedule.map((item, idx) => (
+          {/* Month Navigation */}
+          <div className="flex justify-between items-center mb-4">
+            <button
+              onClick={handlePrev}
+              className="px-3 py-1 bg-white shadow rounded-lg"
+            >
+              ← Prev
+            </button>
+            <h2 className="text-xl font-semibold text-green-700">
+              {monthName} {year}
+            </h2>
+            <button
+              onClick={handleNext}
+              className="px-3 py-1 bg-white shadow rounded-lg"
+            >
+              Next →
+            </button>
+          </div>
+
+          {/* Calendar */}
+          <div className="grid grid-cols-7 gap-px bg-gray-300 rounded-lg overflow-hidden">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+              <div
+                key={d}
+                className="bg-gray-50 p-2 text-center font-semibold text-gray-700"
+              >
+                {d}
+              </div>
+            ))}
+            {daysArray.map((date, idx) => {
+              const dateKey = date ? formatDate(date) : null;
+              const events = dateKey ? scheduleData[dateKey] || [] : [];
+              const filtered = events.filter((e) =>
+                e.title.toLowerCase().includes(searchTerm.toLowerCase())
+              );
+              return (
+                <div key={idx} className="bg-white min-h-[120px] p-2 border">
+                  {date && (
+                    <p className="text-gray-800 font-semibold text-sm">
+                      {date.getDate()}
+                    </p>
+                  )}
+                  <div className="mt-1 space-y-1">
+                    {filtered.map((event, i) => (
                       <div
-                        key={idx}
-                        className={`p-1 text-xs rounded-md ${item.color} ${item.textColor}`}
+                        key={i}
+                        className={`p-1 rounded text-xs font-medium ${
+                          event.type === "Training"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
                       >
-                        <p className="font-semibold">{item.time}</p>
-                        <p>{item.title}</p>
-                        {item.duration && (
-                          <p className="text-[10px] opacity-80">
-                            {item.duration}
-                          </p>
-                        )}
+                        <p>{event.title}</p>
+                        <p className="text-[10px] opacity-70">{event.time}</p>
                       </div>
                     ))}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {summaryCards.map((card, idx) => (
-              <div key={idx} className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-xl font-semibold mb-4">{card.title}</h2>
-                <ul className="space-y-4">{card.content}</ul>
+          {/* My Team Schedule */}
+          <div className="mt-10 p-5 bg-white shadow rounded-lg">
+            <h2 className="text-xl font-bold text-green-700 mb-3">
+              My Schedule
+            </h2>
+            {myTeamSchedules.length === 0 ? (
+              <p className="text-gray-500">
+                No schedule available for your team.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {myTeamSchedules.map((sched) => (
+                  <div
+                    key={sched.id}
+                    className="p-3 border rounded-lg bg-green-50"
+                  >
+                    <p className="font-semibold text-green-800">
+                      {sched.title}
+                    </p>
+                    <p className="text-gray-700">📅 {sched.date}</p>
+                    <p className="text-gray-700">
+                      🕒 {sched.startTime} - {sched.endTime}
+                    </p>
+                    <p className="text-gray-700">📍 {sched.location}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </main>
 
-        {/* Footer */}
         <Footer />
       </div>
     </div>
