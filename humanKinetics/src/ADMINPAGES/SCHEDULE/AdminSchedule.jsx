@@ -1,16 +1,23 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
-import AddEventModal from "./addEventModal";
 
 function AdminSchedule() {
-  const [isModalOpen, setModalOpen] = useState(false);
+  const { id } = useParams();
   const [scheduleData, setScheduleData] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filterStatus, setFilterStatus] = useState("All"); // <-- New state for buttons
   const itemsPerPage = 20;
+
+  const handleAction = (event) => {
+    // Example: show alert or navigate to another page
+    alert(`Performing action for: ${event.title}`);
+    // You can replace this with edit, join, view details, etc.
+  };
 
   const formatDate = (d) =>
     d ? new Date(d).toISOString().split("T")[0] : "unknown";
@@ -39,6 +46,7 @@ function AdminSchedule() {
             location: t.location,
             participants: `Coach: ${t.coach}`,
             type: "Training",
+            teamId: t.teamId || null,
           });
         });
 
@@ -53,6 +61,7 @@ function AdminSchedule() {
               location: tournament.location,
               participants: `${tournament.teams} Teams`,
               type: "Tournament",
+              teamId: tournament.teamId || null,
             });
           });
         });
@@ -70,25 +79,29 @@ function AdminSchedule() {
     (a, b) => new Date(a) - new Date(b)
   );
 
-  // Flatten all events for search/filter
   const allEvents = scheduleKeys.flatMap((date) =>
     scheduleData[date].map((event) => ({ date, ...event }))
   );
 
-  const filteredEvents = allEvents.filter(
-    (event) =>
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.participants.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter based on button selection
+  const filteredEvents = allEvents
+    .filter((event) =>
+      filterStatus === "My Schedule"
+        ? String(event.teamId) === String(id)
+        : true
+    )
+    .filter(
+      (event) =>
+        event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.participants.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const paginatedEvents = filteredEvents.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Overview counts
   const totalEvents = allEvents.length;
   const totalTrainings = allEvents.filter((e) => e.type === "Training").length;
   const totalTournaments = allEvents.filter(
@@ -111,6 +124,23 @@ function AdminSchedule() {
               <p className="text-gray-500 text-sm sm:text-base">
                 Training and Events Calendar
               </p>
+            </div>
+
+            {/* Buttons for My Schedule / All Schedule */}
+            <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full w-fit mb-6">
+              {["All", "My Schedule"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`px-4 py-2 rounded-full font-semibold shadow ${
+                    filterStatus === status
+                      ? "bg-white text-green-700"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -140,24 +170,10 @@ function AdminSchedule() {
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
-                    setCurrentPage(1); // Reset page on search
+                    setCurrentPage(1);
                   }}
                   className="w-full px-4 py-2 pl-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
               </div>
             </div>
 
@@ -165,18 +181,29 @@ function AdminSchedule() {
               <table className="min-w-full divide-y divide-gray-200 text-sm">
                 <thead className="bg-gray-50">
                   <tr>
-                    {["Date", "Time", "Event", "Location", "Participants"].map(
-                      (h) => (
-                        <th
-                          key={h}
-                          className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider"
-                        >
-                          {h}
-                        </th>
-                      )
+                    {[
+                      "Date",
+                      "Time",
+                      "Event",
+                      "Location",
+                      "Participants",
+                      "Type",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                    {filterStatus === "My Schedule" && (
+                      <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                        Action
+                      </th>
                     )}
                   </tr>
                 </thead>
+
                 <tbody className="bg-white divide-y divide-gray-200">
                   {paginatedEvents.map((event, idx) => (
                     <tr key={idx}>
@@ -185,6 +212,54 @@ function AdminSchedule() {
                       <td className="px-4 py-3 font-semibold">{event.title}</td>
                       <td className="px-4 py-3">{event.location}</td>
                       <td className="px-4 py-3">{event.participants}</td>
+                      <td className="px-4 py-3">{event.type}</td>
+                      {filterStatus === "My Schedule" && (
+                        <td className="px-4 py-3 space-x-2">
+                          {event.type === "Training" ? (
+                            <>
+                              <button
+                                onClick={() => handleAction(event, "Start")}
+                                className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition"
+                              >
+                                Start
+                              </button>
+                              <button
+                                onClick={() => handleAction(event, "Done")}
+                                className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition"
+                              >
+                                Done
+                              </button>
+                              <button
+                                onClick={() => handleAction(event, "Cancelled")}
+                                className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition"
+                              >
+                                Cancelled
+                              </button>
+                            </>
+                          ) : event.type === "Tournament" ? (
+                            <>
+                              <button
+                                onClick={() => handleAction(event, "Result")}
+                                className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition"
+                              >
+                                Result
+                              </button>
+                              <button
+                                onClick={() => handleAction(event, "Postponed")}
+                                className="bg-yellow-600 text-white px-3 py-1 rounded-lg hover:bg-yellow-700 transition"
+                              >
+                                Postponed
+                              </button>
+                              <button
+                                onClick={() => handleAction(event, "Cancelled")}
+                                className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition"
+                              >
+                                Cancelled
+                              </button>
+                            </>
+                          ) : null}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -214,17 +289,12 @@ function AdminSchedule() {
           </div>
         </main>
 
-        <AddEventModal
-          isOpen={isModalOpen}
-          onClose={() => setModalOpen(false)}
-        />
         <Footer />
       </div>
     </div>
   );
 }
 
-/* Reusable Overview Card */
 function OverviewCard({ label, value, color }) {
   const colorClass =
     color === "green"
