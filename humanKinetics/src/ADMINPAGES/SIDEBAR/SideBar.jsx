@@ -175,7 +175,6 @@ function AdminSidebar() {
         <SidebarSection title="Managements">
           <SidebarLink to={`/admin-schedule/${id}`} label="Schedule" />
           <SidebarLink to={`/admin-attendance/${id}`} label="Attendance" />
-          <SidebarLink to={`/admin-performance/${id}`} label="Performance" />
         </SidebarSection>
 
         <SidebarSection title="Events">

@@ -625,9 +625,13 @@ const Register = () => {
                     </option>
                     <option value="basketball">Basketball</option>
                     <option value="volleyball">Volleyball</option>
-                    <option value="chess">Chess</option>
-                    <option value="track">Track and Field</option>
-                    <option value="badminton">Badminton</option>
+                    <option value="chess">Futsal</option>
+                    <option value="track">Sepak Takraw</option>
+                    <option value="badminton">Table Tennis</option>
+                    <option value="basketball">Badminton</option>
+                    <option value="volleyball">Taekwondo</option>
+                    <option value="chess">Arnis</option>
+                    <option value="track">Karate-Do</option>
                   </select>
                 </div>
               </div>

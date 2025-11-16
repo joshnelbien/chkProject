@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   AlertTriangle,
   CheckCircle,
@@ -6,7 +7,7 @@ import {
   Loader,
   X,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const PasswordInputWithToggle = ({
@@ -340,20 +341,38 @@ const AdminRegister = () => {
               </div>
 
               {/* Sports */}
-              <div className="flex flex-col">
-                <label className="text-sm font-medium text-gray-700">
-                  Sports to Coach *
+             <div className="flex flex-col">
+                <label
+                  htmlFor="sports"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Preferred Sport <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="sports"
-                  value={formData.sports}
-                  onChange={handleChange}
-                  required
-                  disabled={isDisabled}
-                  className="mt-1 px-4 py-2 border rounded-lg focus:ring-green-700 focus:border-green-700 text-sm shadow-sm"
-                />
-              </div>
+                <div className="mt-1 relative">
+                  <select
+                    id="sports"
+                    name="sports"
+                    value={formData.sports}
+                    onChange={handleChange}
+                    required
+                    disabled={isDisabled}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm appearance-none bg-white cursor-pointer disabled:bg-gray-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="" disabled>
+                      Select Sport
+                    </option>
+                    <option value="Basketball">Basketball</option>
+                    <option value="Volleyball">Volleyball</option>
+                    <option value="Futsal">Futsal</option>
+                    <option value="Sepak Takraw">Sepak Takraw</option>
+                    <option value="Table Tennis">Table Tennis</option>
+                    <option value="Badminton">Badminton</option>
+                    <option value="Taekwondo">Taekwondo</option>
+                    <option value="Arnis">Arnis</option>
+                    <option value="Karate-Do">Karate-Do</option>
+                  </select>
+                </div>
+                </div>
 
               {/* Textareas */}
               {[
