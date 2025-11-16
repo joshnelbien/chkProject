@@ -1,8 +1,16 @@
-import { useState } from "react";
+/* eslint-disable no-unused-vars */
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function TrainingModal({ isOpen, onClose, onSubmit }) {
-  const { id } = useParams();
+  const { id } = useParams(); // Admin/User ID
+  console.log("Fetched id:", id);
+
+  const [teams, setTeams] = useState([]);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [playersByTeam, setPlayersByTeam] = useState({});
+
   const [formData, setFormData] = useState({
     title: "",
     date: "",
@@ -11,64 +19,103 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
     location: "",
     coach: "",
     focusAreas: "",
-    teamId: id,
+    teamId: id, // Fetched params ID goes here
+    id: "", // Selected team ID goes here
   });
+
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Fetch teams for this user/admin
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/teams/getTeams/${id}`
+        );
+        setTeams(res.data);
+
+        // Fetch players per team
+        res.data.forEach((team) => fetchPlayersForTeam(team.id));
+      } catch (err) {
+        console.error("Error fetching teams:", err);
+      }
+    };
+
+    fetchTeams();
+  }, [id]);
+
+  // Fetch players for a specific team
+  const fetchPlayersForTeam = async (teamId) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/teams/player/${teamId}`
+      );
+      setPlayersByTeam((prev) => ({ ...prev, [teamId]: res.data }));
+    } catch (err) {
+      console.error(`Error fetching players for team ${teamId}:`, err);
+    }
+  };
+
+  // Handle all text inputs
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  // Handle team selection
+  const handleTeamSelect = (e) => {
+    const selected = teams.find((t) => t.id.toString() === e.target.value);
+    setSelectedTeam(selected);
+
+    console.log("Selected team:", selected?.id);
+
+    setFormData({
+      ...formData,
+      id: selected?.id, // Selected team → "id"
+      teamId: id, // useParams ID → "teamId"
+    });
+  };
+
+  // Show confirmation modal
+  const handleSubmit = (e) => {
     e.preventDefault();
-    // Show confirmation modal instead of submitting directly
     setShowConfirmation(true);
   };
 
+  // Confirm submission → POST to backend
   const confirmSubmit = async () => {
     try {
-      const response = await fetch(
+      const response = await axios.post(
         "http://localhost:5000/trainingSchedule/training-schedule",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
+        formData
       );
+      console.log("Training added:", response.data);
 
-      const data = await response.json();
+      setShowSuccess(true);
+      setShowConfirmation(false);
 
-      if (response.ok) {
-        // Show success modal instead of alert
-        setShowSuccess(true);
-        setShowConfirmation(false);
-        
-        // Reset form
-        setFormData({
-          title: "",
-          date: "",
-          startTime: "",
-          endTime: "",
-          location: "",
-          coach: "",
-          focusAreas: "",
-          teamId: id,
-        });
-      } else {
-        alert(`❌ Failed: ${data.message}`);
-        setShowConfirmation(false);
-      }
+      // Reset form
+      setFormData({
+        title: "",
+        date: "",
+        startTime: "",
+        endTime: "",
+        location: "",
+        coach: "",
+        focusAreas: "",
+        teamId: id,
+        id: "",
+      });
+
+      if (onSubmit) onSubmit(formData);
     } catch (error) {
-      console.error("Network error:", error);
-      alert("❌ Network error. Please try again.");
+      console.error("Failed to submit training:", error);
+      alert("❌ Error adding training schedule.");
       setShowConfirmation(false);
     }
   };
 
-  const cancelSubmit = () => {
-    setShowConfirmation(false);
-  };
+  const cancelSubmit = () => setShowConfirmation(false);
 
   const closeSuccessModal = () => {
     setShowSuccess(false);
@@ -85,6 +132,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
       coach: "",
       focusAreas: "",
       teamId: id,
+      id: "",
     });
     onClose();
   };
@@ -93,10 +141,9 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
 
   return (
     <>
-      {/* Main Training Modal */}
+      {/* Main Modal */}
       <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
         <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
-          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Add Training Schedule</h2>
             <button
@@ -107,8 +154,29 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
             </button>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Team Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Select Team
+              </label>
+
+              <select
+                value={selectedTeam?.id || ""}
+                onChange={handleTeamSelect}
+                required
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              >
+                <option value="">-- Select a team --</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.teamName.toUpperCase()} ({team.sport.toUpperCase()}) -{" "}
+                    {playersByTeam[team.id]?.length || 0} players
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -121,11 +189,11 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                 onChange={handleChange}
                 placeholder="e.g., Physical Training"
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </div>
 
-            {/* 📅 Date Picker */}
+            {/* Date */}
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Date
@@ -136,7 +204,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                 value={formData.date}
                 onChange={handleChange}
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </div>
 
@@ -152,7 +220,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                   value={formData.startTime}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                 />
               </div>
               <div>
@@ -165,7 +233,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                   value={formData.endTime}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
                 />
               </div>
             </div>
@@ -182,7 +250,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                 onChange={handleChange}
                 placeholder="e.g., Gym / Main Court"
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </div>
 
@@ -198,7 +266,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                 onChange={handleChange}
                 placeholder="e.g., Coach Mike"
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </div>
 
@@ -211,11 +279,11 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                 name="focusAreas"
                 value={formData.focusAreas}
                 onChange={handleChange}
-                placeholder="Separate by commas, e.g., Shooting, Dribbling, Passing"
+                placeholder="e.g., Shooting, Dribbling"
                 required
                 rows="3"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              ></textarea>
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              />
             </div>
 
             {/* Buttons */}
@@ -223,13 +291,13 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium"
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 font-medium"
+                className="px-4 py-2 rounded-md bg-blue-600 text-white"
               >
                 Save Schedule
               </button>
@@ -243,36 +311,36 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[60]">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-blue-600 text-xl">✓</span>
-              </div>
-              
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-gray-800">
                 Confirm Training Schedule
               </h3>
-              
-              <p className="text-gray-600 mb-2">
-                Are you sure you want to add this training schedule?
-              </p>
-              
-              <div className="bg-gray-50 p-3 rounded-lg mb-4 text-sm">
-                <p><strong>Title:</strong> {formData.title}</p>
-                <p><strong>Date:</strong> {formData.date}</p>
-                <p><strong>Time:</strong> {formData.startTime} - {formData.endTime}</p>
-                <p><strong>Coach:</strong> {formData.coach}</p>
-                <p><strong>Location:</strong> {formData.location}</p>
+
+              <div className="mt-3 bg-gray-100 p-3 rounded text-sm">
+                <p>
+                  <strong>Team:</strong> {selectedTeam?.teamName}
+                </p>
+                <p>
+                  <strong>Title:</strong> {formData.title}
+                </p>
+                <p>
+                  <strong>Date:</strong> {formData.date}
+                </p>
+                <p>
+                  <strong>Time:</strong> {formData.startTime} -{" "}
+                  {formData.endTime}
+                </p>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 mt-4">
                 <button
                   onClick={cancelSubmit}
-                  className="flex-1 bg-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-400 transition font-medium"
+                  className="flex-1 bg-gray-300 rounded py-2"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmSubmit}
-                  className="flex-1 bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition font-medium"
+                  className="flex-1 bg-blue-600 text-white rounded py-2"
                 >
                   Confirm
                 </button>
@@ -285,29 +353,18 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
       {/* Success Modal */}
       {showSuccess && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[70]">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-green-600 text-2xl">✓</span>
-              </div>
-              
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Success!
-              </h3>
-              
-              <p className="text-gray-600 mb-2">
-                Training schedule has been successfully added.
-              </p>
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center">
+            <h3 className="text-lg font-bold text-green-600">Success!</h3>
+            <p className="text-gray-600 mt-2">
+              Training schedule has been added.
+            </p>
 
-              <div className="mt-6">
-                <button
-                  onClick={closeSuccessModal}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
+            <button
+              onClick={closeSuccessModal}
+              className="mt-5 bg-blue-600 text-white px-6 py-2 rounded"
+            >
+              Continue
+            </button>
           </div>
         </div>
       )}
