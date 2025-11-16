@@ -1,10 +1,10 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
 import TournamentModal from "./tournamentModal";
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useParams } from "react-router-dom";
 
 function AdminTournament() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -15,14 +15,15 @@ function AdminTournament() {
   // 📝 For Set Schedule Modal
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-  const [isScheduleConfirmationOpen, setIsScheduleConfirmationOpen] = useState(false);
+  const [isScheduleConfirmationOpen, setIsScheduleConfirmationOpen] =
+    useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [scheduleForm, setScheduleForm] = useState({
     date: "",
     startTime: "",
     endTime: "",
     opponent: "",
-    teamId: id,
+    teamId: "",
   });
 
   // ✅ Fetch tournaments from backend (with schedules)
@@ -59,16 +60,21 @@ function AdminTournament() {
 
   const confirmScheduleSubmit = async () => {
     try {
+      // ✅ Prepare payload
+      const payload = {
+        ...scheduleForm,
+        teamId: selectedTournament.id, // ensure using tournament ID
+      };
+
+      console.log("📤 Sending Schedule to backend:", payload); // <-- log here
+
       await axios.post(
         `http://localhost:5000/tournament/tournaments/${selectedTournament.id}/schedule`,
-        {
-          ...scheduleForm,
-          teamId: id,
-        }
+        payload
       );
 
       setIsSuccessModalOpen(true);
-      
+
       fetchTournaments();
       setIsScheduleConfirmationOpen(false);
       setScheduleForm({
@@ -76,7 +82,7 @@ function AdminTournament() {
         startTime: "",
         endTime: "",
         opponent: "",
-        teamId: id,
+        teamId: selectedTournament.id,
       });
       setSelectedTournament(null);
     } catch (error) {
@@ -173,10 +179,11 @@ function AdminTournament() {
                   tournament={tournament}
                   onSetSchedule={() => {
                     setSelectedTournament(tournament);
+                    console.log("✅ Selected Tournament ID:", tournament.id); // 👈 log here
                     setIsScheduleModalOpen(true);
                   }}
-                  filterStatus={filterStatus} // 👈 add this
-                  userId={id} // 👈 and this
+                  filterStatus={filterStatus}
+                  userId={id}
                 />
               ))
             ) : (
@@ -304,20 +311,30 @@ function AdminTournament() {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-blue-600 text-xl">✓</span>
               </div>
-              
+
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 Confirm Schedule
               </h3>
-              
+
               <p className="text-gray-600 mb-2">
                 Are you sure you want to add this schedule?
               </p>
-              
+
               <div className="bg-gray-50 p-3 rounded-lg mb-4 text-sm">
-                <p><strong>Tournament:</strong> {selectedTournament.tournamentName}</p>
-                <p><strong>Date:</strong> {scheduleForm.date}</p>
-                <p><strong>Time:</strong> {scheduleForm.startTime} - {scheduleForm.endTime}</p>
-                <p><strong>Opponent:</strong> {scheduleForm.opponent}</p>
+                <p>
+                  <strong>Tournament:</strong>{" "}
+                  {selectedTournament.tournamentName}
+                </p>
+                <p>
+                  <strong>Date:</strong> {scheduleForm.date}
+                </p>
+                <p>
+                  <strong>Time:</strong> {scheduleForm.startTime} -{" "}
+                  {scheduleForm.endTime}
+                </p>
+                <p>
+                  <strong>Opponent:</strong> {scheduleForm.opponent}
+                </p>
               </div>
 
               <div className="flex gap-3">
@@ -347,11 +364,11 @@ function AdminTournament() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-green-600 text-2xl">✓</span>
               </div>
-              
+
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 Success!
               </h3>
-              
+
               <p className="text-gray-600 mb-2">
                 Schedule has been successfully added to the tournament.
               </p>

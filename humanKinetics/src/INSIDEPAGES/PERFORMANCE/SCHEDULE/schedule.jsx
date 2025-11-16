@@ -85,9 +85,9 @@ function Schedule() {
         );
         const trainingSchedules = trainingRes.data.schedules || [];
 
-        // Filter training schedules by teamId
+        // Filter training schedules by id
         const myTrainingSchedules = trainingSchedules.filter(
-          (sched) => sched.teamId === teamId
+          (sched) => sched.id === teamId
         );
 
         console.log("Filtered Training Schedules:", myTrainingSchedules);
@@ -100,19 +100,20 @@ function Schedule() {
           ? tournamentRes.data
           : tournamentRes.data?.tournaments || [];
 
-        // Filter tournament schedules by teamId
+        // Filter tournament schedules by id
         const myTournamentSchedules = [];
         tournaments.forEach((t) => {
-          t.schedules?.forEach((s) => {
-            if (s.teamId === teamId) {
+          // If the tournament id itself matches the teamId
+          if (t.id === teamId) {
+            t.schedules?.forEach((s) => {
               myTournamentSchedules.push({
                 ...s,
                 title: `${t.tournamentName} vs ${s.opponent}`,
                 location: t.location,
                 type: "Tournament",
               });
-            }
-          });
+            });
+          }
         });
 
         console.log("Filtered Tournament Schedules:", myTournamentSchedules);

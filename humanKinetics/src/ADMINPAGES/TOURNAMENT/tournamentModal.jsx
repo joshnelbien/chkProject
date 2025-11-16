@@ -1,9 +1,11 @@
-import { useState } from "react";
 import axios from "axios";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function TournamentModal({ isOpen, onClose, onSubmit }) {
-  const { id } = useParams();
+  const { id } = useParams(); // Admin/User ID
+  const [teams, setTeams] = useState([]);
+  const [playersByTeam, setPlayersByTeam] = useState({});
   const [formData, setFormData] = useState({
     tournamentName: "",
     sport: "",
@@ -11,22 +13,62 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
     startDate: "",
     endDate: "",
     teams: "",
+    id: "", // selected team
     teamId: id,
   });
   const [showConfirmation, setShowConfirmation] = useState(false);
 
+  // Fetch all teams for this admin/user
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/teams/getTeams/${id}`);
+        setTeams(res.data);
+
+        // Fetch players for each team
+        res.data.forEach((team) => fetchPlayersForTeam(team.id));
+      } catch (err) {
+        console.error("Error fetching teams:", err);
+      }
+    };
+    fetchTeams();
+  }, [id]);
+
+  // Fetch players for a team
+  const fetchPlayersForTeam = async (teamId) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/teams/player/${teamId}`);
+      setPlayersByTeam((prev) => ({ ...prev, [teamId]: res.data }));
+    } catch (err) {
+      console.error(`Error fetching players for team ${teamId}:`, err);
+    }
+  };
+
+  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Function to submit data to backend
-  const handleSubmit = async (e) => {
+  // Handle team selection
+  const handleTeamSelect = (e) => {
+    const selectedTeam = teams.find((t) => t.id === e.target.value);
+    setFormData({
+      ...formData,
+      id: e.target.value,
+      sport: selectedTeam?.sport || "",
+    });
+  };
+
+  // Show confirmation modal on submit
+  const handleSubmit = (e) => {
     e.preventDefault();
     setShowConfirmation(true);
   };
 
+  // Confirm submission and send POST request
   const confirmSubmit = async () => {
     try {
+      console.log("Submitting tournament:", formData);
       const response = await axios.post(
         "http://localhost:5000/tournament/tournaments",
         formData
@@ -35,18 +77,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
 
       if (onSubmit) onSubmit(formData); // optional callback
       setShowConfirmation(false);
-      onClose();
-      
-      // Reset form
-      setFormData({
-        tournamentName: "",
-        sport: "",
-        location: "",
-        startDate: "",
-        endDate: "",
-        teams: "",
-        teamId: id,
-      });
+      handleClose();
     } catch (error) {
       console.error("❌ Failed to submit tournament:", error);
       alert("Error adding tournament. Check the backend.");
@@ -54,9 +85,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
     }
   };
 
-  const cancelSubmit = () => {
-    setShowConfirmation(false);
-  };
+  const cancelSubmit = () => setShowConfirmation(false);
 
   const handleClose = () => {
     setFormData({
@@ -66,7 +95,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
       startDate: "",
       endDate: "",
       teams: "",
-      teamId: id,
+      id: "",
     });
     onClose();
   };
@@ -75,7 +104,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
 
   return (
     <>
-      {/* Main Tournament Modal */}
+      {/* Main Modal */}
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
           <div className="flex justify-between items-center mb-4">
@@ -89,6 +118,29 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Team Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Select Team
+              </label>
+              <select
+                name="id"
+                value={formData.id}
+                onChange={handleTeamSelect}
+                required
+                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+              >
+                <option value="">-- Select a team --</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.teamName.toUpperCase()} ({team.sport.toUpperCase()}) -{" "}
+                    {playersByTeam[team.id]?.length || 0} players
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Tournament Fields */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
                 Tournament Name
@@ -100,7 +152,6 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
                 onChange={handleChange}
                 required
                 className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                placeholder="e.g. Regional Basketball Championship"
               />
             </div>
 
@@ -115,7 +166,6 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
                 onChange={handleChange}
                 required
                 className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                placeholder="e.g. Basketball"
               />
             </div>
 
@@ -130,7 +180,6 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
                 onChange={handleChange}
                 required
                 className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                placeholder="e.g. Main Stadium"
               />
             </div>
 
@@ -175,7 +224,6 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
                 required
                 min="1"
                 className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-                placeholder="e.g. 12"
               />
             </div>
 
@@ -206,13 +254,18 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-blue-600 text-xl">✓</span>
               </div>
-              
+
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 Confirm Tournament Creation
               </h3>
-              
+
               <p className="text-gray-600 mb-6">
-                Are you sure you want to create the tournament "<strong>{formData.tournamentName}</strong>"?
+                Are you sure you want to create the tournament "
+                <strong>{formData.tournamentName}</strong>" for team "
+                <strong>
+                  {teams.find((t) => t.id === formData.id)?.teamName}
+                </strong>
+                "?
               </p>
 
               <div className="flex gap-3">

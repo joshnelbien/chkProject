@@ -17,10 +17,9 @@ function AdminSidebar() {
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
-  // ============================
+  // ==========================
   // FETCH COACH PROFILE
-  // ============================
-
+  // ==========================
   const fetchCoach = async () => {
     try {
       const res = await axios.get(
@@ -30,9 +29,7 @@ function AdminSidebar() {
       setCoach(data);
 
       if (data?.id && data?.profilePicture) {
-        setProfileSrc(
-          `http://localhost:5000/adminAccounts/coaches-photo/${data.id}`
-        );
+        setProfileSrc(`http://localhost:5000/adminAccounts/coach-photo/${data.id}`);
       } else {
         setProfileSrc("/lexi.jpg");
       }
@@ -46,9 +43,9 @@ function AdminSidebar() {
     if (id) fetchCoach();
   }, [id]);
 
-  // ============================
+  // ==========================
   // LOGOUT HANDLING
-  // ============================
+  // ==========================
   const handleLogoutClick = () => setShowLogoutModal(true);
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
@@ -56,12 +53,11 @@ function AdminSidebar() {
   };
   const handleCancelLogout = () => setShowLogoutModal(false);
 
-  // ============================
+  // ==========================
   // LOGOUT MODAL
-  // ============================
+  // ==========================
   const LogoutModal = () => {
     if (!showLogoutModal) return null;
-
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
@@ -81,17 +77,11 @@ function AdminSidebar() {
                 />
               </svg>
             </div>
-
-            <h3 className="text-lg font-bold text-gray-900 mb-2">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 mb-1">
-              Are you sure you want to logout?
-            </p>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Confirm Logout</h3>
+            <p className="text-gray-600 mb-1">Are you sure you want to logout?</p>
             <p className="text-gray-500 text-sm mb-6">
               You will need to sign in again to access the admin dashboard.
             </p>
-
             <div className="flex gap-3 w-full">
               <button
                 onClick={handleCancelLogout}
@@ -112,9 +102,9 @@ function AdminSidebar() {
     );
   };
 
-  // ============================
+  // ==========================
   // RENDER
-  // ============================
+  // ==========================
   return (
     <>
       {/* Mobile Header */}
@@ -154,10 +144,17 @@ function AdminSidebar() {
           </p>
 
           <p className="text-xs text-gray-300">
-            {coach?.sport ? coach.sport.toUpperCase() : "COACH"}
+            {coach?.sports ? coach.sports.toUpperCase() : "COACH"}
           </p>
 
-          {/* NEW: Manage Account button */}
+          <div
+            className={`mt-2 w-fit px-4 py-1 rounded-full text-xs font-semibold border 
+            ${coach?.isVerified ? "border-green-600 text-green-700 bg-green-50" : "border-red-600 text-red-700 bg-red-50"}`}
+          >
+            {coach?.isVerified ? "Email Verified" : "Email Not Verified"}
+          </div>
+
+          {/* Manage Account */}
           <button
             onClick={() => setManageAccountOpen(true)}
             className="mt-3 bg-white text-green-800 font-semibold text-xs px-4 py-1.5 rounded-lg shadow hover:bg-gray-200 transition"
@@ -166,7 +163,6 @@ function AdminSidebar() {
           </button>
         </div>
 
-        {/* Divider */}
         <hr className="my-4 border-gray-400/40 mx-3" />
 
         {/* MENU SECTIONS */}
@@ -207,9 +203,7 @@ function AdminSidebar() {
 function SidebarSection({ title, children }) {
   return (
     <div className="mb-4">
-      {title && (
-        <h2 className="uppercase text-gray-300 text-sm mb-2 pl-2">{title}</h2>
-      )}
+      {title && <h2 className="uppercase text-gray-300 text-sm mb-2 pl-2">{title}</h2>}
       <ul className="space-y-1">{children}</ul>
     </div>
   );

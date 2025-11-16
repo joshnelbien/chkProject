@@ -192,14 +192,7 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer, onUpdateP
                       >
                         Update
                       </button>
-                      <button
-                        onClick={() =>
-                          alert("Performance feature coming soon!")
-                        }
-                        className="px-3 py-1 text-xs bg-green-600 text-white rounded-full hover:bg-green-700"
-                      >
-                        Performance
-                      </button>
+
                     </div>
                   </div>
                 ))}

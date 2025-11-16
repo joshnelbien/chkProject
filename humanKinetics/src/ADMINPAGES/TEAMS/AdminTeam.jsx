@@ -100,14 +100,14 @@ function AdminTeam() {
           </div>
 
           {/* Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
             <OverviewCard label="Total Teams" value={teams.length} />
             <OverviewCard
               label="Total Players"
               value={Object.values(playersByTeam).flat().length}
             />
-            <OverviewCard label="Active Sports" value="3" />
-            <OverviewCard label="Upcoming Matches" value="2" />
+
+    
           </div>
 
           {/* Teams Section */}

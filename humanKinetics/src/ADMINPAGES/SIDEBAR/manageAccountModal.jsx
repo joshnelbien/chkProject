@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
+import { Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function ManageAccountModal({ open, onClose, id }) {
@@ -118,16 +119,14 @@ export default function ManageAccountModal({ open, onClose, id }) {
         {/* ---------------- CONTENT ---------------- */}
         <div className="p-8">
           {loading ? (
-            <>
-              <div className="w-full text-center py-16">
-                <div className="loader mx-auto"></div>
-                <p className="mt-4 text-gray-600">Loading profile...</p>
-              </div>
-            </>
+            <div className="w-full text-center py-16">
+              <div className="loader mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading profile...</p>
+            </div>
           ) : (
             <>
               {/* PROFILE SECTION */}
-              <div className="flex items-center gap-8 mb-10">
+              <div className="flex flex-col items-center gap-6 mb-10">
                 {/* IMAGE */}
                 <div className="relative">
                   <img
@@ -136,8 +135,8 @@ export default function ManageAccountModal({ open, onClose, id }) {
                     alt="Profile"
                   />
 
-                  <label className="absolute bottom-0 right-0 bg-green-700 text-xs text-white px-3 py-1 rounded-full cursor-pointer hover:bg-green-800">
-                    Change
+                  <label className="absolute bottom-0 right-0 bg-green-700 p-2 rounded-full cursor-pointer hover:bg-green-800">
+                    <Pencil className="w-4 h-4 text-white" />
                     <input
                       type="file"
                       onChange={handlePhoto}
@@ -147,7 +146,7 @@ export default function ManageAccountModal({ open, onClose, id }) {
                 </div>
 
                 {/* INFO */}
-                <div className="flex-1">
+                <div className="text-center">
                   <p className="text-xl font-semibold">
                     {coach?.firstName} {coach?.lastName}
                   </p>
@@ -157,11 +156,10 @@ export default function ManageAccountModal({ open, onClose, id }) {
                   </p>
 
                   <div
-                    className={`mt-2 w-fit px-4 py-1 rounded-full text-xs font-semibold border 
-                    ${
-                      coach?.isVerified
-                        ? "border-green-600 text-green-700 bg-green-50"
-                        : "border-red-600 text-red-700 bg-red-50"
+                    className={`mt-2 inline-block px-4 py-1 rounded-full text-xs font-semibold border 
+                    ${coach?.isVerified
+                      ? "border-green-600 text-green-700 bg-green-50"
+                      : "border-red-600 text-red-700 bg-red-50"
                     }`}
                   >
                     {coach?.isVerified ? "Email Verified" : "Email Not Verified"}
@@ -171,7 +169,7 @@ export default function ManageAccountModal({ open, onClose, id }) {
 
               {/* ---------------- FORM FIELDS ---------------- */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Generate small inputs */}
+                {/* Small inputs */}
                 {[
                   ["lastName", "Last Name"],
                   ["firstName", "First Name"],
@@ -182,7 +180,6 @@ export default function ManageAccountModal({ open, onClose, id }) {
                     <label className="text-sm font-semibold text-gray-700">
                       {label}
                     </label>
-
                     <input
                       name={name}
                       value={formData[name] || ""}
@@ -192,7 +189,7 @@ export default function ManageAccountModal({ open, onClose, id }) {
                   </div>
                 ))}
 
-                {/* Generate textareas */}
+                {/* Textareas */}
                 {[
                   ["experience", "Experience"],
                   ["education", "Education"],
@@ -200,24 +197,19 @@ export default function ManageAccountModal({ open, onClose, id }) {
                   ["achievements", "Achievements"],
                 ].map(([name, label]) => (
                   <div key={name} className="md:col-span-2">
-                    <label className="text-sm font-semibold text-gray-700">
-                      {label}
-                    </label>
-
+                    <label className="text-sm font-semibold text-gray-700">{label}</label>
                     <textarea
                       name={name}
                       value={formData[name] || ""}
                       onChange={handleChange}
                       className="w-full p-3 border rounded-lg mt-1 h-24 focus:ring-2 focus:ring-green-600 outline-none"
-                    ></textarea>
+                    />
                   </div>
                 ))}
 
                 {/* Email */}
                 <div>
-                  <label className="text-sm font-semibold text-gray-700">
-                    Email
-                  </label>
+                  <label className="text-sm font-semibold text-gray-700">Email</label>
                   <input
                     name="email"
                     value={formData.email || ""}
@@ -228,7 +220,7 @@ export default function ManageAccountModal({ open, onClose, id }) {
               </div>
 
               {/* ---------------- FOOTER BUTTONS ---------------- */}
-              <div className="flex justify-end gap-3 mt-10">
+              <div className="flex justify-center gap-3 mt-10">
                 <button
                   onClick={onClose}
                   className="px-6 py-2 border rounded-lg text-gray-700 hover:bg-gray-100"
