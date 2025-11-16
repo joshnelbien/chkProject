@@ -1,15 +1,52 @@
-import { useState } from "react";
-import { NavLink, useParams, useNavigate } from "react-router-dom";
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+import axios from "axios";
 import { Menu, X } from "lucide-react"; // for toggle icons
+import { useEffect, useState } from "react";
+
+import { NavLink, useNavigate, useParams } from "react-router-dom";
+
+
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
+
+  const [coach, setCoach] = useState();
+  const [profileSrc, setProfileSrc] = useState("/lexi.jpg");
+
   const navigate = useNavigate();
+
 
   // ✅ Get the ID from the URL (e.g., /admin-overview/:id)
   const { id } = useParams();
+
+  const fetchPlayer = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/adminAccount/coach-profile/${id}`
+      );
+      const data = res.data;
+      setCoach(data);
+
+      // ✅ If a profile picture exists, use backend image route
+      if (data?.id && data?.profilePicture) {
+        setProfileSrc(
+          `http://localhost:5000/adminAccount/coach-photo/${data.id}`
+        );
+      } else {
+        setProfileSrc("/lexi.jpg");
+      }
+    } catch (err) {
+      console.error("Error fetching player:", err);
+      setProfileSrc("/lexi.jpg");
+    }
+  };
+
+  useEffect(() => {
+    if (id) fetchPlayer();
+  }, [id]);
 
   // ✅ Handle logout confirmation
   const handleLogoutClick = () => {
@@ -80,6 +117,7 @@ function Sidebar() {
       </div>
     );
   };
+
 
   return (
     <>

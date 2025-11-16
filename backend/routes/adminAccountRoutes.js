@@ -3,10 +3,13 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const multer = require("multer");
 const { Op } = require("sequelize");
 const Admin = require("../db/model/adminAccountDB");
 require("dotenv").config();
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 // ✅ Setup Email Transporter
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -114,6 +117,79 @@ router.post("/admin-register", async (req, res) => {
     res.status(500).json({ message: "Server error during registration." });
   }
 });
+
+router.get("/coaches", async (req, res) => {
+  try {
+    const coaches = await Admin.findAll({});
+
+    res.json(coaches);
+  } catch (error) {
+    console.error("Error fetching coaches:", error);
+    res.status(500).json({ error: "Server error fetching coaches." });
+  }
+});
+
+router.get("/coaches-profile/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const coach = await Admin.findByPk(id);
+
+    if (!coach) {
+      return res.status(404).json({ error: "coach not found" });
+    }
+
+    res.json(coach);
+  } catch (error) {
+    console.error("Error fetching coach:", error);
+    res.status(500).json({ error: "Server error fetching coach." });
+  }
+});
+
+router.put(
+  "/coaches-update/:id",
+  upload.single("profilePicture"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      const coach = await Admin.findByPk(id);
+      if (!coach) {
+        return res.status(404).json({ message: "coach not found" });
+      }
+
+      const updatedData = { ...req.body };
+      if (req.file) {
+        updatedData.profilePicture = req.file.buffer;
+      }
+      await coach.update(updatedData);
+
+      res.status(200).json({
+        message: "coach updated successfully",
+        coach,
+      });
+    } catch (error) {
+      console.error("Error updating coach:", error);
+      res.status(500).json({
+        message: "Failed to update coach",
+        error: error.message,
+      });
+    }
+  }
+);
+
+router.get("/coach-photo/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const coach = await Admin.findByPk(id);
+
+    res.setHeader("Content-Type", "image/jpeg");
+    res.send(coach.profilePicture);
+  } catch (error) {
+    console.error("Error fetching profile picture:", error);
+    res.status(500).send("Server error fetching profile picture.");
+  }
+});
+
 
 // ✅ Email Verification Route
 router.get("/admin-verify-email", async (req, res) => {
