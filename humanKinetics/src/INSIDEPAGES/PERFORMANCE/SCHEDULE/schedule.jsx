@@ -12,9 +12,34 @@ function Schedule() {
   const [searchTerm, setSearchTerm] = useState("");
   const { id } = useParams(); // get from URL
 
-  const formatDate = (d) =>
-    d ? new Date(d).toISOString().split("T")[0] : null;
+  const handleTimeIn = async (scheduleId) => {
+    console.log("Time In for schedule:", scheduleId);
 
+    // Example request:
+    // await axios.post("http://localhost:5000/attendance/time-in", {
+    //   userId: id,
+    //   scheduleId,
+    // });
+  };
+
+  const handleTimeOut = async (scheduleId) => {
+    console.log("Time Out for schedule:", scheduleId);
+
+    // Example request:
+    // await axios.post("http://localhost:5000/attendance/time-out", {
+    //   userId: id,
+    //   scheduleId,
+    // });
+  };
+
+  const formatDate = (d) => {
+    if (!d) return null;
+    const date = new Date(d);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
@@ -87,7 +112,7 @@ function Schedule() {
 
         // Filter training schedules by id
         const myTrainingSchedules = trainingSchedules.filter(
-          (sched) => sched.id === teamId
+          (sched) => sched.teamSchedule === teamId
         );
 
         console.log("Filtered Training Schedules:", myTrainingSchedules);
@@ -103,17 +128,16 @@ function Schedule() {
         // Filter tournament schedules by id
         const myTournamentSchedules = [];
         tournaments.forEach((t) => {
-          // If the tournament id itself matches the teamId
-          if (t.id === teamId) {
-            t.schedules?.forEach((s) => {
+          t.schedules?.forEach((s) => {
+            if (String(s.teamSchedule) === String(teamId)) {
               myTournamentSchedules.push({
                 ...s,
                 title: `${t.tournamentName} vs ${s.opponent}`,
                 location: t.location,
                 type: "Tournament",
               });
-            });
-          }
+            }
+          });
         });
 
         console.log("Filtered Tournament Schedules:", myTournamentSchedules);
@@ -253,6 +277,7 @@ function Schedule() {
             <h2 className="text-xl font-bold text-green-700 mb-3">
               My Schedule
             </h2>
+
             {myTeamSchedules.length === 0 ? (
               <p className="text-gray-500">
                 No schedule available for your team.
@@ -267,11 +292,31 @@ function Schedule() {
                     <p className="font-semibold text-green-800">
                       {sched.title}
                     </p>
+                    <p className="text-sm font-medium text-blue-700">
+                      {sched.type}
+                    </p>
                     <p className="text-gray-700">📅 {sched.date}</p>
                     <p className="text-gray-700">
                       🕒 {sched.startTime} - {sched.endTime}
                     </p>
                     <p className="text-gray-700">📍 {sched.location}</p>
+
+                    {/* Time In / Time Out Buttons */}
+                    <div className="mt-3 flex gap-3">
+                      <button
+                        onClick={() => handleTimeIn(sched.id)}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                      >
+                        Time In
+                      </button>
+
+                      <button
+                        onClick={() => handleTimeOut(sched.id)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                      >
+                        Time Out
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

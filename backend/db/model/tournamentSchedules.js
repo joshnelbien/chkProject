@@ -7,7 +7,13 @@ const Tournament = sequelize.define("tournaments", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-
+  teamSchedule:{
+    type: DataTypes.STRING,
+  },
+  type:{
+  type: DataTypes.STRING,
+  defaultValue:"tournament",
+  },
   tournamentName: {
     type: DataTypes.STRING,
     allowNull: false,

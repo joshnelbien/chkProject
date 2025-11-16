@@ -9,6 +9,9 @@ const TournamentSchedule = sequelize.define("tournament_schedules", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
+  teamSchedule:{
+    type: DataTypes.STRING,
+  },
   date: { type: DataTypes.DATEONLY, allowNull: false },
   startTime: { type: DataTypes.STRING, allowNull: false },
   endTime: { type: DataTypes.STRING, allowNull: false },

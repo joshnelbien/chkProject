@@ -18,7 +18,14 @@ router.post("/training-schedule", async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!title || !startTime || !endTime || !location || !coach || !focusAreas) {
+    if (
+      !title ||
+      !startTime ||
+      !endTime ||
+      !location ||
+      !coach ||
+      !focusAreas
+    ) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -32,7 +39,7 @@ router.post("/training-schedule", async (req, res) => {
       focusAreas,
       date,
       teamId,
-       id, // 👈 give it a proper field name
+      teamSchedule: id, // 👈 give it a proper field name
     });
 
     return res.status(201).json({
@@ -44,7 +51,6 @@ router.post("/training-schedule", async (req, res) => {
     res.status(500).json({ message: "Server error. Please try again." });
   }
 });
-
 
 router.get("/training-schedule", async (req, res) => {
   try {

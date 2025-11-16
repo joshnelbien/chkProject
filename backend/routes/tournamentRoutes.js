@@ -43,6 +43,7 @@ router.post("/tournaments/:id/schedule", async (req, res) => {
 
 const schedule = await TournamentSchedule.create({
   tournamentId: id,
+  teamSchedule: id,
   teamId: teamId, // <-- use the value sent from frontend
   date,
   startTime,
