@@ -7,12 +7,12 @@ const Tournament = sequelize.define("tournaments", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  teamSchedule:{
+  teamSchedule: {
     type: DataTypes.STRING,
   },
-  type:{
-  type: DataTypes.STRING,
-  defaultValue:"tournament",
+  type: {
+    type: DataTypes.STRING,
+    defaultValue: "tournament",
   },
   tournamentName: {
     type: DataTypes.STRING,
@@ -49,6 +49,16 @@ const Tournament = sequelize.define("tournaments", {
   isCompleted: {
     type: DataTypes.BOOLEAN,
     defaultValue: false, // 👈 You can update this after the tournament ends
+  },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: "upcoming",
+  },
+  homeScore: {
+    type: DataTypes.STRING,
+  },
+  opponentScore: {
+    type: DataTypes.STRING,
   },
 });
 
