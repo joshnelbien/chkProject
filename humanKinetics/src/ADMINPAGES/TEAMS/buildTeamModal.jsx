@@ -11,9 +11,26 @@ function BuildTeamModal({ open, onClose, onTeamCreated }) {
     coach: "",
     description: "",
   });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdTeamData, setCreatedTeamData] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setFormData({
+      teamName: "",
+      sport: "",
+      coach: "",
+      description: "",
+    });
+    // Call onTeamCreated with the created team data
+    if (createdTeamData) {
+      onTeamCreated(createdTeamData);
+    }
+    onClose();
   };
 
   const handleSubmit = async (e) => {
@@ -24,17 +41,67 @@ function BuildTeamModal({ open, onClose, onTeamCreated }) {
         formData
       );
       console.log("✅ Team Created:", res.data);
-      onTeamCreated(res.data);
-      setFormData({
-        teamName: "",
-        sport: "",
-        coach: "",
-        description: "",
-      });
-      onClose();
+      
+      // Store the created team data
+      setCreatedTeamData(res.data);
+      
+      // Show success modal
+      setShowSuccessModal(true);
+      
     } catch (err) {
       console.error("❌ Error creating team:", err);
     }
+  };
+
+  const SuccessModal = () => {
+    if (!showSuccessModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60 p-4">
+        <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">Team Created Successfully!</h3>
+            <button
+              onClick={handleCloseSuccessModal}
+              className="text-gray-400 hover:text-gray-600 transition duration-150"
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <svg 
+                className="w-8 h-8 text-green-600" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth="2" 
+                  d="M5 13l4 4L19 7" 
+                />
+              </svg>
+            </div>
+            <p className="text-gray-600 mb-2">
+              Your team "{formData.teamName}" has been created.
+            </p>
+            <p className="text-gray-500 text-sm mb-6">
+              You can now add athletes to this team.
+            </p>
+
+            <button
+              onClick={handleCloseSuccessModal}
+              className="w-full bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-green-600 transition duration-150 focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (!open) return null;
@@ -129,6 +196,9 @@ function BuildTeamModal({ open, onClose, onTeamCreated }) {
           </div>
         </form>
       </div>
+
+      {/* Success Modal */}
+      <SuccessModal />
     </div>
   );
 }

@@ -15,6 +15,8 @@ function AdminTournament() {
   // 📝 For Set Schedule Modal
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [isScheduleConfirmationOpen, setIsScheduleConfirmationOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [scheduleForm, setScheduleForm] = useState({
     date: "",
     startTime: "",
@@ -52,6 +54,10 @@ function AdminTournament() {
       return;
     }
 
+    setIsScheduleConfirmationOpen(true);
+  };
+
+  const confirmScheduleSubmit = async () => {
     try {
       await axios.post(
         `http://localhost:5000/tournament/tournaments/${selectedTournament.id}/schedule`,
@@ -61,9 +67,10 @@ function AdminTournament() {
         }
       );
 
-      alert("✅ Schedule saved successfully!");
+      setIsSuccessModalOpen(true);
+      
       fetchTournaments();
-      setIsScheduleModalOpen(false);
+      setIsScheduleConfirmationOpen(false);
       setScheduleForm({
         date: "",
         startTime: "",
@@ -75,8 +82,21 @@ function AdminTournament() {
     } catch (error) {
       console.error("❌ Failed to save schedule:", error);
       alert("Failed to save schedule");
+      setIsScheduleConfirmationOpen(false);
     }
   };
+
+  // ✅ Cancel Schedule Submission
+  const cancelScheduleSubmit = () => {
+    setIsScheduleConfirmationOpen(false);
+  };
+
+  // ✅ Close Success Modal
+  const closeSuccessModal = () => {
+    setIsSuccessModalOpen(false);
+    setIsScheduleModalOpen(false);
+  };
+
   const filteredTournaments = tournaments.filter((t) => {
     const today = new Date();
     const startDate = new Date(t.startDate);
@@ -256,7 +276,14 @@ function AdminTournament() {
                 />
               </div>
 
-              <div className="flex justify-end mt-4">
+              <div className="flex gap-3 justify-end mt-4">
+                <button
+                  type="button"
+                  onClick={() => setIsScheduleModalOpen(false)}
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
@@ -265,6 +292,79 @@ function AdminTournament() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 📝 Schedule Confirmation Modal */}
+      {isScheduleConfirmationOpen && selectedTournament && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
+          <div className="bg-white w-full max-w-sm p-6 rounded-2xl shadow-lg">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-blue-600 text-xl">✓</span>
+              </div>
+              
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Confirm Schedule
+              </h3>
+              
+              <p className="text-gray-600 mb-2">
+                Are you sure you want to add this schedule?
+              </p>
+              
+              <div className="bg-gray-50 p-3 rounded-lg mb-4 text-sm">
+                <p><strong>Tournament:</strong> {selectedTournament.tournamentName}</p>
+                <p><strong>Date:</strong> {scheduleForm.date}</p>
+                <p><strong>Time:</strong> {scheduleForm.startTime} - {scheduleForm.endTime}</p>
+                <p><strong>Opponent:</strong> {scheduleForm.opponent}</p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelScheduleSubmit}
+                  className="flex-1 bg-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-400 transition font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmScheduleSubmit}
+                  className="flex-1 bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 transition font-medium"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ Success Modal */}
+      {isSuccessModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70]">
+          <div className="bg-white w-full max-w-sm p-6 rounded-2xl shadow-lg">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-green-600 text-2xl">✓</span>
+              </div>
+              
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Success!
+              </h3>
+              
+              <p className="text-gray-600 mb-2">
+                Schedule has been successfully added to the tournament.
+              </p>
+
+              <div className="mt-6">
+                <button
+                  onClick={closeSuccessModal}
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition font-medium"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

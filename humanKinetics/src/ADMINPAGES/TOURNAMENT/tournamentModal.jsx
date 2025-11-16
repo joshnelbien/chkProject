@@ -13,6 +13,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
     teams: "",
     teamId: id,
   });
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,7 +22,10 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
   // ✅ Function to submit data to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setShowConfirmation(true);
+  };
 
+  const confirmSubmit = async () => {
     try {
       const response = await axios.post(
         "http://localhost:5000/tournament/tournaments",
@@ -30,127 +34,205 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
       console.log("✅ Tournament added:", response.data);
 
       if (onSubmit) onSubmit(formData); // optional callback
+      setShowConfirmation(false);
       onClose();
+      
+      // Reset form
+      setFormData({
+        tournamentName: "",
+        sport: "",
+        location: "",
+        startDate: "",
+        endDate: "",
+        teams: "",
+        teamId: id,
+      });
     } catch (error) {
       console.error("❌ Failed to submit tournament:", error);
       alert("Error adding tournament. Check the backend.");
+      setShowConfirmation(false);
     }
+  };
+
+  const cancelSubmit = () => {
+    setShowConfirmation(false);
+  };
+
+  const handleClose = () => {
+    setFormData({
+      tournamentName: "",
+      sport: "",
+      location: "",
+      startDate: "",
+      endDate: "",
+      teams: "",
+      teamId: id,
+    });
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">🏀 Add Tournament</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-xl"
-          >
-            ×
-          </button>
+    <>
+      {/* Main Tournament Modal */}
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">🏀 Add Tournament</h2>
+            <button
+              onClick={handleClose}
+              className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Tournament Name
+              </label>
+              <input
+                type="text"
+                name="tournamentName"
+                value={formData.tournamentName}
+                onChange={handleChange}
+                required
+                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                placeholder="e.g. Regional Basketball Championship"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Sport
+              </label>
+              <input
+                type="text"
+                name="sport"
+                value={formData.sport}
+                onChange={handleChange}
+                required
+                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                placeholder="e.g. Basketball"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                required
+                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                placeholder="e.g. Main Stadium"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleChange}
+                  required
+                  className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  required
+                  className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                Number of Teams
+              </label>
+              <input
+                type="number"
+                name="teams"
+                value={formData.teams}
+                onChange={handleChange}
+                required
+                min="1"
+                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                placeholder="e.g. 12"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="flex-1 bg-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-400 transition font-medium"
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition font-medium"
+              >
+                Add Tournament
+              </button>
+            </div>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Tournament Name
-            </label>
-            <input
-              type="text"
-              name="tournamentName"
-              value={formData.tournamentName}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              placeholder="e.g. Regional Basketball Championship"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Sport
-            </label>
-            <input
-              type="text"
-              name="sport"
-              value={formData.sport}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              placeholder="e.g. Basketball"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Location
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              placeholder="e.g. Main Stadium"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Start Date
-              </label>
-              <input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
-                required
-                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                End Date
-              </label>
-              <input
-                type="date"
-                name="endDate"
-                value={formData.endDate}
-                onChange={handleChange}
-                required
-                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Number of Teams
-            </label>
-            <input
-              type="number"
-              name="teams"
-              value={formData.teams}
-              onChange={handleChange}
-              required
-              min="1"
-              className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              placeholder="e.g. 12"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition"
-          >
-            Add Tournament
-          </button>
-        </form>
       </div>
-    </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-2xl shadow-lg w-full max-w-sm p-6">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-blue-600 text-xl">✓</span>
+              </div>
+              
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Confirm Tournament Creation
+              </h3>
+              
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to create the tournament "<strong>{formData.tournamentName}</strong>"?
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelSubmit}
+                  className="flex-1 bg-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-400 transition font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmSubmit}
+                  className="flex-1 bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition font-medium"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

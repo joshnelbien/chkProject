@@ -2,7 +2,7 @@ import { useState } from "react";
 import AddPlayerModal from "./AddPlayerModal";
 import PlayersUpdate from "./update";
 
-function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
+function TeamDetailsModal({ open, onClose, team, players, onAddPlayer, onUpdatePlayer }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -17,12 +17,32 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
     const monthDiff = today.getMonth() - birthDate.getMonth();
     const dayDiff = today.getDate() - birthDate.getDate();
 
-    // If birthday hasn’t occurred yet this year, subtract 1
+    // If birthday hasn't occurred yet this year, subtract 1
     if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
       age--;
     }
 
     return age;
+  };
+
+  // Handle player update completion
+  const handlePlayerUpdate = () => {
+    // Call the parent component's refresh function
+    if (onUpdatePlayer) {
+      onUpdatePlayer();
+    }
+  };
+
+  // Handle opening update modal
+  const handleOpenUpdate = (player) => {
+    setSelectedPlayer(player);
+    setShowUpdateModal(true);
+  };
+
+  // Handle closing update modal
+  const handleCloseUpdate = () => {
+    setShowUpdateModal(false);
+    setSelectedPlayer(null);
   };
 
   if (!open || !team) return null;
@@ -167,10 +187,7 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
                     {/* Action Buttons */}
                     <div className="flex gap-2 mt-3">
                       <button
-                        onClick={() => {
-                          setSelectedPlayer(p);
-                          setShowUpdateModal(true);
-                        }}
+                        onClick={() => handleOpenUpdate(p)}
                         className="px-3 py-1 text-xs bg-green-600 text-white rounded-full hover:bg-green-700"
                       >
                         Update
@@ -207,20 +224,24 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer }) {
           </button>
         </div>
       </div>
+
+      {/* Update Player Modal */}
       {showUpdateModal && selectedPlayer && (
         <PlayersUpdate
           player={selectedPlayer}
-          onClose={() => setShowUpdateModal(false)}
+          onClose={handleCloseUpdate}
+          onUpdate={handlePlayerUpdate}
         />
       )}
-      {/* ✅ Player Selection Modal */}
+
+      {/* Add Player Modal */}
       {showAddModal && (
         <AddPlayerModal
-          onClose={() => setShowAddModal(false)} // ✅ fixed name
+          onClose={() => setShowAddModal(false)}
           teamId={team.id}
           onSelectPlayer={(player) => {
             setShowAddModal(false);
-            if (onAddPlayer) onAddPlayer(player); // ✅ trigger refresh
+            if (onAddPlayer) onAddPlayer(player); // trigger refresh
           }}
         />
       )}
