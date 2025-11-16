@@ -52,6 +52,14 @@ const Admin = sequelize.define(
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+   isSuperAdminVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+    profilePicture: {
+      type: DataTypes.BLOB("long"),
+      allowNull: true,
+    },
 
   },
   {

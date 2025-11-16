@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import { NavLink, useParams, useNavigate } from "react-router-dom";
+/* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
+import { useEffect, useState } from "react";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 
 function Sidebar({ isOpen }) {
   const { id } = useParams();

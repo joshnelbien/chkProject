@@ -1,13 +1,45 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
+import axios from "axios";
+import { Menu, X } from "lucide-react"; // for toggle icons
 import { useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
-import { Menu, X } from "lucide-react"; // for toggle icons
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
+  const [coach, setCoach] = useState();
+  const [profileSrc, setProfileSrc] = useState("/lexi.jpg");
 
   // ✅ Get the ID from the URL (e.g., /admin-overview/:id)
   const { id } = useParams();
+
+  const fetchPlayer = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/adminAccount/coach-profile/${id}`
+      );
+      const data = res.data;
+      setCoach(data);
+
+      // ✅ If a profile picture exists, use backend image route
+      if (data?.id && data?.profilePicture) {
+        setProfileSrc(
+          `http://localhost:5000/adminAccount/coach-photo/${data.id}`
+        );
+      } else {
+        setProfileSrc("/lexi.jpg");
+      }
+    } catch (err) {
+      console.error("Error fetching player:", err);
+      setProfileSrc("/lexi.jpg");
+    }
+  };
+
+  useEffect(() => {
+    if (id) fetchPlayer();
+  }, [id]);
 
   return (
     <>
