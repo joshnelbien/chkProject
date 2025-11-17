@@ -14,22 +14,12 @@ function Schedule() {
 
   const handleTimeIn = async (scheduleId) => {
     console.log("Time In for schedule:", scheduleId);
-
-    // Example request:
-    // await axios.post("http://localhost:5000/attendance/time-in", {
-    //   userId: id,
-    //   scheduleId,
-    // });
+    // await axios.post("http://localhost:5000/attendance/time-in", { userId: id, scheduleId });
   };
 
   const handleTimeOut = async (scheduleId) => {
     console.log("Time Out for schedule:", scheduleId);
-
-    // Example request:
-    // await axios.post("http://localhost:5000/attendance/time-out", {
-    //   userId: id,
-    //   scheduleId,
-    // });
+    // await axios.post("http://localhost:5000/attendance/time-out", { userId: id, scheduleId });
   };
 
   const formatDate = (d) => {
@@ -40,17 +30,14 @@ function Schedule() {
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
+
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        // Fetch training and tournament schedules
         const [trainingRes, tournamentRes] = await Promise.all([
           axios.get("http://localhost:5000/trainingSchedule/training-schedule"),
           axios.get("http://localhost:5000/tournament/tournaments-activities"),
         ]);
-
-        console.log("Training Response:", trainingRes.data); // Log full training data
-        console.log("Tournament Response:", tournamentRes.data); // Log tournaments
 
         const trainingSchedules = trainingRes.data.schedules || [];
         const tournaments = Array.isArray(tournamentRes.data)
@@ -95,29 +82,20 @@ function Schedule() {
 
     const fetchMyTeamSchedules = async () => {
       try {
-        // Get logged user details
         const res = await axios.get(
           `http://localhost:5000/userAccounts/players-profile/${id}`
         );
-
-        console.log("Player details:", res.data);
         const teamId = res.data.teamId;
-        console.log("Logged User Team ID:", teamId);
 
-        // Fetch all training schedules
+        // Training schedules
         const trainingRes = await axios.get(
           "http://localhost:5000/trainingSchedule/training-schedule"
         );
-        const trainingSchedules = trainingRes.data.schedules || [];
-
-        // Filter training schedules by id
-        const myTrainingSchedules = trainingSchedules.filter(
+        const myTrainingSchedules = (trainingRes.data.schedules || []).filter(
           (sched) => sched.teamSchedule === teamId
         );
 
-        console.log("Filtered Training Schedules:", myTrainingSchedules);
-
-        // Fetch all tournament schedules
+        // Tournament schedules
         const tournamentRes = await axios.get(
           "http://localhost:5000/tournament/tournaments-activities"
         );
@@ -125,7 +103,6 @@ function Schedule() {
           ? tournamentRes.data
           : tournamentRes.data?.tournaments || [];
 
-        // Filter tournament schedules by id
         const myTournamentSchedules = [];
         tournaments.forEach((t) => {
           t.schedules?.forEach((s) => {
@@ -140,15 +117,7 @@ function Schedule() {
           });
         });
 
-        console.log("Filtered Tournament Schedules:", myTournamentSchedules);
-
-        // Merge both training and tournament schedules
-        const combinedSchedules = [
-          ...myTrainingSchedules,
-          ...myTournamentSchedules,
-        ];
-
-        setMyTeamSchedules(combinedSchedules);
+        setMyTeamSchedules([...myTrainingSchedules, ...myTournamentSchedules]);
       } catch (err) {
         console.error("Error fetching team schedule:", err);
       }
@@ -158,7 +127,7 @@ function Schedule() {
     fetchMyTeamSchedules();
   }, [id]);
 
-  // CALENDAR GENERATION
+  // CALENDAR
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(
     new Date(today.getFullYear(), today.getMonth(), 1)
@@ -179,7 +148,7 @@ function Schedule() {
     setCurrentMonth(new Date(year, currentMonth.getMonth() + 1, 1));
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
       <Sidebar
         isOpen={sidebarOpen}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -192,9 +161,10 @@ function Schedule() {
       >
         <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 p-4 md:p-6 mt-16">
+        {/* Scrollable Main Content */}
+        <main className="flex-1 overflow-auto p-4 md:p-6 mt-16">
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div className=" top-0 bg-gray-100 z-10 flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 p-2 border-b">
             <div>
               <h1 className="text-2xl font-bold text-green-700">Schedule</h1>
               <p className="text-gray-500">Training & Events Calendar</p>
@@ -211,7 +181,7 @@ function Schedule() {
           </div>
 
           {/* Month Navigation */}
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4  top-16 bg-gray-100 z-10 p-2 border-b">
             <button
               onClick={handlePrev}
               className="px-3 py-1 bg-white shadow rounded-lg"
@@ -230,7 +200,7 @@ function Schedule() {
           </div>
 
           {/* Calendar */}
-          <div className="grid grid-cols-7 gap-px bg-gray-300 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-7 gap-px bg-gray-300 rounded-lg overflow-hidden mb-10">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
               <div
                 key={d}
@@ -273,7 +243,7 @@ function Schedule() {
           </div>
 
           {/* My Team Schedule */}
-          <div className="mt-10 p-5 bg-white shadow rounded-lg">
+          <div className="p-5 bg-white shadow rounded-lg mb-20">
             <h2 className="text-xl font-bold text-green-700 mb-3">
               My Schedule
             </h2>
@@ -284,47 +254,65 @@ function Schedule() {
               </p>
             ) : (
               <div className="space-y-4">
-                {myTeamSchedules.map((sched) => (
-                  <div
-                    key={sched.id}
-                    className="p-3 border rounded-lg bg-green-50"
-                  >
-                    <p className="font-semibold text-green-800">
-                      {sched.title}
-                    </p>
-                    <p className="text-sm font-medium text-blue-700">
-                      {sched.type}
-                    </p>
-                    <p className="text-gray-700">📅 {sched.date}</p>
-                    <p className="text-gray-700">
-                      🕒 {sched.startTime} - {sched.endTime}
-                    </p>
-                    <p className="text-gray-700">📍 {sched.location}</p>
+                {myTeamSchedules
+                  .filter((sched) => sched.status !== "Done")
+                  .map((sched) => (
+                    <div
+                      key={sched.id}
+                      className="p-3 border rounded-lg bg-green-50"
+                    >
+                      <p className="font-semibold text-green-800">
+                        {sched.status}
+                      </p>
+                      <p className="font-semibold text-green-800">
+                        {sched.title}
+                      </p>
+                      <p className="text-sm font-medium text-blue-700">
+                        {sched.type}
+                      </p>
+                      <p className="text-gray-700">📅 {sched.date}</p>
+                      <p className="text-gray-700">
+                        🕒 {sched.startTime} - {sched.endTime}
+                      </p>
+                      <p className="text-gray-700">📍 {sched.location}</p>
 
-                    {/* Time In / Time Out Buttons */}
-                    <div className="mt-3 flex gap-3">
-                      <button
-                        onClick={() => handleTimeIn(sched.id)}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                      >
-                        Time In
-                      </button>
+                      {/* Time In / Time Out Buttons */}
+                      <div className="mt-3 flex gap-3">
+                        <button
+                          onClick={() => handleTimeIn(sched.id)}
+                          disabled={sched.status === "Pending"}
+                          className={`px-4 py-2 rounded-lg text-white ${
+                            sched.status === "Pending"
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-green-600 hover:bg-green-700"
+                          }`}
+                        >
+                          Time In
+                        </button>
 
-                      <button
-                        onClick={() => handleTimeOut(sched.id)}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                      >
-                        Time Out
-                      </button>
+                        <button
+                          onClick={() => handleTimeOut(sched.id)}
+                          disabled={sched.status === "Pending"}
+                          className={`px-4 py-2 rounded-lg text-white ${
+                            sched.status === "Pending"
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-red-600 hover:bg-red-700"
+                          }`}
+                        >
+                          Time Out
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
         </main>
 
-        <Footer />
+        {/* Fixed Footer */}
+        <div className="flex-shrink-0">
+          <Footer />
+        </div>
       </div>
     </div>
   );
