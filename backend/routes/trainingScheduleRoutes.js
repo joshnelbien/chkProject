@@ -8,6 +8,7 @@ router.post("/training-schedule", async (req, res) => {
     const {
       title,
       startTime,
+      workoutDetails,
       endTime,
       location,
       coach,
@@ -33,6 +34,7 @@ router.post("/training-schedule", async (req, res) => {
     const newSchedule = await TrainingSchedule.create({
       title,
       startTime,
+      workoutDetails,
       endTime,
       location,
       coach,
@@ -52,9 +54,13 @@ router.post("/training-schedule", async (req, res) => {
   }
 });
 
+// GET all training schedules
 router.get("/training-schedule", async (req, res) => {
   try {
-    const schedules = await TrainingSchedule.findAll();
+    const schedules = await TrainingSchedule.findAll({
+      order: [["date", "ASC"]],
+    });
+
     return res.status(200).json({
       message: "✅ Training schedules fetched successfully.",
       schedules,
@@ -62,6 +68,78 @@ router.get("/training-schedule", async (req, res) => {
   } catch (error) {
     console.error("❌ Error fetching training schedules:", error);
     res.status(500).json({ message: "Server error. Please try again." });
+  }
+});
+
+// GET schedules grouped by day (for Weekly Schedule UI)
+router.get("/training-schedule/by-day", async (req, res) => {
+  try {
+    const schedules = await TrainingSchedule.findAll();
+
+    const grouped = {};
+
+    schedules.forEach((item) => {
+      const dayName = new Date(item.date).toLocaleString("en-US", {
+        weekday: "long",
+      });
+
+      if (!grouped[dayName]) grouped[dayName] = [];
+      grouped[dayName].push(item);
+    });
+
+    return res.status(200).json({
+      message: "✅ Weekly schedule fetched.",
+      weeklySchedule: grouped,
+    });
+  } catch (error) {
+    console.error("❌ Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// GET schedules grouped by workout type (Conditioning / Strength / Skills)
+router.get("/training-schedule/by-type", async (req, res) => {
+  try {
+    const schedules = await TrainingSchedule.findAll();
+
+    const grouped = {
+      Conditioning: [],
+      "Strength Training": [],
+      "Skills Development": [],
+    };
+
+    schedules.forEach((item) => {
+      if (grouped[item.workoutDetails]) {
+        grouped[item.workoutDetails].push(item);
+      }
+    });
+
+    return res.status(200).json({
+      message: "✅ Workout details grouped fetched.",
+      workoutDetails: grouped,
+    });
+  } catch (error) {
+    console.error("❌ Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// GET schedules for a specific team
+router.get("/training-schedule/team/:teamId", async (req, res) => {
+  try {
+    const { teamId } = req.params;
+
+    const schedules = await TrainingSchedule.findAll({
+      where: { teamId },
+    });
+
+    return res.status(200).json({
+      message: "Team schedules loaded.",
+      schedules,
+    });
+  } catch (error) {
+    console.error("❌ Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

@@ -1,3 +1,4 @@
+// models/TrainingSchedule.js
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
 
@@ -8,20 +9,29 @@ const TrainingSchedule = sequelize.define("TrainingSchedule", {
     autoIncrement: true,
   },
 
+  workoutDetails: {
+    type: DataTypes.STRING,
+  },
+
   teamSchedule: {
     type: DataTypes.STRING,
   },
+
   type: {
     type: DataTypes.STRING,
     defaultValue: "training",
   },
+
   title: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+
   date: {
     type: DataTypes.STRING,
+    allowNull: false,
   },
+
   startTime: {
     type: DataTypes.TIME,
     allowNull: false,
@@ -43,10 +53,12 @@ const TrainingSchedule = sequelize.define("TrainingSchedule", {
   },
 
   focusAreas: {
-    type: DataTypes.TEXT, // we use TEXT to allow longer comma-separated lists
+    type: DataTypes.TEXT,
     allowNull: false,
   },
-  teamId: { type: DataTypes.STRING },
+  teamId: {
+    type: DataTypes.STRING,
+  },
 });
 
 module.exports = TrainingSchedule;

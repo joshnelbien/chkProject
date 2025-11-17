@@ -13,6 +13,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
 
   const [formData, setFormData] = useState({
     title: "",
+    workoutDetails: "",
     date: "",
     startTime: "",
     endTime: "",
@@ -98,6 +99,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
       setFormData({
         title: "",
         date: "",
+        workoutDetails: "",
         startTime: "",
         endTime: "",
         location: "",
@@ -126,6 +128,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
     setFormData({
       title: "",
       date: "",
+      workoutDetails: "",
       startTime: "",
       endTime: "",
       location: "",
@@ -268,6 +271,25 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                 required
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Workout Details
+              </label>
+
+              <select
+                name="workoutDetails"
+                value={formData.workoutDetails}
+                onChange={handleChange}
+                required
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              >
+                <option value="">-- Select Workout Type --</option>
+                <option value="Conditioning">Conditioning</option>
+                <option value="Strength Training">Strength Training</option>
+                <option value="Skills Development">Skills Development</option>
+              </select>
             </div>
 
             {/* Focus Areas */}
