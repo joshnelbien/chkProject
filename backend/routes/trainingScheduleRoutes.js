@@ -98,27 +98,54 @@ router.get("/training-schedule/by-day", async (req, res) => {
 });
 
 router.put("/training-updates", async (req, res) => {
-  const { id, status } = req.body; // id is now the UUID of the schedule
+  const { id, status } = req.body;
 
   try {
-    // Update using the primary key (UUID)
-    const [updatedRows] = await TrainingSchedule.update(
-      { status },
-      { where: { id } } // only update this schedule
-    );
+    const event = await TrainingSchedule.findByPk(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
 
-    if (updatedRows === 0) {
-      return res.status(404).json({ message: "Event not found" });
+    let updateData = { status };
+
+    const now = new Date();
+    const formattedTime = now.toTimeString().split(" ")[0]; // HH:MM:SS
+
+    if (status === "Start") {
+      updateData.start = formattedTime;
+    } else if (status === "End" || status === "Done") {
+      updateData.end = formattedTime;
+
+      if (event.start) {
+        const [startH, startM, startS] = event.start.split(":").map(Number);
+        const [endH, endM, endS] = formattedTime.split(":").map(Number);
+
+        const startDate = new Date();
+        startDate.setHours(startH, startM, startS);
+
+        const endDate = new Date();
+        endDate.setHours(endH, endM, endS);
+
+        const diffMs = endDate - startDate; // difference in ms
+        const diffHrs = Math.floor(diffMs / 1000 / 60 / 60);
+        const diffMins = Math.floor((diffMs / 1000 / 60) % 60);
+        const diffSecs = Math.floor((diffMs / 1000) % 60);
+
+        updateData.duration = `${diffHrs.toString().padStart(2, "0")}:${diffMins
+          .toString()
+          .padStart(2, "0")}:${diffSecs.toString().padStart(2, "0")}`;
+      }
+
+      updateData.status = "Done"; // mark done
     }
 
-    const updatedEvent = await TrainingSchedule.findByPk(id);
+    await event.update(updateData);
 
-    res.status(200).json({ message: "Status updated", updated: updatedEvent });
+    res.status(200).json({ message: "Status updated", updated: event });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 // GET schedules grouped by workout type (Conditioning / Strength / Skills)
 router.get("/training-schedule/by-type", async (req, res) => {
   try {

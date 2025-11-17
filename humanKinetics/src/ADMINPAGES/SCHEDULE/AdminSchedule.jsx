@@ -69,7 +69,10 @@ function AdminSchedule() {
           const dateKey = formatDate(t.date);
           if (!mergedSchedules[dateKey]) mergedSchedules[dateKey] = [];
           mergedSchedules[dateKey].push({
-            id: t.id, // <-- include the primary key
+            id: t.id,
+            start: t.start, // <--- add this
+            end: t.end, // <--- add this
+            duration: t.duration, // optional calculation
             time: `${t.startTime} - ${t.endTime}`,
             title: t.title,
             location: t.location,
@@ -115,19 +118,18 @@ function AdminSchedule() {
   const allEvents = scheduleKeys.flatMap((date) =>
     scheduleData[date].map((event) => ({ date, ...event }))
   );
-
   const filteredEvents = allEvents
-    .filter((event) =>
-      filterStatus === "My Schedule"
-        ? String(event.teamId) === String(id)
-        : true
-    )
+    .filter((event) => {
+      if (filterStatus === "Done") return event.status === "Done"; // only done
+      if (filterStatus === "My Schedule")
+        return String(event.teamId) === String(id) && event.status !== "Done"; // my schedule, hide done
+      return event.status !== "Done"; // default "All", hide done
+    })
     .filter(
       (event) =>
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.participants.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
   const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
   const paginatedEvents = filteredEvents.slice(
     (currentPage - 1) * itemsPerPage,
@@ -158,7 +160,7 @@ function AdminSchedule() {
             </div>
 
             <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full w-fit mb-6">
-              {["All", "My Schedule"].map((status) => (
+              {["All", "My Schedule", "Done"].map((status) => (
                 <button
                   key={status}
                   onClick={() => setFilterStatus(status)}
@@ -244,22 +246,39 @@ function AdminSchedule() {
                       <td className="px-4 py-3">{event.location}</td>
                       <td className="px-4 py-3">{event.participants}</td>
                       <td className="px-4 py-3">{event.type}</td>
-                      {/* ✅ Status */}
                       <td className="px-4 py-3 font-semibold">
                         {event.status}
                       </td>
                       {filterStatus === "My Schedule" && (
-                        <td className="px-0.5 py-3 ">
-                          {event.type === "Training" ? (
+                        <td className="px-0.5 py-3">
+                          {event.status === "Done" ? (
+                            // ✅ Show Start, End, Duration for DONE events
+                            <div className="flex flex-col space-y-1 text-sm">
+                              <span>
+                                <strong>Start:</strong> {event.start}
+                              </span>
+                              <span>
+                                <strong>End:</strong> {event.end}
+                              </span>
+                              <span>
+                                <strong>Duration:</strong> {event.duration}
+                              </span>
+                            </div>
+                          ) : event.type === "Training" ? (
                             <>
                               <button
                                 onClick={() => handleAction(event, "Start")}
-                                className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition"
+                                disabled={event.status === "Start"}
+                                className={`px-3 py-1 rounded-lg transition ${
+                                  event.status === "Start"
+                                    ? "bg-gray-400 text-white cursor-not-allowed"
+                                    : "bg-green-600 text-white hover:bg-green-700"
+                                }`}
                               >
                                 Start
                               </button>
                               <button
-                                onClick={() => handleAction(event, "Done")}
+                                onClick={() => handleAction(event, "End")}
                                 className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition"
                               >
                                 Done

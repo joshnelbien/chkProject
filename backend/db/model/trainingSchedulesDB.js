@@ -58,6 +58,15 @@ const TrainingSchedule = sequelize.define("TrainingSchedule", {
   teamId: {
     type: DataTypes.STRING,
   },
+  start: {
+    type: DataTypes.STRING,
+  },
+  end: {
+    type: DataTypes.STRING,
+  },
+  duration: {
+    type: DataTypes.STRING,
+  },
   status: {
     type: DataTypes.STRING,
     defaultValue: "Pending",
