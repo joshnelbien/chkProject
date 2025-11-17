@@ -97,6 +97,28 @@ router.get("/training-schedule/by-day", async (req, res) => {
   }
 });
 
+router.put("/training-updates", async (req, res) => {
+  const { id, status } = req.body; // id is now the UUID of the schedule
+
+  try {
+    // Update using the primary key (UUID)
+    const [updatedRows] = await TrainingSchedule.update(
+      { status },
+      { where: { id } } // only update this schedule
+    );
+
+    if (updatedRows === 0) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    const updatedEvent = await TrainingSchedule.findByPk(id);
+
+    res.status(200).json({ message: "Status updated", updated: updatedEvent });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 // GET schedules grouped by workout type (Conditioning / Strength / Skills)
 router.get("/training-schedule/by-type", async (req, res) => {
   try {

@@ -9,7 +9,7 @@ const TournamentSchedule = sequelize.define("tournament_schedules", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  teamSchedule:{
+  teamSchedule: {
     type: DataTypes.STRING,
   },
   date: { type: DataTypes.DATEONLY, allowNull: false },
@@ -17,6 +17,7 @@ const TournamentSchedule = sequelize.define("tournament_schedules", {
   endTime: { type: DataTypes.STRING, allowNull: false },
   opponent: { type: DataTypes.STRING, allowNull: false },
   teamId: { type: DataTypes.STRING },
+  status: { type: DataTypes.STRING, defaultValue: "Pending" },
 });
 
 Tournament.hasMany(TournamentSchedule, {

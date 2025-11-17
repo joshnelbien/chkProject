@@ -4,11 +4,10 @@ const { sequelize } = require("../sequelize");
 
 const TrainingSchedule = sequelize.define("TrainingSchedule", {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
-    autoIncrement: true,
   },
-
   workoutDetails: {
     type: DataTypes.STRING,
   },

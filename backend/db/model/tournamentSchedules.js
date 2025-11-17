@@ -52,7 +52,7 @@ const Tournament = sequelize.define("tournaments", {
   },
   status: {
     type: DataTypes.STRING,
-    defaultValue: "upcoming",
+    defaultValue: "Pending",
   },
   homeScore: {
     type: DataTypes.STRING,

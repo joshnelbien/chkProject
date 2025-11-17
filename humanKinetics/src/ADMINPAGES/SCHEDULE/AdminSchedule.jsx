@@ -10,13 +10,39 @@ function AdminSchedule() {
   const [scheduleData, setScheduleData] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [filterStatus, setFilterStatus] = useState("All"); // <-- New state for buttons
+  const [filterStatus, setFilterStatus] = useState("All");
   const itemsPerPage = 20;
 
-  const handleAction = (event) => {
-    // Example: show alert or navigate to another page
-    alert(`Performing action for: ${event.title}`);
-    // You can replace this with edit, join, view details, etc.
+  const handleAction = async (event, action) => {
+    try {
+      const payload = {
+        id: event.id, // use the schedule's UUID primary key
+        status: action,
+      };
+
+      const res = await axios.put(
+        "http://localhost:5000/trainingSchedule/training-updates",
+        payload
+      );
+
+      if (res.status === 200) {
+        // Update local state
+        setScheduleData((prev) => {
+          const newData = { ...prev };
+          Object.keys(newData).forEach((date) => {
+            newData[date] = newData[date].map((e) =>
+              e.id === event.id ? { ...e, status: action } : e
+            );
+          });
+          return newData;
+        });
+
+        alert(`✅ Status updated to "${action}" for ${event.title}`);
+      }
+    } catch (error) {
+      console.error("❌ Error updating status:", error);
+      alert("Failed to update status. Please try again.");
+    }
   };
 
   const formatDate = (d) =>
@@ -37,31 +63,38 @@ function AdminSchedule() {
 
         const mergedSchedules = {};
 
+        // Add training schedules
+        // Add training schedules
         trainingSchedules.forEach((t) => {
           const dateKey = formatDate(t.date);
           if (!mergedSchedules[dateKey]) mergedSchedules[dateKey] = [];
           mergedSchedules[dateKey].push({
+            id: t.id, // <-- include the primary key
             time: `${t.startTime} - ${t.endTime}`,
             title: t.title,
             location: t.location,
             participants: `Coach: ${t.coach}`,
             type: "Training",
             teamId: t.teamId || null,
+            status: t.status || "Pending",
           });
         });
 
+        // Add tournament schedules
         tournaments.forEach((tournament) => {
           const schedules = tournament.schedules || [];
           schedules.forEach((ts) => {
             const dateKey = formatDate(ts.date);
             if (!mergedSchedules[dateKey]) mergedSchedules[dateKey] = [];
             mergedSchedules[dateKey].push({
+              id: ts.id || tournament.id, // <-- use schedule id if exists
               time: `${ts.startTime} - ${ts.endTime}`,
               title: `${tournament.tournamentName} vs ${ts.opponent}`,
               location: tournament.location,
               participants: `${tournament.teams} Teams`,
               type: "Tournament",
               teamId: tournament.teamId || null,
+              status: ts.status || "Pending",
             });
           });
         });
@@ -83,7 +116,6 @@ function AdminSchedule() {
     scheduleData[date].map((event) => ({ date, ...event }))
   );
 
-  // Filter based on button selection
   const filteredEvents = allEvents
     .filter((event) =>
       filterStatus === "My Schedule"
@@ -115,7 +147,6 @@ function AdminSchedule() {
         <Navbar />
 
         <main className="flex-grow overflow-y-auto p-4 sm:p-6 max-w-7xl mx-auto w-full mt-16 md:mt-20">
-          {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
             <div>
               <h2 className="text-2xl font-semibold text-green-700">
@@ -126,7 +157,6 @@ function AdminSchedule() {
               </p>
             </div>
 
-            {/* Buttons for My Schedule / All Schedule */}
             <div className="flex items-center space-x-2 bg-gray-200 p-1 rounded-full w-fit mb-6">
               {["All", "My Schedule"].map((status) => (
                 <button
@@ -188,6 +218,7 @@ function AdminSchedule() {
                       "Location",
                       "Participants",
                       "Type",
+                      "Status",
                     ].map((h) => (
                       <th
                         key={h}
@@ -213,8 +244,12 @@ function AdminSchedule() {
                       <td className="px-4 py-3">{event.location}</td>
                       <td className="px-4 py-3">{event.participants}</td>
                       <td className="px-4 py-3">{event.type}</td>
+                      {/* ✅ Status */}
+                      <td className="px-4 py-3 font-semibold">
+                        {event.status}
+                      </td>
                       {filterStatus === "My Schedule" && (
-                        <td className="px-4 py-3 space-x-2">
+                        <td className="px-0.5 py-3 ">
                           {event.type === "Training" ? (
                             <>
                               <button
@@ -266,7 +301,7 @@ function AdminSchedule() {
               </table>
             </div>
 
-            {/* Pagination Buttons */}
+            {/* Pagination */}
             {filteredEvents.length > itemsPerPage && (
               <div className="flex justify-center mt-4 space-x-2">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
