@@ -125,12 +125,12 @@ router.get("/training-schedule/by-type", async (req, res) => {
 });
 
 // GET schedules for a specific team
-router.get("/training-schedule/team/:teamId", async (req, res) => {
+router.get("/training-schedule/team/:teamSchedule", async (req, res) => {
   try {
-    const { teamId } = req.params;
+    const { teamSchedule } = req.params;
 
     const schedules = await TrainingSchedule.findAll({
-      where: { teamId },
+      where: { teamSchedule },
     });
 
     return res.status(200).json({

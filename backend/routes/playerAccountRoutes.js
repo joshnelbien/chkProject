@@ -40,10 +40,11 @@ router.put("/update-performance/:id", async (req, res) => {
     return res.json({ message: "Player updated successfully!", player });
   } catch (error) {
     console.error("Error updating performance:", error);
-    return res.status(500).json({ message: "Server error updating performance" });
+    return res
+      .status(500)
+      .json({ message: "Server error updating performance" });
   }
 });
-
 
 // ✅ Registration with Email Verification
 router.post("/register", async (req, res) => {
@@ -168,6 +169,17 @@ router.get("/verify-email", async (req, res) => {
 });
 
 router.get("/players", async (req, res) => {
+  try {
+    const players = await playerAccounts.findAll({});
+
+    res.json(players);
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({ error: "Server error fetching players." });
+  }
+});
+
+router.get("/players/:id", async (req, res) => {
   try {
     const players = await playerAccounts.findAll({});
 

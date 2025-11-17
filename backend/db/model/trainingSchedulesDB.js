@@ -59,6 +59,10 @@ const TrainingSchedule = sequelize.define("TrainingSchedule", {
   teamId: {
     type: DataTypes.STRING,
   },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: "Pending",
+  },
 });
 
 module.exports = TrainingSchedule;
