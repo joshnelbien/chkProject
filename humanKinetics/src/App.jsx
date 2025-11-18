@@ -31,6 +31,7 @@ import HomePage from "./PAGES/HomePage/HomePage";
 import ProgramPage from "./PAGES/Programs/ProgramPage";
 import Register from "./PAGES/Register/Register";
 import AdminRegister from "./PAGES/Register/adminRegister";
+import NotFound from "./notFound/NotFound";
 import "./index.css";
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
           <Route path="/overView/:id" element={<OverView />} />
           <Route path="/register" element={<Register />} />
           <Route path="/adminRegister" element={<AdminRegister />} />
+          <Route path="*" element={<NotFound />} />
 
           {/* ATHLETE PAGES */}
           <Route path="/medal-tally/:id" element={<MedalTally />} />

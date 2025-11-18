@@ -1,162 +1,244 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable"; // Correct import
 import Footer from "../../FOOTER/footer";
 import Navbar from "../../NAVBAR/navbar";
 import Sidebar from "../../SIDEBAR/sidebar";
 
 function MedicalRecord() {
-  const [sidebarOpen, setSidebarOpen] = useState(false); // default closed
+  const { id } = useParams();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [player, setPlayer] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPlayer = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/userAccounts/players-profile/${id}`
+        );
+        setPlayer(res.data);
+      } catch (err) {
+        console.error("Error fetching player:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlayer();
+  }, [id]);
+
+  if (loading) return <div className="p-6">Loading...</div>;
+  if (!player) return <div className="p-6">Player not found.</div>;
+
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    const title = `${player.firstName} ${player.lastName} - Medical Record`;
+    doc.setFontSize(18);
+    doc.setTextColor(34, 139, 34);
+    doc.text(title, 14, 20);
+
+    const sections = [
+      {
+        title: "Personal Info",
+        data: [
+          ["Age/Birthday", player.bDay],
+          ["Height", player.height],
+          ["Weight", player.weight],
+          ["Blood Type", player.bloodType],
+          ["Allergies", player.allergies || "None"],
+          [
+            "Emergency Contact",
+            `${player.emergencyName} - ${player.emergencyContact}`,
+          ],
+          ["Preferred Hospital", player.preferredHospital],
+        ],
+      },
+      {
+        title: "Vitals & Health",
+        data: [
+          ["Resting Heart Rate", player.restingHeartRate],
+          ["Blood Pressure", player.bloodPressure],
+          ["Chronic Illness", player.chronicIllness || "None"],
+          ["Hospitalization", player.hospitalization || "None"],
+          ["Surgery", player.surgery || "None"],
+          ["Family History", player.familyHistory || "None"],
+          ["Vaccine Record", player.vaccineRecord || "None"],
+        ],
+      },
+      {
+        title: "Medications",
+        data: player.medications
+          ? player.medications.split(",").map((med) => [med])
+          : [["None"]],
+      },
+      {
+        title: "Injuries & Therapy",
+        data: [
+          ["Injuries", player.injuries || "None"],
+          ["Illnesses", player.illnesses || "None"],
+          ["Sports Injuries", player.sportsInjuries || "None"],
+          ["Therapy Records", player.therapyRecords || "None"],
+        ],
+      },
+      {
+        title: "Lifestyle & Fitness",
+        data: [
+          ["Sleep Hours", player.sleepHours || "N/A"],
+          ["Diet Plan", player.dietPlan || "N/A"],
+          ["Fitness Level", player.fitnessLevel || "N/A"],
+          ["Last Checkup", player.lastCheckup || "N/A"],
+          ["Cleared for Activity", player.clearedForActivity || "N/A"],
+          ["Doctor Info", player.doctorInfo || "N/A"],
+        ],
+      },
+    ];
+
+    let y = 30;
+    sections.forEach((section) => {
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text(section.title, 14, y);
+      y += 6;
+
+      autoTable(doc, {
+        startY: y,
+        head: section.title === "Medications" ? [] : [["Field", "Value"]],
+        body: section.data,
+        theme: "grid",
+        styles: { fontSize: 12 },
+        margin: { left: 14, right: 14 },
+        headStyles: { fillColor: [34, 139, 34] },
+      });
+
+      y = doc.lastAutoTable.finalY + 10;
+    });
+
+    doc.save(`${player.firstName}_${player.lastName}_MedicalRecord.pdf`);
+  };
 
   const personalInfo = [
-    { label: "Age", value: "21" },
-    { label: "Height", value: "5'9\"" },
-    { label: "Weight", value: "175 lbs" },
-    { label: "Blood Type", value: "O+" },
-    { label: "Allergies", value: "None" },
-    { label: "Emergency Contact", value: "Jane Doe - 0912-345-6789" },
+    { label: "Age/Birthday", value: player.bDay },
+    { label: "Height", value: player.height },
+    { label: "Weight", value: player.weight },
+    { label: "Blood Type", value: player.bloodType },
+    { label: "Allergies", value: player.allergies || "None" },
+    {
+      label: "Emergency Contact",
+      value: `${player.emergencyName} - ${player.emergencyContact}`,
+    },
+    { label: "Preferred Hospital", value: player.preferredHospital },
   ];
 
   const vitals = [
-    { label: "Last Checked", value: "Sep 19, 2025" },
-    { label: "Blood Pressure", value: "120/80" },
-    { label: "Heart Rate", value: "75 bpm" },
-    { label: "Temperature", value: "36.8°C" },
+    { label: "Resting Heart Rate", value: player.restingHeartRate },
+    { label: "Blood Pressure", value: player.bloodPressure },
+    { label: "Chronic Illness", value: player.chronicIllness || "None" },
+    { label: "Hospitalization", value: player.hospitalization || "None" },
+    { label: "Surgery", value: player.surgery || "None" },
+    { label: "Family History", value: player.familyHistory || "None" },
+    { label: "Vaccine Record", value: player.vaccineRecord || "None" },
   ];
 
-  const medications = [
-    "Ibuprofen 200mg (as needed)",
-    "Vitamin C supplement (daily)",
+  const medications = player.medications
+    ? player.medications.split(",")
+    : ["None"];
+
+  const injuries = [
+    { label: "Injuries", value: player.injuries || "None" },
+    { label: "Illnesses", value: player.illnesses || "None" },
+    { label: "Sports Injuries", value: player.sportsInjuries || "None" },
+    { label: "Therapy Records", value: player.therapyRecords || "None" },
   ];
 
-  const appointments = [
-    { date: "Oct 1, 2025", event: "Physical Therapy Session" },
-  ];
-
-  const recentUpdates = [
-    { date: "Sep 19, 2025", update: "Vitals checked and recorded." },
-    { date: "Sep 16, 2025", update: "Initial diagnosis of knee sprain." },
+  const lifestyle = [
+    { label: "Sleep Hours", value: player.sleepHours || "N/A" },
+    { label: "Diet Plan", value: player.dietPlan || "N/A" },
+    { label: "Fitness Level", value: player.fitnessLevel || "N/A" },
+    { label: "Last Checkup", value: player.lastCheckup || "N/A" },
+    {
+      label: "Cleared for Activity",
+      value: player.clearedForActivity || "N/A",
+    },
+    { label: "Doctor Info", value: player.doctorInfo || "N/A" },
   ];
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* Main container */}
       <div
         className={`flex flex-col flex-1 transition-all duration-300 ${
           sidebarOpen ? "ml-64" : "ml-0"
         }`}
       >
-        {/* Navbar */}
         <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* Main content */}
         <main className="flex-grow mt-16 p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-green-700">
-              Personal Medical Record
+              {player.firstName} {player.lastName} - Medical Record
             </h1>
-            <button className="px-4 py-2 rounded-lg bg-green-700 text-white font-semibold shadow">
-              Download Record
+            <button
+              onClick={downloadPDF}
+              className="px-4 py-2 rounded-lg bg-green-700 text-white font-semibold shadow"
+            >
+              Download Record (PDF)
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Personal Info */}
-            <div className="bg-white p-6 rounded-lg shadow space-y-4">
+            <div className="bg-white p-6 rounded-lg shadow space-y-3">
+              <h2 className="font-bold text-lg mb-2">Personal Info</h2>
               {personalInfo.map((item, idx) => (
-                <div key={idx}>
-                  <h3 className="text-sm text-gray-500">{item.label}</h3>
-                  <p className="font-semibold text-lg">{item.value}</p>
-                </div>
+                <p key={idx}>
+                  <strong>{item.label}:</strong> {item.value}
+                </p>
               ))}
             </div>
 
-            {/* Medical Data */}
-            <div className="space-y-6">
-              {/* Current Condition */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-                  <span>Current Condition</span>
-                  <span>Started: Sep 15, 2025</span>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-bold text-lg text-red-500">
-                    Knee Sprain
-                  </h3>
-                  <span className="text-sm text-gray-500">
-                    Expected Recovery: Oct 1, 2025
-                  </span>
-                </div>
-                <p className="text-gray-600">Recovery Progress</p>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                  <div
-                    className="bg-green-700 h-2.5 rounded-full"
-                    style={{ width: "50%" }}
-                  ></div>
-                </div>
-              </div>
+            <div className="bg-white p-6 rounded-lg shadow space-y-3">
+              <h2 className="font-bold text-lg mb-2">Vitals & Health</h2>
+              {vitals.map((item, idx) => (
+                <p key={idx}>
+                  <strong>{item.label}:</strong> {item.value}
+                </p>
+              ))}
+            </div>
 
-              {/* Latest Vitals */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="font-semibold text-lg mb-4">Latest Vitals</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  {vitals.map((item, idx) => (
-                    <div key={idx} className="p-2 bg-gray-100 rounded-lg">
-                      <p className="text-sm text-gray-500">{item.label}</p>
-                      <p className="font-bold">{item.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="font-bold text-lg mb-2">Medications</h2>
+              <ul className="list-disc list-inside space-y-1">
+                {medications.map((med, idx) => (
+                  <li key={idx}>{med}</li>
+                ))}
+              </ul>
+            </div>
 
-              {/* Current Medications */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="font-semibold text-lg mb-4">
-                  Current Medications
-                </h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-700">
-                  {medications.map((med, idx) => (
-                    <li key={idx}>{med}</li>
-                  ))}
-                </ul>
-              </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="font-bold text-lg mb-2">Injuries & Therapy</h2>
+              {injuries.map((item, idx) => (
+                <p key={idx}>
+                  <strong>{item.label}:</strong> {item.value}
+                </p>
+              ))}
+            </div>
 
-              {/* Upcoming Appointments */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="font-semibold text-lg mb-4">
-                  Upcoming Appointments
-                </h3>
-                <ul className="space-y-2 text-gray-700">
-                  {appointments.map((appt, idx) => (
-                    <li key={idx}>
-                      <span className="font-semibold">{appt.date}:</span>{" "}
-                      {appt.event}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Recent Updates */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="font-semibold text-lg mb-4">Recent Updates</h3>
-                <ul className="space-y-2 text-gray-700">
-                  {recentUpdates.map((update, idx) => (
-                    <li key={idx}>
-                      <span className="font-semibold">{update.date}:</span>{" "}
-                      {update.update}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="font-bold text-lg mb-2">Lifestyle & Fitness</h2>
+              {lifestyle.map((item, idx) => (
+                <p key={idx}>
+                  <strong>{item.label}:</strong> {item.value}
+                </p>
+              ))}
             </div>
           </div>
         </main>
 
-        {/* Footer */}
         <Footer />
       </div>
     </div>

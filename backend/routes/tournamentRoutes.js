@@ -61,6 +61,15 @@ router.get("/tournaments-activities", async (req, res) => {
   }
 });
 
+router.get("/tournaments-Schedules", async (req, res) => {
+  try {
+    const tournaments = await TournamentSchedule.findAll({});
+    res.json(tournaments);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch tournaments" });
+  }
+});
+
 router.post("/tournaments/:id/schedule", async (req, res) => {
   try {
     const { id } = req.params;
