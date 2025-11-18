@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
+import ResultModal from "./ResultModal";
 
 function AdminSchedule() {
   const { id } = useParams();
@@ -12,6 +13,51 @@ function AdminSchedule() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState("All");
   const itemsPerPage = 20;
+
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const submitResult = async (homeScore, opponentScore) => {
+    try {
+      const payload = {
+        status: "Done",
+        isCompleted: true,
+        homeScore,
+        opponentScore,
+      };
+
+      const res = await axios.put(
+        `http://localhost:5000/tournament/tournaments/${selectedEvent.id}`,
+        payload
+      );
+
+      if (res.status === 200) {
+        // Update frontend instantly
+        setScheduleData((prev) => {
+          const updated = { ...prev };
+          Object.keys(updated).forEach((date) => {
+            updated[date] = updated[date].map((e) =>
+              e.id === selectedEvent.id
+                ? {
+                    ...e,
+                    status: "Done",
+                    homeScore,
+                    opponentScore,
+                  }
+                : e
+            );
+          });
+          return updated;
+        });
+        alert("Result submitted successfully!");
+      }
+    } catch (error) {
+      console.error("Error submitting result:", error);
+      alert("Failed to submit result.");
+    }
+
+    setShowResultModal(false);
+  };
 
   const handleAction = async (event, action) => {
     try {
@@ -51,10 +97,15 @@ function AdminSchedule() {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const [trainingRes, tournamentRes] = await Promise.all([
-          axios.get("http://localhost:5000/trainingSchedule/training-schedule"),
-          axios.get("http://localhost:5000/tournament/tournaments-activities"),
-        ]);
+        const [trainingRes, tournamentRes, tournamentSchedules] =
+          await Promise.all([
+            axios.get(
+              "http://localhost:5000/trainingSchedule/training-schedule"
+            ),
+            axios.get(
+              "http://localhost:5000/tournament/tournaments-activities"
+            ),
+          ]);
 
         const trainingSchedules = trainingRes.data.schedules || [];
         const tournaments = Array.isArray(tournamentRes.data)
@@ -80,6 +131,8 @@ function AdminSchedule() {
             type: "Training",
             teamId: t.teamId || null,
             status: t.status || "Pending",
+            homeScore: t.homeScore || null,
+            opponentScore: t.opponentScore || null,
           });
         });
 
@@ -90,7 +143,7 @@ function AdminSchedule() {
             const dateKey = formatDate(ts.date);
             if (!mergedSchedules[dateKey]) mergedSchedules[dateKey] = [];
             mergedSchedules[dateKey].push({
-              id: ts.id || tournament.id, // <-- use schedule id if exists
+              id: ts.id || tournament.id,
               time: `${ts.startTime} - ${ts.endTime}`,
               title: `${tournament.tournamentName} vs ${ts.opponent}`,
               location: tournament.location,
@@ -98,6 +151,8 @@ function AdminSchedule() {
               type: "Tournament",
               teamId: tournament.teamId || null,
               status: ts.status || "Pending",
+              homeScore: ts.homeScore ?? null, // <-- FIXED
+              opponentScore: ts.opponentScore ?? null, // <-- FIXED
             });
           });
         });
@@ -234,6 +289,13 @@ function AdminSchedule() {
                         Action
                       </th>
                     )}
+                    {filterStatus === "Done" && (
+                      <>
+                        <th className="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">
+                          Result
+                        </th>
+                      </>
+                    )}
                   </tr>
                 </thead>
 
@@ -249,6 +311,56 @@ function AdminSchedule() {
                       <td className="px-4 py-3 font-semibold">
                         {event.status}
                       </td>
+
+                      {event.type === "Tournament" &&
+                        event.status === "Done" && (
+                          <>
+                            <td className="px-4 py-3 font-semibold">
+                              <p>Home: {event.homeScore}</p>
+                              <p>Opponent: {event.opponentScore}</p>
+
+                              <p className="mt-1">
+                                Result:{" "}
+                                <span
+                                  className={
+                                    Number(event.homeScore) >
+                                    Number(event.opponentScore)
+                                      ? "text-green-600 font-bold"
+                                      : Number(event.homeScore) <
+                                        Number(event.opponentScore)
+                                      ? "text-red-600 font-bold"
+                                      : "text-gray-600 font-bold"
+                                  }
+                                >
+                                  {Number(event.homeScore) >
+                                  Number(event.opponentScore)
+                                    ? "WIN"
+                                    : Number(event.homeScore) <
+                                      Number(event.opponentScore)
+                                    ? "LOSE"
+                                    : "DRAW"}
+                                </span>
+                              </p>
+                            </td>
+                          </>
+                        )}
+
+                      {event.type === "Training" && event.status === "Done" && (
+                        <>
+                          <td className="px-4 py-3 font-semibold">
+                            <p>
+                              <strong>Start:</strong> {event.start}
+                            </p>
+                            <p>
+                              <strong>End:</strong> {event.end}
+                            </p>
+                            <p>
+                              <strong>Duration:</strong> {event.duration}
+                            </p>
+                          </td>
+                        </>
+                      )}
+
                       {filterStatus === "My Schedule" && (
                         <td className="px-0.5 py-3">
                           {event.status === "Done" ? (
@@ -293,11 +405,16 @@ function AdminSchedule() {
                           ) : event.type === "Tournament" ? (
                             <>
                               <button
-                                onClick={() => handleAction(event, "Result")}
+                                onClick={() => {
+                                  console.log("Selected Event:", event); // <-- LOG HERE
+                                  setSelectedEvent(event);
+                                  setShowResultModal(true);
+                                }}
                                 className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition"
                               >
                                 Result
                               </button>
+
                               <button
                                 onClick={() => handleAction(event, "Postponed")}
                                 className="bg-yellow-600 text-white px-3 py-1 rounded-lg hover:bg-yellow-700 transition"
@@ -343,6 +460,12 @@ function AdminSchedule() {
           </div>
         </main>
 
+        <ResultModal
+          isOpen={showResultModal}
+          onClose={() => setShowResultModal(false)}
+          event={selectedEvent}
+          onSubmit={submitResult}
+        />
         <Footer />
       </div>
     </div>

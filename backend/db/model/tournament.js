@@ -18,6 +18,20 @@ const TournamentSchedule = sequelize.define("tournament_schedules", {
   opponent: { type: DataTypes.STRING, allowNull: false },
   teamId: { type: DataTypes.STRING },
   status: { type: DataTypes.STRING, defaultValue: "Pending" },
+  isCompleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, // 👈 You can update this after the tournament ends
+  },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: "Pending",
+  },
+  homeScore: {
+    type: DataTypes.STRING,
+  },
+  opponentScore: {
+    type: DataTypes.STRING,
+  },
 });
 
 Tournament.hasMany(TournamentSchedule, {

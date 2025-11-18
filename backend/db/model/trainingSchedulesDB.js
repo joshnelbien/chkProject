@@ -71,6 +71,21 @@ const TrainingSchedule = sequelize.define("TrainingSchedule", {
     type: DataTypes.STRING,
     defaultValue: "Pending",
   },
+
+  isCompleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: "Pending",
+  },
+  homeScore: {
+    type: DataTypes.STRING,
+  },
+  opponentScore: {
+    type: DataTypes.STRING,
+  },
 });
 
 module.exports = TrainingSchedule;
