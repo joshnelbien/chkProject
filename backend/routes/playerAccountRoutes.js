@@ -172,7 +172,19 @@ router.get("/players", async (req, res) => {
   try {
     const players = await playerAccounts.findAll({});
 
-    res.json(players);
+    const formatted = players.map((p) => {
+      const player = p.toJSON();
+
+      if (player.profilePicture) {
+        player.profilePicture = Buffer.from(player.profilePicture).toString(
+          "base64"
+        );
+      }
+
+      return player;
+    });
+
+    res.json(formatted);
   } catch (error) {
     console.error("Error fetching players:", error);
     res.status(500).json({ error: "Server error fetching players." });

@@ -120,9 +120,22 @@ router.post("/admin-register", async (req, res) => {
 
 router.get("/coaches", async (req, res) => {
   try {
-    const coaches = await Admin.findAll({});
+    const coaches = await Admin.findAll();
 
-    res.json(coaches);
+    const formatted = coaches.map((c) => ({
+      id: c.id,
+      name: `${c.firstName} ${c.middleName ?? ""} ${c.lastName}`,
+      sport: c.sports,
+      experience: c.experience,
+      image: c.profilePicture
+        ? `data:image/jpeg;base64,${c.profilePicture.toString("base64")}`
+        : "/default.jpg",
+      education: c.education.split("|"), // stored as "A|B|C"
+      specialization: c.specialization.split("|"),
+      achievements: c.achievements.split("|"),
+    }));
+
+    res.json(formatted);
   } catch (error) {
     console.error("Error fetching coaches:", error);
     res.status(500).json({ error: "Server error fetching coaches." });
@@ -189,7 +202,6 @@ router.get("/coach-photo/:id", async (req, res) => {
     res.status(500).send("Server error fetching profile picture.");
   }
 });
-
 
 // ✅ Email Verification Route
 router.get("/admin-verify-email", async (req, res) => {

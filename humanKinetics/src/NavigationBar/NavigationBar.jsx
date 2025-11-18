@@ -13,7 +13,7 @@ function NavigationBar() {
   const routes = [
     { path: "/", name: "Home" },
     { path: "/about", name: "About" },
-    { path: "/program", name: "Programs" },
+
     { path: "/athletes", name: "Athletes" },
     { path: "/coaches", name: "Coaches" },
     { path: "/event", name: "Events" },
