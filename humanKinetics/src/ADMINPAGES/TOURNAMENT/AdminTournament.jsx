@@ -24,6 +24,8 @@ function AdminTournament() {
     endTime: "",
     opponent: "",
     teamId: "",
+    teamName: "",
+    sport: "",
   });
 
   // ✅ Fetch tournaments from backend (with schedules)
@@ -63,7 +65,9 @@ function AdminTournament() {
       // ✅ Prepare payload
       const payload = {
         ...scheduleForm,
-        teamId: selectedTournament.id, // ensure using tournament ID
+        teamId: selectedTournament.id,
+        teamName: selectedTournament.teamName, // ensure using tournament ID
+        sport: selectedTournament.sport,
       };
 
       console.log("📤 Sending Schedule to backend:", payload); // <-- log here
@@ -83,6 +87,8 @@ function AdminTournament() {
         endTime: "",
         opponent: "",
         teamId: selectedTournament.id,
+        teamName: selectedTournament.teamName,
+        sports: selectedTournament.sport,
       });
       setSelectedTournament(null);
     } catch (error) {
@@ -179,7 +185,15 @@ function AdminTournament() {
                   tournament={tournament}
                   onSetSchedule={() => {
                     setSelectedTournament(tournament);
-                    console.log("✅ Selected Tournament ID:", tournament.id); // 👈 log here
+
+                    // ⬇️ add this — save teamName + teamId inside scheduleForm
+                    setScheduleForm((prev) => ({
+                      ...prev,
+                      teamId: tournament.id,
+                      teamName: tournament.teamName,
+                      sport: tournament.sport,
+                    }));
+
                     setIsScheduleModalOpen(true);
                   }}
                   filterStatus={filterStatus}
@@ -326,6 +340,12 @@ function AdminTournament() {
                   {selectedTournament.tournamentName}
                 </p>
                 <p>
+                  <strong>Team:</strong> {selectedTournament.teamName}
+                </p>
+                <p>
+                  <strong>Sport:</strong> {selectedTournament.sport}
+                </p>
+                <p>
                   <strong>Date:</strong> {scheduleForm.date}
                 </p>
                 <p>
@@ -439,7 +459,8 @@ function TournamentCard({ tournament, onSetSchedule, filterStatus, userId }) {
           <ul className="text-xs text-gray-600 space-y-1">
             {tournament.schedules.map((s, i) => (
               <li key={i}>
-                📅 {s.date} — ⏰ {s.startTime} - {s.endTime} — 🆚 {s.opponent}
+                📅 {s.date} — ⏰ {s.startTime} - {s.endTime} — {s.teamName}🆚{" "}
+                {s.opponent}
               </li>
             ))}
           </ul>

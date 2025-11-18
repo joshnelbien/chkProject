@@ -13,6 +13,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
     startDate: "",
     endDate: "",
     teams: "",
+    teamName: "",
     id: "", // selected team
     teamId: id,
   });
@@ -22,7 +23,9 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/teams/getTeams/${id}`);
+        const res = await axios.get(
+          `http://localhost:5000/teams/getTeams/${id}`
+        );
         setTeams(res.data);
 
         // Fetch players for each team
@@ -37,7 +40,9 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
   // Fetch players for a team
   const fetchPlayersForTeam = async (teamId) => {
     try {
-      const res = await axios.get(`http://localhost:5000/teams/player/${teamId}`);
+      const res = await axios.get(
+        `http://localhost:5000/teams/player/${teamId}`
+      );
       setPlayersByTeam((prev) => ({ ...prev, [teamId]: res.data }));
     } catch (err) {
       console.error(`Error fetching players for team ${teamId}:`, err);
@@ -56,6 +61,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
       ...formData,
       id: e.target.value,
       sport: selectedTeam?.sport || "",
+      teamName: selectedTeam?.teamName || "",
     });
   };
 

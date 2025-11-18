@@ -65,7 +65,8 @@ router.post("/tournaments/:id/schedule", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { date, startTime, endTime, opponent, teamId } = req.body;
+    const { date, startTime, endTime, opponent, teamId, teamName, sport } =
+      req.body;
     // ✅ Fetch tournament to get the correct teamId
     const tournament = await Tournament.findByPk(id);
     if (!tournament)
@@ -79,6 +80,8 @@ router.post("/tournaments/:id/schedule", async (req, res) => {
       startTime,
       endTime,
       opponent,
+      teamName,
+      sport,
     });
 
     res.status(201).json(schedule);

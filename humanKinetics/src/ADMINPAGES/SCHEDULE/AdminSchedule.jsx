@@ -126,6 +126,7 @@ function AdminSchedule() {
             duration: t.duration, // optional calculation
             time: `${t.startTime} - ${t.endTime}`,
             title: t.title,
+            teamName: t.teamName,
             location: t.location,
             participants: `Coach: ${t.coach}`,
             type: "Training",
@@ -145,7 +146,7 @@ function AdminSchedule() {
             mergedSchedules[dateKey].push({
               id: ts.id || tournament.id,
               time: `${ts.startTime} - ${ts.endTime}`,
-              title: `${tournament.tournamentName} vs ${ts.opponent}`,
+              title: `${tournament.teamName} vs ${ts.opponent}`,
               location: tournament.location,
               participants: `${tournament.teams} Teams`,
               type: "Tournament",
