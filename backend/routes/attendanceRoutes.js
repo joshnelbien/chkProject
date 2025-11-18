@@ -101,4 +101,19 @@ router.get("/user/:userId/schedule/:scheduleId", async (req, res) => {
   }
 });
 
+router.get("/all", async (req, res) => {
+  try {
+    const records = await Attendance.findAll({
+      order: [
+        ["date", "DESC"],
+        ["timeIn", "ASC"],
+      ],
+    });
+    res.status(200).json(records);
+  } catch (err) {
+    console.error("Fetch all attendance error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 module.exports = router;
