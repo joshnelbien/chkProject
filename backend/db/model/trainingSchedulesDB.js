@@ -18,7 +18,7 @@ const TrainingSchedule = sequelize.define("TrainingSchedule", {
 
   type: {
     type: DataTypes.STRING,
-    defaultValue: "training",
+    defaultValue: "Training",
   },
 
   title: {

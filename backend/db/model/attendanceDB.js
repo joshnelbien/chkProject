@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
-const attendance = sequelize.define(
+
+const Attendance = sequelize.define(
   "attendance",
   {
     id: {
@@ -10,39 +11,39 @@ const attendance = sequelize.define(
     },
     lastName: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     firstName: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     middleName: {
       type: DataTypes.STRING,
-      allowNull: true,
     },
-    sports: {
+    type: {
       type: DataTypes.STRING,
-      allowNull: false,
+    },
+    sport: {
+      type: DataTypes.STRING,
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     timeIn: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     timeOut: {
       type: DataTypes.STRING,
-      defaultValue: false,
     },
-     date: {
+    date: {
       type: DataTypes.STRING,
-      defaultValue: false,
     },
-      description: {
+    description: {
       type: DataTypes.STRING,
-      defaultValue: false,
+    },
+    userId: {
+      type: DataTypes.UUID,
+    },
+    scheduleId: {
+      type: DataTypes.UUID,
     },
   },
   {
@@ -51,4 +52,4 @@ const attendance = sequelize.define(
   }
 );
 
-module.exports = attendance;
+module.exports = Attendance;

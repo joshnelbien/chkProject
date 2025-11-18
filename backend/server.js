@@ -22,6 +22,9 @@ const tournamentRoutes = require("./routes/tournamentRoutes");
 const Teams = require("./db/model/teamDB");
 const TeamsRoutes = require("./routes/teamRoutes");
 
+const Attendance = require("./db/model/attendanceDB");
+const AttendanceRoutes = require("./routes/attendanceRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -39,6 +42,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
     await Tournament.sync({ alter: true });
     await TournamentSchedule.sync({ alter: true });
     await Teams.sync({ alter: true });
+    await Attendance.sync({ alter: true });
 
     console.log("Database ready.");
   } catch (error) {
@@ -52,6 +56,7 @@ app.use("/teamSchedule", teamScheduleRoutes);
 app.use("/trainingSchedule", trainingScheduleRoutes);
 app.use("/tournament", tournamentRoutes);
 app.use("/teams", TeamsRoutes);
+app.use("/attendance", AttendanceRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

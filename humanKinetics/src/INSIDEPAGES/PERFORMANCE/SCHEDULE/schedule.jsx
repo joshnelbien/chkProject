@@ -10,17 +10,7 @@ function Schedule() {
   const [scheduleData, setScheduleData] = useState({});
   const [myTeamSchedules, setMyTeamSchedules] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const { id } = useParams(); // get from URL
-
-  const handleTimeIn = async (scheduleId) => {
-    console.log("Time In for schedule:", scheduleId);
-    // await axios.post("http://localhost:5000/attendance/time-in", { userId: id, scheduleId });
-  };
-
-  const handleTimeOut = async (scheduleId) => {
-    console.log("Time Out for schedule:", scheduleId);
-    // await axios.post("http://localhost:5000/attendance/time-out", { userId: id, scheduleId });
-  };
+  const { id } = useParams(); // user ID from URL
 
   const formatDate = (d) => {
     if (!d) return null;
@@ -31,6 +21,84 @@ function Schedule() {
     return `${year}-${month}-${day}`;
   };
 
+  // Handle Time In
+  const handleTimeIn = async (sched) => {
+    try {
+      const resUser = await axios.get(
+        `http://localhost:5000/userAccounts/players-profile/${id}`
+      );
+      const user = resUser.data;
+
+      const res = await axios.post("http://localhost:5000/attendance/time-in", {
+        userId: id,
+        scheduleId: sched.id,
+        type: sched.type,
+        sport: user.sport,
+        description: sched.description,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      });
+
+      setMyTeamSchedules((prev) =>
+        prev.map((s) =>
+          s.id === sched.id
+            ? { ...s, status: "In Progress", timeIn: res.data.timeIn }
+            : s
+        )
+      );
+
+      alert("Timed In"); // ✅ alert always on success
+    } catch (err) {
+      if (err.response?.status === 400) {
+        // Already timed in
+        setMyTeamSchedules((prev) =>
+          prev.map((s) =>
+            s.id === sched.id
+              ? {
+                  ...s,
+                  status: "In Progress",
+                  timeIn: err.response.data.attendance?.timeIn,
+                }
+              : s
+          )
+        );
+        alert("Already Timed In"); // ✅ alert if already timed in
+      } else {
+        console.error("Time In error:", err);
+      }
+    }
+  };
+
+  const handleTimeOut = async (sched) => {
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/attendance/time-out",
+        {
+          userId: id,
+          scheduleId: sched.id,
+        }
+      );
+
+      setMyTeamSchedules((prev) =>
+        prev.map((s) =>
+          s.id === sched.id
+            ? { ...s, status: "Done", timeOut: res.data.timeOut }
+            : s
+        )
+      );
+
+      alert("Timed Out");
+    } catch (err) {
+      if (err.response?.status === 400) {
+        alert(err.response.data.message);
+      } else {
+        console.error("Time Out error:", err);
+      }
+    }
+  };
+
+  // Fetch all schedules
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
@@ -46,30 +114,31 @@ function Schedule() {
 
         const merged = {};
 
-        // Merge training schedules
         trainingSchedules.forEach((t) => {
           const key = formatDate(t.date);
           if (!merged[key]) merged[key] = [];
           merged[key].push({
             time: `${t.startTime} - ${t.endTime}`,
-            title: t.title,
+            title: t.teamName,
             location: t.location,
             participants: `Coach: ${t.coach}`,
             type: "Training",
+            status: t.status,
+            teamName: t.teamName,
           });
         });
 
-        // Merge tournament schedules
         tournaments.forEach((t) => {
           t.schedules?.forEach((s) => {
             const key = formatDate(s.date);
             if (!merged[key]) merged[key] = [];
             merged[key].push({
               time: `${s.startTime} - ${s.endTime}`,
-              title: `${t.tournamentName} vs ${s.opponent}`,
+              title: `${t.teamName} vs ${s.opponent}`,
               location: t.location,
               participants: `${t.teams} Teams`,
               type: "Tournament",
+              status: s.status || t.status,
             });
           });
         });
@@ -87,7 +156,6 @@ function Schedule() {
         );
         const teamId = res.data.teamId;
 
-        // Training schedules
         const trainingRes = await axios.get(
           "http://localhost:5000/trainingSchedule/training-schedule"
         );
@@ -95,7 +163,6 @@ function Schedule() {
           (sched) => sched.teamSchedule === teamId
         );
 
-        // Tournament schedules
         const tournamentRes = await axios.get(
           "http://localhost:5000/tournament/tournaments-activities"
         );
@@ -109,15 +176,41 @@ function Schedule() {
             if (String(s.teamSchedule) === String(teamId)) {
               myTournamentSchedules.push({
                 ...s,
-                title: `${t.tournamentName} vs ${s.opponent}`,
+                title: `${t.teamName} vs ${s.opponent}`,
                 location: t.location,
                 type: "Tournament",
+                status: t.status, // default
               });
             }
           });
         });
 
-        setMyTeamSchedules([...myTrainingSchedules, ...myTournamentSchedules]);
+        const allSchedules = [...myTrainingSchedules, ...myTournamentSchedules];
+
+        // Fetch attendance for each schedule
+        const updatedSchedules = await Promise.all(
+          allSchedules.map(async (sched) => {
+            try {
+              const att = await axios.get(
+                `http://localhost:5000/attendance/user/${id}/schedule/${sched.id}`
+              );
+              if (att.data) {
+                return {
+                  ...sched,
+                  timeIn: att.data.timeIn,
+                  timeOut: att.data.timeOut,
+                  status: att.data?.status || sched.status, // <-- use the fetched schedule status
+                };
+              } else {
+                return { ...sched, status: sched.status || "Pending" };
+              }
+            } catch (err) {
+              return { ...sched, status: sched.status || "Pending" };
+            }
+          })
+        );
+
+        setMyTeamSchedules(updatedSchedules);
       } catch (err) {
         console.error("Error fetching team schedule:", err);
       }
@@ -127,7 +220,7 @@ function Schedule() {
     fetchMyTeamSchedules();
   }, [id]);
 
-  // CALENDAR
+  // Calendar logic
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(
     new Date(today.getFullYear(), today.getMonth(), 1)
@@ -147,6 +240,21 @@ function Schedule() {
   const handleNext = () =>
     setCurrentMonth(new Date(year, currentMonth.getMonth() + 1, 1));
 
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/userAccounts/players-profile/${id}`
+        );
+        console.log("Current User Profile:", res.data);
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+      }
+    };
+
+    fetchUserProfile();
+  }, [id]);
+
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       <Sidebar
@@ -161,10 +269,9 @@ function Schedule() {
       >
         <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* Scrollable Main Content */}
         <main className="flex-1 overflow-auto p-4 md:p-6 mt-16">
           {/* Header */}
-          <div className=" top-0 bg-gray-100 z-10 flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 p-2 border-b">
+          <div className="top-0 bg-gray-100 z-10 flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 p-2 border-b">
             <div>
               <h1 className="text-2xl font-bold text-green-700">Schedule</h1>
               <p className="text-gray-500">Training & Events Calendar</p>
@@ -181,7 +288,7 @@ function Schedule() {
           </div>
 
           {/* Month Navigation */}
-          <div className="flex justify-between items-center mb-4  top-16 bg-gray-100 z-10 p-2 border-b">
+          <div className="flex justify-between items-center mb-4 top-16 bg-gray-100 z-10 p-2 border-b">
             <button
               onClick={handlePrev}
               className="px-3 py-1 bg-white shadow rounded-lg"
@@ -213,7 +320,7 @@ function Schedule() {
               const dateKey = date ? formatDate(date) : null;
               const events = dateKey ? scheduleData[dateKey] || [] : [];
               const filtered = events.filter((e) =>
-                e.title.toLowerCase().includes(searchTerm.toLowerCase())
+                e.title?.toLowerCase().includes(searchTerm.toLowerCase())
               );
               return (
                 <div key={idx} className="bg-white min-h-[120px] p-2 border">
@@ -248,14 +355,15 @@ function Schedule() {
               My Schedule
             </h2>
 
-            {myTeamSchedules.length === 0 ? (
+            {myTeamSchedules.filter((sched) => sched.status !== "Done")
+              .length === 0 ? (
               <p className="text-gray-500">
                 No schedule available for your team.
               </p>
             ) : (
               <div className="space-y-4">
                 {myTeamSchedules
-                  .filter((sched) => sched.status !== "Done")
+                  .filter((sched) => sched.status !== "Done") // <-- filter out Done
                   .map((sched) => (
                     <div
                       key={sched.id}
@@ -264,6 +372,7 @@ function Schedule() {
                       <p className="font-semibold text-green-800">
                         {sched.status}
                       </p>
+
                       <p className="font-semibold text-green-800">
                         {sched.title}
                       </p>
@@ -277,31 +386,53 @@ function Schedule() {
                       <p className="text-gray-700">📍 {sched.location}</p>
 
                       {/* Time In / Time Out Buttons */}
-                      <div className="mt-3 flex gap-3">
+                      {sched.type === "Training" && (
+                        <div className="mt-3 flex gap-3">
+                          <button
+                            onClick={() => handleTimeIn(sched)}
+                            disabled={sched.status !== "Start"}
+                            className={`px-4 py-2 rounded-lg text-white ${
+                              sched.status !== "Start"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-green-600 hover:bg-green-700"
+                            }`}
+                          >
+                            Time In {sched.timeIn ? `(${sched.timeIn})` : ""}
+                          </button>
+
+                          <button
+                            onClick={() => handleTimeOut(sched)}
+                            disabled={sched.status !== "In Progress"}
+                            className={`px-4 py-2 rounded-lg text-white ${
+                              sched.status !== "In Progress"
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-red-600 hover:bg-red-700"
+                            }`}
+                          >
+                            Time Out {sched.timeOut ? `(${sched.timeOut})` : ""}
+                          </button>
+                        </div>
+                      )}
+
+                      {sched.type === "Tournament" && (
                         <button
-                          onClick={() => handleTimeIn(sched.id)}
-                          disabled={sched.status === "Pending"}
+                          onClick={() => handleTimeIn(sched)}
+                          disabled={
+                            sched.date !==
+                              new Date().toISOString().slice(0, 10) ||
+                            sched.timeIn
+                          } // disabled if date is not today or already timed in
                           className={`px-4 py-2 rounded-lg text-white ${
-                            sched.status === "Pending"
+                            sched.date !==
+                              new Date().toISOString().slice(0, 10) ||
+                            sched.timeIn
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-green-600 hover:bg-green-700"
                           }`}
                         >
-                          Time In
+                          Attend {sched.timeIn ? `(${sched.timeIn})` : ""}
                         </button>
-
-                        <button
-                          onClick={() => handleTimeOut(sched.id)}
-                          disabled={sched.status === "Pending"}
-                          className={`px-4 py-2 rounded-lg text-white ${
-                            sched.status === "Pending"
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-red-600 hover:bg-red-700"
-                          }`}
-                        >
-                          Time Out
-                        </button>
-                      </div>
+                      )}
                     </div>
                   ))}
               </div>
@@ -309,7 +440,6 @@ function Schedule() {
           </div>
         </main>
 
-        {/* Fixed Footer */}
         <div className="flex-shrink-0">
           <Footer />
         </div>

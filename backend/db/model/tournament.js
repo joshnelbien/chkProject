@@ -29,10 +29,7 @@ const TournamentSchedule = sequelize.define("tournament_schedules", {
     type: DataTypes.BOOLEAN,
     defaultValue: false, // 👈 You can update this after the tournament ends
   },
-  status: {
-    type: DataTypes.STRING,
-    defaultValue: "Pending",
-  },
+
   homeScore: {
     type: DataTypes.STRING,
   },

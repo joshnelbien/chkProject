@@ -17,7 +17,7 @@ const Tournament = sequelize.define("tournaments", {
 
   type: {
     type: DataTypes.STRING,
-    defaultValue: "tournament",
+    defaultValue: "Tournament",
   },
   tournamentName: {
     type: DataTypes.STRING,
@@ -55,7 +55,7 @@ const Tournament = sequelize.define("tournaments", {
     type: DataTypes.BOOLEAN,
     defaultValue: false, // 👈 You can update this after the tournament ends
   },
-  status: {
+  Tournamentstatus: {
     type: DataTypes.STRING,
     defaultValue: "Pending",
   },
