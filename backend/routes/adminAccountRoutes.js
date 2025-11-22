@@ -228,7 +228,23 @@ router.put("/verify-superadmin/:id", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
 
+  try {
+    const admin = await Admin.findByPk(id);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+
+    await admin.destroy(); // delete the admin
+
+    res.json({ success: true, message: "Admin deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting admin:", error);
+    res.status(500).json({ success: false, message: "Server error while deleting admin" });
+  }
+});
 
 
 router.get("/coach-photo/:id", async (req, res) => {

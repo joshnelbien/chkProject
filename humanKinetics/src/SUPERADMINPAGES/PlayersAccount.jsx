@@ -3,29 +3,67 @@ import axios from "axios";
 import Sidebar from "./SideBar";
 import Navbar from "./NavBar";
 import Footer from "./Footer";
+import PlayerModal from "./modals/PlayerModal";
+import ConfirmModal from "./modals/ConfirmModal";
 
 function PlayerAccounts() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null); // Player to delete
 
   useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/userAccounts/player`); // Adjust your route
-        setPlayers(res.data);
-      } catch (error) {
-        console.error("Error fetching players:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPlayers();
   }, []);
+
+  const fetchPlayers = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`http://localhost:5000/userAccounts/player`);
+      setPlayers(res.data);
+    } catch (error) {
+      console.error("Error fetching players:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openModal = (player) => {
+    setSelectedPlayer(player);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedPlayer(null);
+    setIsModalOpen(false);
+  };
+
+  const openConfirmDelete = (player) => {
+    setConfirmDelete(player);
+  };
+
+  const closeConfirmDelete = () => {
+    setConfirmDelete(null);
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    try {
+      await axios.delete(`http://localhost:5000/userAccounts/player/${confirmDelete.id}`);
+      // Remove player from the state
+      setPlayers((prev) => prev.filter((p) => p.id !== confirmDelete.id));
+      closeConfirmDelete();
+      alert("Player deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting player:", error);
+      alert("Failed to delete player.");
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar isOpen={true} />
-
       <div className="flex-1 flex flex-col ml-15 md:ml-15 mt-16">
         <Navbar />
 
@@ -43,10 +81,8 @@ function PlayerAccounts() {
                 <table className="min-w-full table-auto border border-gray-200">
                   <thead className="bg-green-700 text-white">
                     <tr>
-              
                       <th className="px-4 py-2 border">Name</th>
                       <th className="px-4 py-2 border">Email</th>
-                   
                       <th className="px-4 py-2 border">Sport</th>
                       <th className="px-4 py-2 border">Jersey No</th>
                       <th className="px-4 py-2 border">Position</th>
@@ -58,20 +94,24 @@ function PlayerAccounts() {
                   <tbody className="bg-white text-gray-700">
                     {players.map((player) => (
                       <tr key={player.id}>
-                   
                         <td className="px-4 py-2 border">{player.lastName} {player.firstName}</td>
                         <td className="px-4 py-2 border">{player.email}</td>
-                
                         <td className="px-4 py-2 border">{player.sport}</td>
                         <td className="px-4 py-2 border">{player.jerseyNo}</td>
                         <td className="px-4 py-2 border">{player.position}</td>
                         <td className="px-4 py-2 border">{player.isVerified ? "Yes" : "No"}</td>
                         <td className="px-4 py-2 border">{player.status}</td>
                         <td className="px-4 py-2 border">
-                          <button className="bg-blue-600 text-white px-3 py-1 rounded-md mr-2 hover:bg-blue-700">
-                            Edit
+                          <button
+                            className="bg-blue-600 text-white px-3 py-1 rounded-md mr-2 hover:bg-blue-700"
+                            onClick={() => openModal(player)}
+                          >
+                            View
                           </button>
-                          <button className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700">
+                          <button
+                            className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
+                            onClick={() => openConfirmDelete(player)}
+                          >
                             Delete
                           </button>
                         </td>
@@ -80,6 +120,18 @@ function PlayerAccounts() {
                   </tbody>
                 </table>
               </div>
+            )}
+
+            {isModalOpen && selectedPlayer && (
+              <PlayerModal player={selectedPlayer} onClose={closeModal} />
+            )}
+
+            {confirmDelete && (
+              <ConfirmModal
+                message={`Are you sure you want to delete ${confirmDelete.firstName} ${confirmDelete.lastName}?`}
+                onConfirm={handleDelete}
+                onCancel={closeConfirmDelete}
+              />
             )}
           </div>
         </main>

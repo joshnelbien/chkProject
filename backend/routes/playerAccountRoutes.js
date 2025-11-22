@@ -168,6 +168,21 @@ router.get("/verify-email", async (req, res) => {
   }
 });
 
+router.delete("/player/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await playerAccounts.destroy({ where: { id } });
+    if (deleted) {
+      res.json({ success: true, message: "Player deleted successfully." });
+    } else {
+      res.status(404).json({ success: false, message: "Player not found." });
+    }
+  } catch (error) {
+    console.error("Error deleting player:", error);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
+
 router.get("/players", async (req, res) => {
   try {
     const players = await playerAccounts.findAll({});

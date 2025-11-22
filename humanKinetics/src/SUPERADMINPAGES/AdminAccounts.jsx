@@ -4,12 +4,14 @@ import Sidebar from "./SideBar";
 import Navbar from "./NavBar";
 import Footer from "./Footer";
 import AdminModal from "./modals/AdminModal";
+import ConfirmModal from "./modals/ConfirmModal";
 
 function AdminAccounts() {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [confirmDeleteAdmin, setConfirmDeleteAdmin] = useState(null);
 
   useEffect(() => {
     fetchAdmins();
@@ -45,6 +47,31 @@ function AdminAccounts() {
     );
     // Update modal data
     setSelectedAdmin(updatedAdmin);
+  };
+
+  const handleDeleteClick = (admin) => {
+    setConfirmDeleteAdmin(admin);
+  };
+
+  // Cancel deletion
+  const handleCancelDelete = () => {
+    setConfirmDeleteAdmin(null);
+  };
+
+  // Confirm deletion
+  const handleConfirmDelete = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/adminAccounts/${confirmDeleteAdmin.id}`);
+      alert("Admin deleted successfully");
+
+      // Update table after deletion
+      setAdmins((prev) => prev.filter((a) => a.id !== confirmDeleteAdmin.id));
+    } catch (error) {
+      console.error("Error deleting admin:", error);
+      alert(error.response?.data?.message || "Failed to delete admin.");
+    } finally {
+      setConfirmDeleteAdmin(null);
+    }
   };
 
   return (
@@ -85,7 +112,10 @@ function AdminAccounts() {
                           >
                             View
                           </button>
-                          <button className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700">
+                          <button
+                            className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
+                            onClick={() => handleDeleteClick(admin)}
+                          >
                             Delete
                           </button>
                         </td>
@@ -94,6 +124,13 @@ function AdminAccounts() {
                   </tbody>
                 </table>
               </div>
+            )}
+            {confirmDeleteAdmin && (
+              <ConfirmModal
+                message={`Are you sure you want to delete ${confirmDeleteAdmin.firstName} ${confirmDeleteAdmin.lastName}?`}
+                onConfirm={handleConfirmDelete}
+                onCancel={handleCancelDelete}
+              />
             )}
           </div>
         </main>
