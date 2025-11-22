@@ -243,6 +243,23 @@ function Login() {
       return;
     }
 
+  if (
+  formData.email === "superadmin@gmail.com" &&
+  formData.password === "adminpassword"
+) {
+  console.log("🚀 Super Admin logged in!");
+
+  setLoading(true); // show loader just like normal login
+
+  // Add a small delay so the loading UI is visible
+  setTimeout(() => {
+    navigate("/super-adminAccounts");
+    setLoading(false);
+  }, 800);
+
+  return;
+}
+
     setLoading(true);
 
     try {

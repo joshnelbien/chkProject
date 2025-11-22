@@ -33,6 +33,8 @@ import Register from "./PAGES/Register/Register";
 import AdminRegister from "./PAGES/Register/adminRegister";
 import NotFound from "./notFound/NotFound";
 import AdminAccounts from "./SUPERADMINPAGES/AdminAccounts";
+import Logs from "./SUPERADMINPAGES/Logs";
+import PlayersAccount from "./SUPERADMINPAGES/PlayersAccount";
 import "./index.css";
 
 function App() {
@@ -55,8 +57,8 @@ function App() {
 
           {/* SUPERADMIN PAGES */}
           <Route path="/super-adminAccounts" element={<AdminAccounts />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/athletes" element={<AthletePage />} />
+          <Route path="/super-adminPlayer" element={<PlayersAccount />} />
+          <Route path="/super-adminLogs" element={<Logs />} />
 
           {/* ATHLETE PAGES */}
           <Route path="/medal-tally/:id" element={<MedalTally />} />

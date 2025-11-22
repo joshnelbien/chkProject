@@ -142,6 +142,19 @@ router.get("/coaches", async (req, res) => {
   }
 });
 
+router.get("/admins", async (req, res) => {
+  try {
+    const admins = await Admin.findAll({});
+
+    res.json(admins);
+  } catch (error) {
+    console.error("Error fetching admins:", error);
+    res.status(500).json({ error: "Server error fetching admins." });
+  }
+});
+
+
+
 router.get("/coaches-profile/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -189,6 +202,34 @@ router.put(
     }
   }
 );
+
+router.put("/verify-superadmin/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const admin = await Admin.findByPk(id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Check if admin is verified first
+    if (!admin.isVerified) {
+      return res.status(400).json({ success: false, message: "Cannot verify Super Admin: admin is not verified yet." });
+    }
+
+    // Update Super Admin Verified field
+    admin.isSuperAdminVerified = true;
+    await admin.save();
+
+    res.json({ success: true, message: "Super Admin Verified", admin });
+  } catch (error) {
+    console.error("Error verifying admin:", error);
+    res.status(500).json({ error: "Server error while verifying admin." });
+  }
+});
+
+
+
 
 router.get("/coach-photo/:id", async (req, res) => {
   try {

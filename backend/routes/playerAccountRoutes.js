@@ -202,6 +202,19 @@ router.get("/players/:id", async (req, res) => {
   }
 });
 
+router.get("/player", async (req, res) => {
+  try {
+    const players = await playerAccounts.findAll({});
+
+    res.json(players);
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({ error: "Server error fetching players." });
+  }
+});
+
+
+
 router.get("/players-profile/:id", async (req, res) => {
   try {
     const { id } = req.params;
