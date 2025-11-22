@@ -48,7 +48,22 @@ function Sidebar({ isOpen }) {
   };
 
   // ✅ Handle logout confirmation
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
+    // Log the logout activity
+    try {
+      await axios.post("http://localhost:5000/logs/logs", {
+        email: player?.email || "", 
+        description: "Logged Out", // ✅ Description
+        time: new Date().toLocaleTimeString(),
+        date: new Date().toLocaleDateString(),
+        role: "athlete",
+      });
+      console.log("📝 Logout activity logged successfully");
+    } catch (err) {
+      console.error("❌ Failed to log logout activity:", err);
+    }
+
+    // Proceed to logout
     setShowLogoutModal(false);
     navigate("/");
   };

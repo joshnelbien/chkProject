@@ -25,6 +25,9 @@ const TeamsRoutes = require("./routes/teamRoutes");
 const Attendance = require("./db/model/attendanceDB");
 const AttendanceRoutes = require("./routes/attendanceRoutes");
 
+const Logs = require("./db/model/logsDB");
+const LogsRoutes = require("./routes/logsRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -43,7 +46,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
     await TournamentSchedule.sync({ alter: true });
     await Teams.sync({ alter: true });
     await Attendance.sync({ alter: true });
-
+     await Logs.sync({ alter: true });
     console.log("Database ready.");
   } catch (error) {
     console.error("Database setup or hardcoded insertion failed:", error);
@@ -57,6 +60,7 @@ app.use("/trainingSchedule", trainingScheduleRoutes);
 app.use("/tournament", tournamentRoutes);
 app.use("/teams", TeamsRoutes);
 app.use("/attendance", AttendanceRoutes);
+app.use("/logs", LogsRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

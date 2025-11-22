@@ -47,10 +47,29 @@ function AdminSidebar() {
   // LOGOUT HANDLING
   // ==========================
   const handleLogoutClick = () => setShowLogoutModal(true);
-  const handleConfirmLogout = () => {
-    setShowLogoutModal(false);
-    navigate("/");
-  };
+
+ const handleConfirmLogout = async () => {
+  // Log the logout activity
+  try {
+    await axios.post("http://localhost:5000/logs/logs", {
+      firstName: coach?.firstName || "Admin",
+      lastName: coach?.lastName || "",
+      email: coach?.email || "", 
+      sport: "N/A",
+      description: "Logged Out", // ✅ Description
+      time: new Date().toLocaleTimeString(),
+      date: new Date().toLocaleDateString(),
+      role: "admin",
+    });
+    console.log("📝 Logout activity logged successfully");
+  } catch (err) {
+    console.error("❌ Failed to log logout activity:", err);
+  }
+
+  // Proceed to logout
+  setShowLogoutModal(false);
+  navigate("/");
+};
   const handleCancelLogout = () => setShowLogoutModal(false);
 
   // ==========================

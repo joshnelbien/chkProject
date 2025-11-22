@@ -220,19 +220,33 @@ function Login() {
     window.open("https://mail.google.com", "_blank");
   };
 
-  const handleSuccessfulLogin = (id) => {
-    setLoggedInId(id);
-    setShowSuccessModal(true);
+  const handleSuccessfulLogin = async (id) => {
+  setLoggedInId(id);
+  setShowSuccessModal(true);
 
-    // Navigate after showing success modal for 2 seconds
-    timeoutRef.current = setTimeout(() => {
-      if (loginType === "athlete") {
-        navigate(`/overView/${id}`);
-      } else {
-        navigate(`/admin-overview/${id}`);
-      }
-    }, 2000);
-  };
+  // ✅ Log the login activity
+  try {
+    await axios.post("http://localhost:5000/logs/logs", {
+      email: formData.email,
+      description: "Logged In", // ✅ This is what you wanted
+      time: new Date().toLocaleTimeString(),
+      date: new Date().toLocaleDateString(),
+      role: loginType,
+    });
+    console.log("📝 Login activity logged successfully");
+  } catch (err) {
+    console.error("❌ Failed to log login activity:", err);
+  }
+
+  // Navigate after showing success modal for 2 seconds
+  timeoutRef.current = setTimeout(() => {
+    if (loginType === "athlete") {
+      navigate(`/overView/${id}`);
+    } else {
+      navigate(`/admin-overview/${id}`);
+    }
+  }, 2000);
+};
 
   // ✅ LOGIN HANDLER
   const handleSubmit = async (e) => {
