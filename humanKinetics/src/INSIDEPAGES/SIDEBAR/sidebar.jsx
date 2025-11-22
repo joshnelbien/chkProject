@@ -185,7 +185,7 @@ function Sidebar({ isOpen }) {
 
         <SidebarSection title="Performance">
           <SidebarLink to={`/analytics/${id}`} label="Analytics" />
-          <SidebarLink to={`/nutrition/${id}`} label="Nutrition" />
+
           <SidebarLink to={`/schedule/${id}`} label="Schedule" />
         </SidebarSection>
 
