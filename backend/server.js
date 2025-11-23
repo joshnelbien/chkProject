@@ -30,6 +30,9 @@ const AttendanceRoutes = require("./routes/attendanceRoutes");
 const Logs = require("./db/model/logsDB");
 const LogsRoutes = require("./routes/logsRoutes");
 
+const MedalTally = require("./db/model/medalTally");
+const MedalTallyRoutes = require("./routes/medalTallyRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -49,6 +52,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
     await Teams.sync({ alter: true });
     await Attendance.sync({ alter: true });
      await Logs.sync({ alter: true });
+      await MedalTally.sync({ alter: true });
     console.log("Database ready.");
   } catch (error) {
     console.error("Database setup or hardcoded insertion failed:", error);
@@ -63,6 +67,7 @@ app.use("/tournament", tournamentRoutes);
 app.use("/teams", TeamsRoutes);
 app.use("/attendance", AttendanceRoutes);
 app.use("/logs", LogsRoutes);
+app.use("/medalTally", MedalTallyRoutes);
 
 app.post("/contact", async (req, res) => {
   const { fullName, email, subject, message } = req.body;
