@@ -10,6 +10,7 @@ function EditAccountModal({ open, onClose, player, onSave }) {
     course: "",
     yearLevel: "",
     sport: "",
+    medicalCertificate: "",
 
     // 🩺 Basic Health Info
     height: "",
@@ -55,6 +56,9 @@ function EditAccountModal({ open, onClose, player, onSave }) {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const fileInputRef = useRef(null);
+  const [medicalCertificateFile, setMedicalCertificateFile] = useState(null);
+  const [medicalCertificatePreview, setMedicalCertificatePreview] = useState(null);
+  const medicalCertificateRef = useRef(null);
 
   // 🧮 Auto-calculate BMI
   useEffect(() => {
@@ -119,6 +123,13 @@ function EditAccountModal({ open, onClose, player, onSave }) {
       });
 
       // Profile preview
+      if (player.medicalCertificate) {
+        // Assume this URL returns the file, could be PDF or image
+        const url = `http://localhost:5000/userAccounts/medical-certificate/${player.id}`;
+        setMedicalCertificatePreview(url);
+      }
+
+
       if (player?.id) {
         setProfilePreview(
           `http://localhost:5000/userAccounts/player-photo/${player.id}`
@@ -146,15 +157,31 @@ function EditAccountModal({ open, onClose, player, onSave }) {
     setShowConfirmationModal(true);
   };
 
+  const handleMedicalCertificateChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setMedicalCertificateFile(file);
+
+      if (file.type === "application/pdf") {
+        setMedicalCertificatePreview(URL.createObjectURL(file)); // PDF can open in new tab
+      } else if (file.type.startsWith("image/")) {
+        setMedicalCertificatePreview(URL.createObjectURL(file));
+      }
+    }
+  };
+
   const handleConfirmSave = async () => {
     setShowConfirmationModal(false);
-    
+
     try {
       const data = new FormData();
       Object.entries(formData).forEach(([key, value]) =>
         data.append(key, value)
       );
+
       if (profileFile) data.append("profilePicture", profileFile);
+      if (medicalCertificateFile)
+        data.append("medicalCertificate", medicalCertificateFile);
 
       await axios.put(
         `http://localhost:5000/userAccounts/players-update/${player.id}`,
@@ -163,9 +190,9 @@ function EditAccountModal({ open, onClose, player, onSave }) {
       );
 
       setShowSuccessModal(true);
-      
+
       onSave(formData);
-      
+
       setTimeout(() => {
         setShowSuccessModal(false);
         onClose();
@@ -526,6 +553,65 @@ function EditAccountModal({ open, onClose, player, onSave }) {
               onChange={handleChange}
             />
           </Section>
+          <Section title="Medical Certificate">
+            <div className="flex items-center gap-2">
+              {medicalCertificatePreview ? (
+                <>
+                  {medicalCertificateFile ? (
+                    // If the user just selected a file
+                    medicalCertificateFile.type === "application/pdf" ? (
+                      <span className="text-sm text-gray-700">PDF uploaded</span>
+                    ) : (
+                      <img
+                        src={medicalCertificatePreview}
+                        alt="Medical Certificate Preview"
+                        className="w-20 h-20 object-contain border rounded-lg"
+                      />
+                    )
+                  ) : (
+                    // If loaded from server
+                    <>
+                      {medicalCertificatePreview.startsWith("data:application/pdf") ||
+                        medicalCertificatePreview.includes("application/pdf") ? (
+                        <span className="text-sm text-gray-700">PDF uploaded</span>
+                      ) : (
+                        <img
+                          src={medicalCertificatePreview}
+                          alt="Medical Certificate Preview"
+                          className="w-20 h-20 object-contain border rounded-lg"
+                        />
+                      )}
+                    </>
+                  )}
+                  <button
+                    onClick={() =>
+                      window.open(medicalCertificatePreview, "_blank")
+                    }
+                    className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition text-sm"
+                  >
+                    View
+                  </button>
+                </>
+              ) : (
+                <span className="text-sm text-red-600">
+                  No Certificate Uploaded, Please Upload
+                </span>
+              )}
+              <input
+                type="file"
+                ref={medicalCertificateRef}
+                accept="image/*,application/pdf"
+                onChange={handleMedicalCertificateChange}
+                className="hidden"
+              />
+              <button
+                onClick={() => medicalCertificateRef.current.click()}
+                className="px-3 py-1 bg-green-700 text-white rounded-lg hover:bg-green-600 transition text-sm"
+              >
+                Upload
+              </button>
+            </div>
+          </Section>
 
           {/* 🚨 Emergency Info */}
           <Section title="Emergency Information">
@@ -622,11 +708,10 @@ function InputField({
         value={value}
         readOnly={readOnly}
         onChange={onChange}
-        className={`border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-          readOnly
-            ? "bg-gray-100"
-            : "focus:ring-green-500 focus:border-green-500"
-        } transition`}
+        className={`border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${readOnly
+          ? "bg-gray-100"
+          : "focus:ring-green-500 focus:border-green-500"
+          } transition`}
       />
     </div>
   );

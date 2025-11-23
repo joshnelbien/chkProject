@@ -175,6 +175,13 @@ strength:{
     type: DataTypes.BLOB("long"),
     allowNull: true,
   },
+
+    medicalCertificate: {
+    type: DataTypes.BLOB("long"),
+    allowNull: true,
+  },
+
+
 });
 
 

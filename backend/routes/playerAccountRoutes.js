@@ -9,6 +9,8 @@ const { Op, where } = require("sequelize");
 const multer = require("multer");
 const playerAccounts = require("../db/model/playerAccountsDb");
 require("dotenv").config();
+const path = require("path");
+const fs = require("fs");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -257,7 +259,10 @@ router.get("/players-profile/:id", async (req, res) => {
 
 router.put(
   "/players-update/:id",
-  upload.single("profilePicture"),
+  upload.fields([
+    { name: "profilePicture", maxCount: 1 },
+    { name: "medicalCertificate", maxCount: 1 },
+  ]),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -267,12 +272,17 @@ router.put(
         return res.status(404).json({ message: "Player not found" });
       }
 
-      // Create a copy of all fields from req.body
+      // Copy all fields from req.body
       const updatedData = { ...req.body };
 
-      // If image uploaded, attach it
-      if (req.file) {
-        updatedData.profilePicture = req.file.buffer;
+      // Attach uploaded profile picture
+      if (req.files.profilePicture) {
+        updatedData.profilePicture = req.files.profilePicture[0].buffer;
+      }
+
+      // Attach uploaded medical certificate
+      if (req.files.medicalCertificate) {
+        updatedData.medicalCertificate = req.files.medicalCertificate[0].buffer;
       }
 
       // Perform update
@@ -302,6 +312,35 @@ router.get("/player-photo/:id", async (req, res) => {
   } catch (error) {
     console.error("Error fetching profile picture:", error);
     res.status(500).send("Server error fetching profile picture.");
+  }
+});
+
+router.get("/medical-certificate/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const player = await playerAccounts.findByPk(id);
+
+    if (!player || !player.medicalCertificate) {
+      return res.status(404).send("Medical certificate not found.");
+    }
+
+    // Determine content type
+    let contentType = "application/octet-stream"; // default
+    if (player.medicalCertificateType) {
+      // If you store MIME type in DB
+      contentType = player.medicalCertificateType;
+    } else {
+      // Fallback based on extension
+      const ext = path.extname(player.medicalCertificateName || "").toLowerCase();
+      if (ext === ".pdf") contentType = "application/pdf";
+      else contentType = "image/jpeg";
+    }
+
+    res.setHeader("Content-Type", contentType);
+    res.send(player.medicalCertificate); // assuming this is a Buffer or Blob in DB
+  } catch (error) {
+    console.error("Error fetching medical certificate:", error);
+    res.status(500).send("Server error fetching medical certificate.");
   }
 });
 
