@@ -14,6 +14,29 @@ function TrainProgram() {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
   const [userTeamId, setUserTeamId] = useState(null);
+  const [attendanceData, setAttendanceData] = useState([]);
+
+  useEffect(() => {
+  if (!userData) return;
+
+  const fetchAttendance = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/attendance/all`
+      );
+      // Filter attendance by user email
+      const userAttendance = res.data.filter(
+        (att) => att.email === userData.email
+      );
+      setAttendanceData(userAttendance);
+    } catch (err) {
+      console.error("Error fetching attendance:", err);
+    }
+  };
+
+  fetchAttendance();
+}, [userData]);
+
 
   // Fetch schedule data
   useEffect(() => {
@@ -73,15 +96,15 @@ function TrainProgram() {
 
   // Compute training summary counts
   const totalSessions = filteredSchedule.length;
-  const statusCounts = filteredSchedule.reduce(
-    (acc, session) => {
-      const status = session.status?.toLowerCase() || "unknown";
-      if (!acc[status]) acc[status] = 0;
-      acc[status]++;
-      return acc;
-    },
-    { pending: 0, done: 0, cancelled: 0 }
-  );
+ const statusCounts = filteredSchedule.reduce((acc, session) => {
+  const status = session.status?.toLowerCase() || "unknown";
+  if (!acc[status]) acc[status] = 0;
+  acc[status]++;
+  return acc;
+}, { pending: 0, done: 0, cancelled: 0, attended: 0 });
+
+// Add attended from attendanceData
+statusCounts.attended = attendanceData.length;
 
   if (loading)
     return (
@@ -119,7 +142,7 @@ function TrainProgram() {
           </div>
 
           {/* Summary Card */}
-          <div className="bg-white p-6 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+          <div className="bg-white p-6 rounded-lg shadow mb-6 grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
             <div className="p-4 border rounded-lg">
               <p className="text-gray-500">Total Sessions</p>
               <p className="text-2xl font-bold">{totalSessions}</p>
@@ -135,6 +158,10 @@ function TrainProgram() {
             <div className="p-4 border rounded-lg">
               <p className="text-red-500 font-semibold">Cancelled</p>
               <p className="text-xl font-bold">{statusCounts.cancelled}</p>
+            </div>
+            <div className="p-4 border rounded-lg">
+              <p className="text-green-500 font-semibold">Attended</p>
+              <p className="text-xl font-bold">{statusCounts.attended}</p>
             </div>
           </div>
 
