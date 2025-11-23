@@ -228,6 +228,15 @@ router.get("/player", async (req, res) => {
   }
 });
 
+router.get("/player/count", async (req, res) => {
+  try {
+    const count = await playerAccounts.count(); // count all players
+    res.json({ totalPlayers: count });
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({ error: "Server error fetching players." });
+  }
+});
 
 
 router.get("/players-profile/:id", async (req, res) => {

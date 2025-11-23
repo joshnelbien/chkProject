@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { Op } = require("sequelize");
 const Tournament = require("../db/model/tournamentSchedules");
 const TournamentSchedule = require("../db/model/tournament");
 
@@ -23,6 +24,31 @@ router.get("/tournaments", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch tournaments" });
   }
 });
+
+
+router.get("/tournaments/counts", async (req, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+    const upcoming = await Tournament.count({
+      where: { startDate: { [Op.gt]: today } },
+    });
+
+    const ongoing = await Tournament.count({
+      where: { startDate: { [Op.lte]: today }, endDate: { [Op.gte]: today } },
+    });
+
+    const ended = await Tournament.count({
+      where: { endDate: { [Op.lt]: today } },
+    });
+
+    res.json({ upcoming, ongoing, ended });
+  } catch (err) {
+    console.error("Error fetching tournament counts:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 router.put("/tournaments/:id", async (req, res) => {
   try {

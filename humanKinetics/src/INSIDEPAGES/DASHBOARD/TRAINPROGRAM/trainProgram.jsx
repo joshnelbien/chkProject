@@ -95,16 +95,19 @@ function TrainProgram() {
   ];
 
   // Compute training summary counts
-  const totalSessions = filteredSchedule.length;
- const statusCounts = filteredSchedule.reduce((acc, session) => {
+const totalSessions = filteredSchedule.length;
+
+const statusCounts = filteredSchedule.reduce((acc, session) => {
   const status = session.status?.toLowerCase() || "unknown";
   if (!acc[status]) acc[status] = 0;
   acc[status]++;
   return acc;
 }, { pending: 0, done: 0, cancelled: 0, attended: 0 });
 
-// Add attended from attendanceData
-statusCounts.attended = attendanceData.length;
+// Only count attended where type is "training"
+statusCounts.attended = attendanceData.filter(
+  (att) => att.type?.toLowerCase() === "training"
+).length;
 
   if (loading)
     return (

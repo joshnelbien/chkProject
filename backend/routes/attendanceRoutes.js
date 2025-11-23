@@ -1,6 +1,7 @@
 // routes/attendance.js
 const express = require("express");
 const router = express.Router();
+
 const Attendance = require("../db/model/attendanceDB");
 
 // Time In
@@ -115,5 +116,22 @@ router.get("/all", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+router.get("/attendance/recent", async (req, res) => {
+  try {
+    const records = await Attendance.findAll({
+      order: [
+        ["date", "DESC"],
+        ["timeIn", "ASC"],
+      ],
+      limit: 5,
+    });
+    res.json(records);
+  } catch (err) {
+    console.error("Fetch all attendance error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 
 module.exports = router;
