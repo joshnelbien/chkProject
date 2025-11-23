@@ -120,7 +120,7 @@ function MedalTally() {
                       : "bg-white border border-gray-300 text-gray-600"
                   }`}
                 >
-                  {year}
+                  LCUAA {year}
                 </button>
               ))}
             </div>

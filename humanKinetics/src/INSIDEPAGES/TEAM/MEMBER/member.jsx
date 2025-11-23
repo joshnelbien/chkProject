@@ -42,9 +42,9 @@ function Member() {
           id: m.id,
           name: `${m.firstName} ${m.lastName}`,
           position: m.position || "Unknown",
-          attendance: m.attendance || 0,
-          performance: m.performance || 0,
+          jerseyNo: m.jerseyNo || "N/A",
           status: m.status || "Pending",
+          sport: m.sport || "N/A",
           profilePicture: m.profilePicture || null,
         }));
         setMembers(mappedMembers);
@@ -127,39 +127,19 @@ function Member() {
                   src={getProfileImage(member)}
                   alt={member.name}
                   onError={(e) => (e.target.src = "/lexi.jpg")}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-green-600 shadow-md mb-4"
+                  className="w-24 h-24 rounded-full object-cover border-2 border-green-600 shadow-md "
                 />
 
-                <h3 className="text-xl font-semibold">{member.name}</h3>
-                <p className="text-gray-500 mb-4">{member.position}</p>
+                <h3 className="text-xl font-semibold">{member.name?.toUpperCase()}</h3>
+                <p className="text-gray-500 ">Position :{member.position}</p>
+                <p className="text-gray-500 ">Jersey No: {member.jerseyNo}</p>
+                <p className="text-gray-500 ">Sports: {member.sport?.toUpperCase()}</p>
 
                 {/* Attendance */}
-                <div className="w-full mb-3">
-                  <div className="flex justify-between items-center text-sm text-gray-600 mb-1">
-                    <span>Attendance</span>
-                    <span>{member.attendance}%</span>
-                  </div>
-                  <div className="w-full h-1 bg-gray-200 rounded-full">
-                    <div
-                      className="h-full bg-green-500 rounded-full"
-                      style={{ width: `${member.attendance}%` }}
-                    ></div>
-                  </div>
-                </div>
+
 
                 {/* Performance */}
-                <div className="w-full mb-4">
-                  <div className="flex justify-between items-center text-sm text-gray-600 mb-1">
-                    <span>Performance</span>
-                    <span>{member.performance}%</span>
-                  </div>
-                  <div className="w-full h-1 bg-gray-200 rounded-full">
-                    <div
-                      className="h-full bg-green-500 rounded-full"
-                      style={{ width: `${member.performance}%` }}
-                    ></div>
-                  </div>
-                </div>
+               
 
                 {/* Status */}
                 <div className="flex justify-between w-full text-sm font-semibold">
@@ -172,12 +152,7 @@ function Member() {
                   >
                     {member.status}
                   </span>
-                  <a
-                    href="#"
-                    className="text-gray-600 hover:text-green-700 transition-colors"
-                  >
-                    View Profile
-                  </a>
+
                 </div>
               </div>
             ))}
