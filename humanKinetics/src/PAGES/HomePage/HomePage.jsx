@@ -113,23 +113,18 @@ function HomePage() {
               </h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="text-blue-500 hover:underline text-lg">
+                  <a href="athletes" className="text-blue-500 hover:underline text-lg">
                     Student Portal
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-blue-500 hover:underline text-lg">
+                  <a href="event" className="text-blue-500 hover:underline text-lg">
                     Sports Programs
                   </a>
                 </li>
-                <li>
-                  <a href="#" className="text-blue-500 hover:underline text-lg">
-                    Training Schedule
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-blue-500 hover:underline text-lg">
-                    Event Calendar
+                     <li>
+                  <a href="coaches" className="text-blue-500 hover:underline text-lg">
+                    Coaching Staff
                   </a>
                 </li>
               </ul>

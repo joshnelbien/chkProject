@@ -6,7 +6,7 @@ function Footer() {
   return (
     <footer className="w-full text-white py-12" style={{ backgroundColor: navBgColor }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 lg:gap-8 border-b border-gray-600 pb-10 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 lg:gap-8 border-b border-gray-600 pb-10 mb-6">
           {/* Section 1: Logo, Text, and Social Media */}
           <div className="flex flex-col items-start space-y-4">
             <div className="flex items-center space-x-2">
@@ -37,11 +37,11 @@ function Footer() {
           <div>
             <h3 className="text-xl font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">About Us</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Programs</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Athletes</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">Events</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors duration-300">News</a></li>
+              <li><a href="about" className="text-gray-300 hover:text-white transition-colors duration-300">About Us</a></li>
+              <li><a href="coaches" className="text-gray-300 hover:text-white transition-colors duration-300">Coaching Staff</a></li>
+              <li><a href="athletes" className="text-gray-300 hover:text-white transition-colors duration-300">Athletes</a></li>
+              <li><a href="event" className="text-gray-300 hover:text-white transition-colors duration-300">Events</a></li>
+              <li><a href="contact" className="text-gray-300 hover:text-white transition-colors duration-300">Contact</a></li>
             </ul>
           </div>
 
@@ -70,26 +70,6 @@ function Footer() {
             </div>
           </div>
 
-          {/* Section 4: Newsletter */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Newsletter</h3>
-            <p className="text-sm text-gray-300 mb-4">
-              Subscribe to get latest updates and news.
-            </p>
-            <form className="space-y-4">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="w-full bg-transparent border border-white text-white rounded-lg px-4 py-3 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-              <button
-                type="submit"
-                className="w-full bg-[#FC951B] text-white font-bold py-3 px-4 rounded-lg hover:bg-opacity-80 transition-colors duration-300"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
         </div>
 
         {/* Bottom Bar */}
