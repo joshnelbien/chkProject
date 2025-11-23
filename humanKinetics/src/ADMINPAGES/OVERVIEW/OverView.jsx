@@ -5,13 +5,13 @@ import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
 
 function AdminOverView() {
-  const [totalAthletes, setTotalAthletes] = useState(0);
-  const [upcomingSessions, setUpcomingSessions] = useState(0);
-  const [ongoingSessions, setOngoingSessions] = useState(0); // ✅ added
-  const [endedSessions, setEndedSessions] = useState(0);     // ✅ added
-  const [recentActivities, setRecentActivities] = useState([]);
-  const [allActivities, setAllActivities] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
+const [totalAthletes, setTotalAthletes] = useState(0);
+const [upcomingSessions, setUpcomingSessions] = useState(0);
+const [ongoingSessions, setOngoingSessions] = useState(0);
+const [endedSessions, setEndedSessions] = useState(0);
+const [recentActivities, setRecentActivities] = useState([]);
+const [allActivities, setAllActivities] = useState([]);
+const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     // Fetch total athletes
@@ -19,7 +19,7 @@ function AdminOverView() {
       .then((res) => setTotalAthletes(res.data.totalPlayers))
       .catch((err) => console.error(err));
 
-    // Fetch tournament counts
+    // Fetch upcoming sessions
     axios.get("http://localhost:5000/tournament/tournaments/counts")
       .then((res) => {
         setUpcomingSessions(res.data.upcoming);
@@ -28,7 +28,8 @@ function AdminOverView() {
       })
       .catch((err) => console.error(err));
 
-    // Fetch recent activities (latest 5 or so)
+
+    // Fetch recent activities
     axios.get("http://localhost:5000/attendance/attendance/recent")
       .then((res) => setRecentActivities(res.data))
       .catch((err) => console.error(err));
@@ -37,7 +38,7 @@ function AdminOverView() {
   // Function to open modal and fetch all activities
   const handleViewAll = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/attendance/attendance/recent"); // fetch all records
+      const res = await axios.get("http://localhost:5000/attendance/attendance/recent");
       setAllActivities(res.data);
       setModalOpen(true);
     } catch (err) {
@@ -111,7 +112,13 @@ function AdminOverView() {
               </ul>
             </div>
 
-            
+            {/* Team Performance Placeholder */}
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-xl font-semibold mb-4">Team Performance</h3>
+              <div className="flex justify-center items-center h-48 text-gray-400 text-center border border-dashed rounded-md">
+                Performance Chart Here
+              </div>
+            </div>
           </div>
         </main>
 

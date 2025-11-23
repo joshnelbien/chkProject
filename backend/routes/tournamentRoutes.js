@@ -49,6 +49,23 @@ router.get("/tournaments/counts", async (req, res) => {
   }
 });
 
+router.get("/tournaments/upcoming", async (req, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+    const upcomingTournaments = await Tournament.findAll({
+      where: { startDate: { [Op.gt]: today } },
+      order: [["startDate", "ASC"]],
+      limit: 10, // optional, limit to next 10 tournaments
+    });
+
+    res.json(upcomingTournaments);
+  } catch (err) {
+    console.error("Error fetching upcoming tournaments:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 router.put("/tournaments/:id", async (req, res) => {
   try {
