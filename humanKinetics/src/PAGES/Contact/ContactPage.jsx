@@ -1,9 +1,11 @@
+import { useState } from "react";
+import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import Footer from "../../Footer/Footer"
-import NavigationBar from "../../NavigationBar/NavigationBar"
+import Footer from "../../Footer/Footer";
+import NavigationBar from "../../NavigationBar/NavigationBar";
 
-// Fix for default marker icon not showing
+// Fix Marker Icon Issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
@@ -11,25 +13,26 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
+// Map Component
 function MapComponent() {
-  const position = [14.0734, 121.3262]; // Coordinates for the specified location
+  const position = [14.0734, 121.3262];
 
   return (
     <div className="w-full h-full">
-      <MapContainer 
-        center={position} 
-        zoom={18} 
+      <MapContainer
+        center={position}
+        zoom={18}
         scrollWheelZoom={false}
         style={{ height: "400px", width: "100%" }}
         className="rounded-lg shadow-md"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Marker position={position}>
           <Popup>
-            College of Human Kinetics<br />
+            College of Human Kinetics <br />
             Pamantasan ng Lungsod ng San Pablo
           </Popup>
         </Marker>
@@ -39,56 +42,93 @@ function MapComponent() {
 }
 
 function ContactPage() {
+  // Form State
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+
+  // 🔥 Loading state
+  const [loading, setLoading] = useState(false);
+
+  // Submit Handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true); // ⏳ Start loading
+
+    try {
+      const res = await axios.post("http://localhost:5000/contact", formData);
+
+      if (res.data.success) {
+        alert("Message sent successfully!");
+        setFormData({
+          fullName: "",
+          email: "",
+          subject: "",
+          message: ""
+        });
+      }
+    } catch (error) {
+      alert("Failed to send message.");
+    } finally {
+      setLoading(false); // ⏹️ Stop loading
+    }
+  };
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Navbar at the top */}
+      {/* Navbar */}
       <NavigationBar />
 
-      {/* Page content (fills available space) */}
       <main className="flex-grow pt-16">
         {/* Hero Section */}
         <section className="bg-gray-600 h-[30vh] flex items-center justify-center text-white">
           <h1 className="text-5xl font-bold">Contact Us</h1>
         </section>
 
-        {/* Contact Info and Form Section */}
+        {/* Contact Section */}
         <section className="bg-white p-8">
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Get in Touch */}
+
+            {/* Contact Info */}
             <div>
               <h2 className="text-3xl font-bold mb-4 text-gray-700">Get in Touch</h2>
               <p className="text-gray-600 mb-6">
-                Have questions about our sports programs or facilities? We're here to help. Fill out the form and we'll get back to you as soon as possible.
+                Have questions about our sports programs or facilities? We're here to help.
               </p>
+
               <div className="space-y-6">
                 <div className="flex items-start">
                   <span className="text-3xl text-green-700 mr-4">📍</span>
                   <div>
                     <h4 className="font-bold text-lg">Visit Us</h4>
                     <p className="text-gray-600">
-                      College of Human Kinetics<br />
-                      Pamantasan ng Lungsod ng San Pablo<br />
-                      Brgy. San Jose, San Pablo City<br />
+                      College of Human Kinetics <br />
+                      Pamantasan ng Lungsod ng San Pablo <br />
+                      Brgy. San Jose, San Pablo City <br />
                       Laguna, Philippines
                     </p>
                   </div>
                 </div>
+
                 <div className="flex items-start">
                   <span className="text-3xl text-green-700 mr-4">✉️</span>
                   <div>
                     <h4 className="font-bold text-lg">Email Us</h4>
                     <p className="text-gray-600">
-                      info@plsp.edu.ph<br />
+                      info@plsp.edu.ph <br />
                       sports@plsp.edu.ph
                     </p>
                   </div>
                 </div>
+
                 <div className="flex items-start">
                   <span className="text-3xl text-green-700 mr-4">📞</span>
                   <div>
                     <h4 className="font-bold text-lg">Call Us</h4>
                     <p className="text-gray-600">
-                      (049) 123-4567<br />
+                      (049) 123-4567 <br />
                       0912-345-6789
                     </p>
                   </div>
@@ -96,50 +136,62 @@ function ContactPage() {
               </div>
             </div>
 
-            {/* Send Us a Message Form */}
+            {/* Contact Form */}
             <div>
               <h2 className="text-3xl font-bold mb-4 text-gray-700">Send us a Message</h2>
-              <form className="space-y-4">
+
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name</label>
+                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
                   <input
                     type="text"
-                    id="fullName"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
                     placeholder="Enter your full name"
-                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                   />
                 </div>
+
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
+                  <label className="block text-sm font-medium text-gray-700">Email Address</label>
                   <input
                     type="email"
-                    id="email"
-                    placeholder="Enter your email address"
-                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+                    placeholder="Enter your email"
                   />
                 </div>
+
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700">Subject</label>
+                  <label className="block text-sm font-medium text-gray-700">Subject</label>
                   <input
                     type="text"
-                    id="subject"
-                    placeholder="Enter message subject"
-                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+                    placeholder="Enter subject"
                   />
                 </div>
+
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message</label>
+                  <label className="block text-sm font-medium text-gray-700">Message</label>
                   <textarea
-                    id="message"
                     rows="4"
-                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md"
+                    placeholder="Write your message here..."
                   ></textarea>
                 </div>
+
                 <button
                   type="submit"
-                  className="w-full bg-green-700 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-800"
+                  disabled={loading}
+                  className={`w-full py-3 rounded-lg font-semibold text-white 
+    ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-700 hover:bg-green-800"}`}
                 >
-                  Send Message
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
               </form>
             </div>
@@ -155,10 +207,10 @@ function ContactPage() {
         </section>
       </main>
 
-      {/* Footer always at bottom */}
+      {/* Footer */}
       <Footer />
     </div>
-  )
+  );
 }
 
-export default ContactPage
+export default ContactPage;
