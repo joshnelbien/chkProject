@@ -626,13 +626,13 @@ const Register = () => {
                     </option>
                     <option value="basketball">Basketball</option>
                     <option value="volleyball">Volleyball</option>
-                    <option value="chess">Futsal</option>
-                    <option value="track">Sepak Takraw</option>
-                    <option value="badminton">Table Tennis</option>
-                    <option value="basketball">Badminton</option>
-                    <option value="volleyball">Taekwondo</option>
-                    <option value="chess">Arnis</option>
-                    <option value="track">Karate-Do</option>
+                    <option value="Futsal">Futsal</option>
+                    <option value="Sepak Takraw">Sepak Takraw</option>
+                    <option value="Table Tennis">Table Tennis</option>
+                    <option value="Badminton">Badminton</option>
+                    <option value="Taekwondo">Taekwondo</option>
+                    <option value="Arnis">Arnis</option>
+                    <option value="Karate-Do">Karate-Do</option>
                   </select>
                 </div>
               </div>
