@@ -12,6 +12,7 @@ function PlayerAccounts() {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null); // Player to delete
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
     fetchPlayers();
@@ -20,7 +21,7 @@ function PlayerAccounts() {
   const fetchPlayers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/userAccounts/player`);
+      const res = await axios.get(`${API}/userAccounts/player`);
       setPlayers(res.data);
     } catch (error) {
       console.error("Error fetching players:", error);
@@ -50,7 +51,7 @@ function PlayerAccounts() {
   const handleDelete = async () => {
     if (!confirmDelete) return;
     try {
-      await axios.delete(`http://localhost:5000/userAccounts/player/${confirmDelete.id}`);
+      await axios.delete(`${API}/userAccounts/player/${confirmDelete.id}`);
       // Remove player from the state
       setPlayers((prev) => prev.filter((p) => p.id !== confirmDelete.id));
       closeConfirmDelete();
