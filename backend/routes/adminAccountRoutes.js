@@ -7,17 +7,15 @@ const multer = require("multer");
 const { Op } = require("sequelize");
 const Admin = require("../db/model/adminAccountDB");
 require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 // ✅ Setup Email Transporter
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // ✅ Admin Registration with Email Verification
 router.post("/admin-register", async (req, res) => {
@@ -94,19 +92,22 @@ router.post("/admin-register", async (req, res) => {
     const verifyLink = `${process.env.BACKEND_URL}/adminAccounts/admin-verify-email?token=${token}`;
 
     // Send verification email
-    await transporter.sendMail({
-      from: `"E-Athleta Admin Support" <${process.env.EMAIL_USER}>`,
+    const msg = {
       to: email,
-      subject: "Verify Your E-Athleta Admin Account",
+      from: process.env.FROM_EMAIL, // Verified sender in SendGrid
+      subject: "Verify your Admin E-Athleta Account",
       html: `
         <h2>Welcome to E-Athleta, ${firstName}!</h2>
-        <p>Please verify your admin account by clicking below:</p>
+        <p>Please verify your email address to activate your account.</p>
         <a href="${verifyLink}" style="background:#166534;color:white;padding:10px 15px;border-radius:5px;text-decoration:none;">Verify Email</a>
         <p>If the button doesn’t work, click this link:</p>
         <p>${verifyLink}</p>
         <p>This link will expire in 24 hours.</p>
       `,
-    });
+    };
+
+    await sgMail.send(msg);
+    console.log("📧 Email sent successfully!");
 
     res.status(201).json({
       message:
