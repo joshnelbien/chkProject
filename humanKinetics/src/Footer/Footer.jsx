@@ -74,7 +74,7 @@ function Footer() {
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
-          <p>© 2024 College of Human Kinetics. All rights reserved.</p>
+          <p>© 2024 Institute of Human Kinetics. All rights reserved.</p>
           <div className="flex space-x-4 mt-2 md:mt-0">
             <a href="#" className="hover:text-white transition-colors duration-300">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors duration-300">Terms of Service</a>

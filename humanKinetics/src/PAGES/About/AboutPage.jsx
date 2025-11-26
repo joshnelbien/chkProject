@@ -157,7 +157,7 @@ function AboutPage() {
               {[
                 { name: "Dr. Preciosa D. Villacruel,LPT", role: "University President", image: "/president.jpg" },
                 { name: "", role: "CTED Dean", image: "/cteddean.jpg" },
-                { name: "Directors and Staffs", role: "Director and Staffs", image: "/directorsandstaffs.jpg" },
+                { name: "Prof. Evan Jesusco, LPT, EDD(CAND.) CPAPHS", role: "Director of Institute of Human Kinetics", image: "/director.jpg" },
               ].map((leader) => (
                 <div key={leader.name} className="text-center">
                   <div className="rounded-full w-32 h-32 mx-auto mb-4 overflow-hidden">
