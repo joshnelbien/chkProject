@@ -171,6 +171,7 @@ const SuccessModal = ({ isOpen, onClose, onLoginRedirect, onOpenGmail }) => {
 
 const Register = () => {
   const Navigate = useNavigate();
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -243,7 +244,7 @@ const Register = () => {
 
       // 2. Make the API request
       const response = await fetch(
-        "http://localhost:5000/userAccounts/register",
+        `${API}/userAccounts/register`,
         {
           method: "POST",
           headers: {

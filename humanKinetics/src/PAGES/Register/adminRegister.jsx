@@ -144,6 +144,7 @@ const SuccessModal = ({ isOpen, onClose, onLoginRedirect, onOpenGmail }) => {
 
 const AdminRegister = () => {
   const navigate = useNavigate();
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [formData, setFormData] = useState({
     lastName: "",
     firstName: "",
@@ -203,7 +204,7 @@ const AdminRegister = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/adminAccounts/admin-register",
+        `${API}/adminAccounts/admin-register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
