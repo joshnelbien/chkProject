@@ -7,6 +7,7 @@ import Sidebar from "../SIDEBAR/SideBar";
 import ResultModal from "./ResultModal";
 
 function AdminSchedule() {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const { id } = useParams();
   const [scheduleData, setScheduleData] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,7 +28,7 @@ function AdminSchedule() {
       };
 
       const res = await axios.put(
-        `http://localhost:5000/tournament/tournaments/${selectedEvent.id}`,
+        `${API}/tournament/tournaments/${selectedEvent.id}`,
         payload
       );
 
@@ -67,7 +68,7 @@ function AdminSchedule() {
       };
 
       const res = await axios.put(
-        "http://localhost:5000/trainingSchedule/training-updates",
+        `${API}/trainingSchedule/training-updates`,
         payload
       );
 
@@ -100,10 +101,10 @@ function AdminSchedule() {
         const [trainingRes, tournamentRes, tournamentSchedules] =
           await Promise.all([
             axios.get(
-              "http://localhost:5000/trainingSchedule/training-schedule"
+              `${API}/trainingSchedule/training-schedule`
             ),
             axios.get(
-              "http://localhost:5000/tournament/tournaments-activities"
+              `${API}/tournament/tournaments-activities`
             ),
           ]);
 

@@ -12,6 +12,7 @@ function Member() {
   const [members, setMembers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [teamId, setTeamId] = useState(null);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   // ✅ 1️⃣ Fetch the logged-in user's teamId
   useEffect(() => {
@@ -19,7 +20,7 @@ function Member() {
       if (!id) return;
       try {
         const res = await axios.get(
-          `http://localhost:5000/userAccounts/players-profile/${id}`
+          `${API}/userAccounts/players-profile/${id}`
         );
         const fetchedTeamId = res.data.teamId;
         setTeamId(fetchedTeamId);
@@ -36,7 +37,7 @@ function Member() {
       if (!teamId) return;
       try {
         const res = await axios.get(
-          `http://localhost:5000/teams/player/${teamId}`
+          `${API}/teams/player/${teamId}`
         );
         const mappedMembers = res.data.map((m) => ({
           id: m.id,
@@ -64,7 +65,7 @@ function Member() {
   // ✅ Helper to get member profile image
   const getProfileImage = (member) => {
     if (member.profilePicture && member.id) {
-      return `http://localhost:5000/userAccounts/player-photo/${member.id}`;
+      return `${API}/userAccounts/player-photo/${member.id}`;
     } else {
       return "/lexi.jpg"; // default placeholder
     }

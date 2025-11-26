@@ -11,6 +11,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 function AdminTraining() {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [isModalOpen, setModalOpen] = useState(false);
   const [trainingSchedules, setTrainingSchedules] = useState([]);
 
@@ -22,7 +23,7 @@ function AdminTraining() {
     const fetchSchedules = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/trainingSchedule/training-schedule"
+          `${API}/trainingSchedule/training-schedule`
         );
         console.log("📌 Training Schedules (Frontend):", res.data.schedules);
         setTrainingSchedules(res.data.schedules);

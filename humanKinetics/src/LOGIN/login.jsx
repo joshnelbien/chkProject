@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
+
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
@@ -226,7 +228,7 @@ function Login() {
 
   // ✅ Log the login activity
   try {
-    await axios.post("http://localhost:5000/logs/logs", {
+    await axios.post(`${API}/logs/logs`, {
       email: formData.email,
       description: "Logged In", // ✅ This is what you wanted
       time: new Date().toLocaleTimeString(),
@@ -282,13 +284,13 @@ function Login() {
       if (loginType === "athlete") {
         // 🔹 Athlete login endpoint
         response = await axios.post(
-          "http://localhost:5000/userAccounts/player-login",
+          `${API}/userAccounts/player-login`,
           formData
         );
       } else {
         // 🔹 Admin login endpoint
         response = await axios.post(
-          "http://localhost:5000/adminAccounts/admin-login",
+          `${API}/adminAccounts/admin-login`,
           formData
         );
       }

@@ -83,6 +83,7 @@ const CoachProfileModal = ({ coach, onClose }) => {
 };
 
 function CoachesPage() {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [coaches, setCoaches] = useState([]);
   const [filteredCoaches, setFilteredCoaches] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -106,7 +107,7 @@ function CoachesPage() {
   // Fetch backend coaches
   useEffect(() => {
     axios
-      .get("http://localhost:5000/adminAccounts/coaches")
+      .get(`${API}/adminAccounts/coaches`)
       .then((res) => {
         const updated = res.data.map((coach) => ({
           ...coach,

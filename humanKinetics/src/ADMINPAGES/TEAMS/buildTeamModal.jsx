@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 
 function BuildTeamModal({ open, onClose, onTeamCreated }) {
   const { id } = useParams();
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [formData, setFormData] = useState({
     teamId: id,
     teamName: "",
@@ -37,7 +38,7 @@ function BuildTeamModal({ open, onClose, onTeamCreated }) {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "http://localhost:5000/teams/createTeams",
+        `${API}/teams/createTeams`,
         formData
       );
       console.log("✅ Team Created:", res.data);

@@ -3,13 +3,13 @@ import axios from "axios";
 
 export default function AdminModal({ admin, onClose, onUpdate }) {
   const [verifying, setVerifying] = useState(false);
-
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const handleVerify = async () => {
     if (!admin.isVerified) return;
     setVerifying(true);
     try {
       const res = await axios.put(
-        `http://localhost:5000/adminAccounts/verify-superadmin/${admin.id}`
+        `${API}/adminAccounts/verify-superadmin/${admin.id}`
       );
       if (res.data.success) {
         alert("Admin successfully verified!");

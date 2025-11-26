@@ -8,12 +8,13 @@ function SportEvent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/tournament/tournaments-schedules"
+          `${API}/tournament/tournaments-schedules`
         );
         setEvents(res.data);
       } catch (err) {

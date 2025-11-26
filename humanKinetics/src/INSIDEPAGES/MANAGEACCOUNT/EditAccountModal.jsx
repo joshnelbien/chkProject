@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 function EditAccountModal({ open, onClose, player, onSave }) {
+
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -125,14 +127,14 @@ function EditAccountModal({ open, onClose, player, onSave }) {
       // Profile preview
       if (player.medicalCertificate) {
         // Assume this URL returns the file, could be PDF or image
-        const url = `http://localhost:5000/userAccounts/medical-certificate/${player.id}`;
+        const url = `${API}/userAccounts/medical-certificate/${player.id}`;
         setMedicalCertificatePreview(url);
       }
 
 
       if (player?.id) {
         setProfilePreview(
-          `http://localhost:5000/userAccounts/player-photo/${player.id}`
+          `${API}/userAccounts/player-photo/${player.id}`
         );
       } else {
         setProfilePreview("/lexi.jpg");
@@ -184,7 +186,7 @@ function EditAccountModal({ open, onClose, player, onSave }) {
         data.append("medicalCertificate", medicalCertificateFile);
 
       await axios.put(
-        `http://localhost:5000/userAccounts/players-update/${player.id}`,
+        `${API}/userAccounts/players-update/${player.id}`,
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

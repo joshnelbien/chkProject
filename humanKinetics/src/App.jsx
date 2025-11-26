@@ -39,6 +39,7 @@ import SuperAdminMedalTally from "./SUPERADMINPAGES/medalTally";
 import "./index.css";
 
 function App() {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   return (
     <>
       <BrowserRouter>

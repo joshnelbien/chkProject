@@ -42,6 +42,7 @@ function MapComponent() {
 }
 
 function ContactPage() {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   // Form State
   const [formData, setFormData] = useState({
     fullName: "",
@@ -59,7 +60,7 @@ function ContactPage() {
     setLoading(true); // ⏳ Start loading
 
     try {
-      const res = await axios.post("http://localhost:5000/contact", formData);
+      const res = await axios.post(`${API}/contact`, formData);
 
       if (res.data.success) {
         alert("Message sent successfully!");

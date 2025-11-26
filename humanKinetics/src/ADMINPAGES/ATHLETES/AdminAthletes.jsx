@@ -6,12 +6,12 @@ import Sidebar from "../SIDEBAR/SideBar";
 
 function AdminAthletes() {
   const [players, setPlayers] = useState([]);
-
+  const API = import.meta.env.VITE_BBACKEND_URL;
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/userAccounts/players"
+          `${API}/userAccounts/players`
         );
         console.log("📌 Fetched Players (Frontend):", res.data);
         setPlayers(res.data);
@@ -90,7 +90,7 @@ function AdminAthletes() {
                   key={player.id}
                   profileUrl={
                     player.id
-                      ? `http://localhost:5000/userAccounts/player-photo/${player.id}`
+                      ? `${API}/userAccounts/player-photo/${player.id}`
                       : "/lexi.jpg" // fallback
                   }
                   name={`${player.firstName} ${player.lastName}`}

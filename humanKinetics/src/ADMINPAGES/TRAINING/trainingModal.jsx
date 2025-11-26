@@ -10,6 +10,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [playersByTeam, setPlayersByTeam] = useState({});
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   const [formData, setFormData] = useState({
     title: "",
@@ -32,7 +33,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
     const fetchTeams = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/teams/getTeams/${id}`
+          `${API}/teams/getTeams/${id}`
         );
         setTeams(res.data);
 
@@ -50,7 +51,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
   const fetchPlayersForTeam = async (teamId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/teams/player/${teamId}`
+        `${API}/teams/player/${teamId}`
       );
       setPlayersByTeam((prev) => ({ ...prev, [teamId]: res.data }));
     } catch (err) {
@@ -87,7 +88,7 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
   const confirmSubmit = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/trainingSchedule/training-schedule",
+        `${API}/trainingSchedule/training-schedule`,
         formData
       );
       console.log("Training added:", response.data);

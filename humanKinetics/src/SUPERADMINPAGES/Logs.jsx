@@ -7,11 +7,12 @@ import axios from "axios";
 function Logs() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   // Fetch logs from backend
   const fetchLogs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/logs/logs");
+      const res = await axios.get(`${API}/logs/logs`);
       setLogs(res.data);
     } catch (err) {
       console.error("❌ Error fetching logs:", err);

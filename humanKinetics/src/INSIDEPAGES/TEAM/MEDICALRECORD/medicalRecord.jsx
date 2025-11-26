@@ -12,12 +12,13 @@ function MedicalRecord() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [player, setPlayer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
     const fetchPlayer = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/userAccounts/players-profile/${id}`
+          `${API}/userAccounts/players-profile/${id}`
         );
         setPlayer(res.data);
       } catch (err) {

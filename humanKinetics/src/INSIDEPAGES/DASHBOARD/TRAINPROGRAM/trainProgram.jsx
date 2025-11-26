@@ -15,6 +15,7 @@ function TrainProgram() {
   const [error, setError] = useState(null);
   const [userTeamId, setUserTeamId] = useState(null);
   const [attendanceData, setAttendanceData] = useState([]);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
   if (!userData) return;
@@ -22,7 +23,7 @@ function TrainProgram() {
   const fetchAttendance = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/attendance/all`
+        `${API}/attendance/all`
       );
       // Filter attendance by user email
       const userAttendance = res.data.filter(
@@ -43,7 +44,7 @@ function TrainProgram() {
     const fetchSchedule = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/trainingSchedule/training-schedule"
+          `${API}/trainingSchedule/training-schedule`
         );
         setScheduleData(res.data.schedules);
         setLoading(false);
@@ -64,7 +65,7 @@ function TrainProgram() {
     const fetchUser = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/userAccounts/players-profile/${id}`
+          `${API}/userAccounts/players-profile/${id}`
         );
         setUserData(res.data);
         setUserTeamId(res.data.teamId);

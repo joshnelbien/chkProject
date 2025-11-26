@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 function PlayersUpdate({ player, onClose, onUpdate }) {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [form, setForm] = useState({
     // Basic Info
     firstName: player.firstName || "",
@@ -74,7 +75,7 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
   const handleConfirmUpdate = async () => {
     try {
       setUpdating(true);
-      const response = await fetch(`http://localhost:5000/userAccounts/update-performance/${player.id}`, {
+      const response = await fetch(`${API}/userAccounts/update-performance/${player.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

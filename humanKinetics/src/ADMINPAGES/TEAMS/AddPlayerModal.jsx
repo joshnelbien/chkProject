@@ -5,12 +5,13 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
   const [players, setPlayers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/userAccounts/players"
+          `${API}/userAccounts/players`
         );
         // ✅ Only show players with Pending status
         const pendingPlayers = res.data.filter(
@@ -28,7 +29,7 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
   const handleAddPlayer = async (player) => {
     try {
       setLoading(true);
-      await axios.put("http://localhost:5000/teams/player-addTeam", {
+      await axios.put(`${API}/teams/player-addTeam`, {
         playerId: player.id,
         teamId: teamId,
       });

@@ -6,6 +6,7 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer, onUpdateP
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   const calculateAge = (bDay) => {
     if (!bDay) return "—"; // fallback if no date
@@ -104,7 +105,7 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer, onUpdateP
                     <img
                       src={
                         p.id
-                          ? `http://localhost:5000/userAccounts/player-photo/${p.id}`
+                          ? `${API}/userAccounts/player-photo/${p.id}`
                           : "/lexi.jpg"
                       }
                       alt={`${p.firstName} ${p.lastName}`}

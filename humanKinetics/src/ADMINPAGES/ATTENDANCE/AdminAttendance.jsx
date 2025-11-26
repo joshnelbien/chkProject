@@ -5,6 +5,7 @@ import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
 
 function AdminAttendance() {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [attendanceData, setAttendanceData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filter, setFilter] = useState("all"); // all / today / week / month
@@ -55,7 +56,7 @@ function AdminAttendance() {
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/attendance/all");
+        const res = await axios.get(`${API}/attendance/all`);
         setAttendanceData(res.data);
         setFilteredData(res.data); // default: all
       } catch (err) {

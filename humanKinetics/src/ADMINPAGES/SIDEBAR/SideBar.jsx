@@ -11,6 +11,7 @@ function AdminSidebar() {
   const [profileSrc, setProfileSrc] = useState("/lexi.jpg");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [manageAccountOpen, setManageAccountOpen] = useState(false);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   const navigate = useNavigate();
   const { id } = useParams();
@@ -23,13 +24,13 @@ function AdminSidebar() {
   const fetchCoach = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/adminAccounts/coaches-profile/${id}`
+        `${API}/adminAccounts/coaches-profile/${id}`
       );
       const data = res.data;
       setCoach(data);
 
       if (data?.id && data?.profilePicture) {
-        setProfileSrc(`http://localhost:5000/adminAccounts/coach-photo/${data.id}`);
+        setProfileSrc(`${API}/adminAccounts/coach-photo/${data.id}`);
       } else {
         setProfileSrc("/lexi.jpg");
       }
@@ -51,7 +52,7 @@ function AdminSidebar() {
  const handleConfirmLogout = async () => {
   // Log the logout activity
   try {
-    await axios.post("http://localhost:5000/logs/logs", {
+    await axios.post(`${API}/logs/logs`, {
       firstName: coach?.firstName || "Admin",
       lastName: coach?.lastName || "",
       email: coach?.email || "", 

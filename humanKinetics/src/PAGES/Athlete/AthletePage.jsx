@@ -53,6 +53,8 @@ const AthleteProfileModal = ({ athlete, onClose }) => {
 };
 
 function AthletePage() {
+
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [athletes, setAthletes] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAthlete, setSelectedAthlete] = useState(null);
@@ -73,7 +75,7 @@ function AthletePage() {
   // Fetch players from backend
   useEffect(() => {
     axios
-      .get("http://localhost:5000/userAccounts/players")
+      .get(`${API}/userAccounts/players`)
       .then((res) => {
         const mapped = res.data.map((p) => ({
           name: `${p.firstName} ${p.lastName}`,

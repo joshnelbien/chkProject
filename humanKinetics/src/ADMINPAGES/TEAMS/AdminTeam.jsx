@@ -14,6 +14,7 @@ function AdminTeam() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   const handleViewDetails = (team) => {
     console.log("🟢 Selected Team ID:", team.id);
@@ -34,7 +35,7 @@ function AdminTeam() {
     const fetchTeams = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/teams/getTeams/${id}`
+          `${API}/teams/getTeams/${id}`
         );
         console.log(" Teams fetched:", res.data);
         setTeams(res.data);
@@ -52,7 +53,7 @@ function AdminTeam() {
   const fetchPlayersForTeam = async (teamId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/teams/player/${teamId}`
+        `${API}/teams/player/${teamId}`
       );
       console.log(` Players for team ${teamId}:`, res.data);
 

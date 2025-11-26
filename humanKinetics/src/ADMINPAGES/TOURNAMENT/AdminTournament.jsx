@@ -11,6 +11,7 @@ function AdminTournament() {
   const [tournaments, setTournaments] = useState([]);
   const { id } = useParams();
   const [filterStatus, setFilterStatus] = useState("My Tournament");
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   // 📝 For Set Schedule Modal
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -32,7 +33,7 @@ function AdminTournament() {
   const fetchTournaments = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/tournament/tournaments-activities"
+        `${API}/tournament/tournaments-activities`
       );
 
       console.log("📌 All Tournaments from backend:", response.data);
@@ -73,7 +74,7 @@ function AdminTournament() {
       console.log("📤 Sending Schedule to backend:", payload); // <-- log here
 
       await axios.post(
-        `http://localhost:5000/tournament/tournaments/${selectedTournament.id}/schedule`,
+        `${API}/tournament/tournaments/${selectedTournament.id}/schedule`,
         payload
       );
 

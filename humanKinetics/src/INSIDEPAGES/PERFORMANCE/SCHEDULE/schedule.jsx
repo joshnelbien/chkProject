@@ -11,6 +11,7 @@ function Schedule() {
   const [myTeamSchedules, setMyTeamSchedules] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { id } = useParams(); // user ID from URL
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   const formatDate = (d) => {
     if (!d) return null;
@@ -25,11 +26,11 @@ function Schedule() {
   const handleTimeIn = async (sched) => {
     try {
       const resUser = await axios.get(
-        `http://localhost:5000/userAccounts/players-profile/${id}`
+        `${API}/userAccounts/players-profile/${id}`
       );
       const user = resUser.data;
 
-      const res = await axios.post("http://localhost:5000/attendance/time-in", {
+      const res = await axios.post(`${API}/attendance/time-in`, {
         userId: id,
         scheduleId: sched.id,
         type: sched.type,
@@ -73,7 +74,7 @@ function Schedule() {
   const handleTimeOut = async (sched) => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/attendance/time-out",
+        `${API}/attendance/time-out`,
         {
           userId: id,
           scheduleId: sched.id,
@@ -103,8 +104,8 @@ function Schedule() {
     const fetchSchedules = async () => {
       try {
         const [trainingRes, tournamentRes] = await Promise.all([
-          axios.get("http://localhost:5000/trainingSchedule/training-schedule"),
-          axios.get("http://localhost:5000/tournament/tournaments-activities"),
+          axios.get(`${API}/trainingSchedule/training-schedule`),
+          axios.get(`${API}/tournament/tournaments-activities`),
         ]);
 
         const trainingSchedules = trainingRes.data.schedules || [];
@@ -152,19 +153,19 @@ function Schedule() {
     const fetchMyTeamSchedules = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/userAccounts/players-profile/${id}`
+          `${API}/userAccounts/players-profile/${id}`
         );
         const teamId = res.data.teamId;
 
         const trainingRes = await axios.get(
-          "http://localhost:5000/trainingSchedule/training-schedule"
+          `${API}/trainingSchedule/training-schedule`
         );
         const myTrainingSchedules = (trainingRes.data.schedules || []).filter(
           (sched) => sched.teamSchedule === teamId
         );
 
         const tournamentRes = await axios.get(
-          "http://localhost:5000/tournament/tournaments-activities"
+          `${API}/tournament/tournaments-activities`
         );
         const tournaments = Array.isArray(tournamentRes.data)
           ? tournamentRes.data
@@ -192,7 +193,7 @@ function Schedule() {
           allSchedules.map(async (sched) => {
             try {
               const att = await axios.get(
-                `http://localhost:5000/attendance/user/${id}/schedule/${sched.id}`
+                `${API}/attendance/user/${id}/schedule/${sched.id}`
               );
               if (att.data) {
                 return {
@@ -244,7 +245,7 @@ function Schedule() {
     const fetchUserProfile = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/userAccounts/players-profile/${id}`
+          `${API}/userAccounts/players-profile/${id}`
         );
         console.log("Current User Profile:", res.data);
       } catch (err) {

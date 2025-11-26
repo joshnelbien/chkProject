@@ -10,11 +10,12 @@ function MedalTally() {
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState(""); // currently selected year
   const [years, setYears] = useState([]); // list of available years
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   // Fetch medal tally from backend
   const fetchMedalTally = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/medalTally/medalTally");
+      const res = await axios.get(`${API}/medalTally/medalTally`);
       setMedalData(res.data);
 
       // Extract unique years from data

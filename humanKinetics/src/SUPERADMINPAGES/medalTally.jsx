@@ -8,6 +8,8 @@ function MedalTally() {
   const [medals, setMedals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [newMedal, setNewMedal] = useState({
     year: "",
     sports: "",
@@ -19,7 +21,7 @@ function MedalTally() {
   // Fetch medal tally from backend
   const fetchMedals = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/medalTally/medalTally");
+      const res = await axios.get(`${API}/medalTally/medalTally`);
       setMedals(res.data);
     } catch (err) {
       console.error("❌ Error fetching medals:", err);
@@ -36,7 +38,7 @@ function MedalTally() {
   const handleAddMedal = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/medalTally/medalTally", newMedal);
+      const res = await axios.post(`${API}/medalTally/medalTally`, newMedal);
       setMedals([...medals, res.data]);
       setIsModalOpen(false);
       setNewMedal({ year: "", sports: "", gold: "", silver: "", bronze: "" });

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 
 function Sidebar({ isOpen }) {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const { id } = useParams();
   const navigate = useNavigate();
   const [player, setPlayer] = useState(null);
@@ -14,7 +15,7 @@ function Sidebar({ isOpen }) {
   const fetchPlayer = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/userAccounts/players-profile/${id}`
+        `${API}/userAccounts/players-profile/${id}`
       );
       const data = res.data;
       setPlayer(data);
@@ -22,7 +23,7 @@ function Sidebar({ isOpen }) {
       // ✅ If a profile picture exists, use backend image route
       if (data?.id && data?.profilePicture) {
         setProfileSrc(
-          `http://localhost:5000/userAccounts/player-photo/${data.id}`
+          `${API}/userAccounts/player-photo/${data.id}`
         );
       } else {
         setProfileSrc("/lexi.jpg");

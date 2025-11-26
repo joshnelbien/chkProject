@@ -8,6 +8,7 @@ export default function ManageAccountModal({ open, onClose, id }) {
   const [coach, setCoach] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [formData, setFormData] = useState({
     lastName: "",
     firstName: "",
@@ -29,7 +30,7 @@ export default function ManageAccountModal({ open, onClose, id }) {
     setLoading(true);
     try {
       const res = await axios.get(
-        `http://localhost:5000/adminAccounts/coaches-profile/${id}`
+        `${API}/adminAccounts/coaches-profile/${id}`
       );
 
       setCoach(res.data);
@@ -37,7 +38,7 @@ export default function ManageAccountModal({ open, onClose, id }) {
 
       if (res.data.profilePicture) {
         setProfilePreview(
-          `http://localhost:5000/adminAccounts/coach-photo/${id}`
+          `${API}/adminAccounts/coach-photo/${id}`
         );
       }
     } catch (err) {
@@ -77,7 +78,7 @@ export default function ManageAccountModal({ open, onClose, id }) {
       }
 
       await axios.put(
-        `http://localhost:5000/adminAccounts/coaches-update/${id}`,
+        `${API}/adminAccounts/coaches-update/${id}`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

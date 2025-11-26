@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function AddEventModal({ isOpen, onClose, onSuccess }) {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [formData, setFormData] = useState({
     teamName: "",
     matchDate: "",
@@ -22,7 +23,7 @@ export default function AddEventModal({ isOpen, onClose, onSuccess }) {
     setLoading(true);
     try {
       await axios.post(
-        "http://localhost:5000/teamSchedule/addSchedule",
+        `${API}/teamSchedule/addSchedule`,
         formData
       );
       if (onSuccess) onSuccess();

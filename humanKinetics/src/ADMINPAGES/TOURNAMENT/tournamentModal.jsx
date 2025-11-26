@@ -6,6 +6,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
   const { id } = useParams(); // Admin/User ID
   const [teams, setTeams] = useState([]);
   const [playersByTeam, setPlayersByTeam] = useState({});
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [formData, setFormData] = useState({
     tournamentName: "",
     sport: "",
@@ -24,7 +25,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
     const fetchTeams = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/teams/getTeams/${id}`
+          `${API}/teams/getTeams/${id}`
         );
         setTeams(res.data);
 
@@ -41,7 +42,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
   const fetchPlayersForTeam = async (teamId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/teams/player/${teamId}`
+        `${API}/teams/player/${teamId}`
       );
       setPlayersByTeam((prev) => ({ ...prev, [teamId]: res.data }));
     } catch (err) {
@@ -76,7 +77,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
     try {
       console.log("Submitting tournament:", formData);
       const response = await axios.post(
-        "http://localhost:5000/tournament/tournaments",
+        `${API}/tournament/tournaments`,
         formData
       );
       console.log("✅ Tournament added:", response.data);

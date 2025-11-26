@@ -12,15 +12,16 @@ const [endedSessions, setEndedSessions] = useState(0);
 const [recentActivities, setRecentActivities] = useState([]);
 const [allActivities, setAllActivities] = useState([]);
 const [modalOpen, setModalOpen] = useState(false);
+const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
     // Fetch total athletes
-    axios.get("http://localhost:5000/userAccounts/player/count")
+    axios.get(`${API}/userAccounts/player/count`)
       .then((res) => setTotalAthletes(res.data.totalPlayers))
       .catch((err) => console.error(err));
 
     // Fetch upcoming sessions
-    axios.get("http://localhost:5000/tournament/tournaments/counts")
+    axios.get(`${API}/tournament/tournaments/counts`)
       .then((res) => {
         setUpcomingSessions(res.data.upcoming);
         setOngoingSessions(res.data.ongoing);
@@ -30,7 +31,7 @@ const [modalOpen, setModalOpen] = useState(false);
 
 
     // Fetch recent activities
-    axios.get("http://localhost:5000/attendance/attendance/recent")
+    axios.get(`${API}/attendance/attendance/recent`)
       .then((res) => setRecentActivities(res.data))
       .catch((err) => console.error(err));
   }, []);
@@ -38,7 +39,7 @@ const [modalOpen, setModalOpen] = useState(false);
   // Function to open modal and fetch all activities
   const handleViewAll = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/attendance/attendance/recent");
+      const res = await axios.get(`${API}/attendance/attendance/recent`);
       setAllActivities(res.data);
       setModalOpen(true);
     } catch (err) {

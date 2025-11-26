@@ -14,6 +14,7 @@ function OverView() {
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
 const [upcomingTournaments, setUpcomingTournaments] = useState([]);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
 useEffect(() => {
   if (!id) return;
@@ -21,11 +22,11 @@ useEffect(() => {
   const fetchData = async () => {
     try {
       // User profile
-      const userRes = await axios.get(`http://localhost:5000/userAccounts/players-profile/${id}`);
+      const userRes = await axios.get(`${API}/userAccounts/players-profile/${id}`);
       setUserData(userRes.data);
 
       // Recent activities
-      const attendanceRes = await axios.get("http://localhost:5000/attendance/all");
+      const attendanceRes = await axios.get(`${API}/attendance/all`);
       const userAttendance = attendanceRes.data
         .filter(att => att.email === userRes.data.email)
         .map(att => ({
@@ -39,7 +40,7 @@ useEffect(() => {
       setRecentActivities(userAttendance);
 
       // Fetch upcoming tournaments (details)
-      const tourRes = await axios.get("http://localhost:5000/tournament/tournaments/upcoming");
+      const tourRes = await axios.get(`${API}/tournament/tournaments/upcoming`);
       setUpcomingTournaments(tourRes.data);
 
       setLoading(false);

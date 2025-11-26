@@ -12,6 +12,7 @@ function AdminAccounts() {
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmDeleteAdmin, setConfirmDeleteAdmin] = useState(null);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
     fetchAdmins();
@@ -20,7 +21,7 @@ function AdminAccounts() {
   const fetchAdmins = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/adminAccounts/admins`);
+      const res = await axios.get(`${API}/adminAccounts/admins`);
       setAdmins(res.data);
     } catch (error) {
       console.error("Error fetching admins:", error);
@@ -61,7 +62,7 @@ function AdminAccounts() {
   // Confirm deletion
   const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:5000/adminAccounts/${confirmDeleteAdmin.id}`);
+      await axios.delete(`${API}/adminAccounts/${confirmDeleteAdmin.id}`);
       alert("Admin deleted successfully");
 
       // Update table after deletion

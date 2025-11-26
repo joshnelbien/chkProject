@@ -96,6 +96,7 @@ const EventModal = ({ event, onClose }) => {
 };
 
 function EventPage() {
+  const API = import.meta.env.VITE_BBACKEND_URL;
   const [events, setEvents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -103,7 +104,7 @@ function EventPage() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/tournament/tournaments")
+      .get(`${API}/tournament/tournaments`)
       .then((res) => setEvents(res.data))
       .catch((err) => console.error("❌ Error fetching tournaments:", err));
   }, []);

@@ -3,6 +3,7 @@ import Footer from "../../Footer/Footer";
 import NavigationBar from "../../NavigationBar/NavigationBar";
 
 function AboutPage() {
+
   const [activeTab, setActiveTab] = useState("Mission");
 
   const tabContent = {
@@ -115,11 +116,10 @@ function AboutPage() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`py-2 px-4 font-semibold whitespace-nowrap ${
-                    activeTab === tab
-                      ? "border-b-4 border-blue-500 text-blue-600"
-                      : "text-gray-500 hover:text-blue-500"
-                  }`}
+                  className={`py-2 px-4 font-semibold whitespace-nowrap ${activeTab === tab
+                    ? "border-b-4 border-blue-500 text-blue-600"
+                    : "text-gray-500 hover:text-blue-500"
+                    }`}
                 >
                   {tab}
                 </button>
@@ -145,7 +145,7 @@ function AboutPage() {
                 Recognized sports programs
               </p>
             </div>
-          
+
           </div>
 
           {/* Leadership */}
@@ -155,14 +155,14 @@ function AboutPage() {
             </h2>
             <div className="flex flex-col md:flex-row justify-around items-center space-y-8 md:space-y-0 md:space-x-8">
               {[
-                { name: "Dr. Juan Dela Cruz", role: "College Dean" },
-                { name: "Prof. Maria Santos", role: "Associate Dean" },
-                { name: "Prof. Pedro Reyes", role: "Department Head" },
+                { name: "Dr. Preciosa D. Villacruel,LPT", role: "University President", image: "/president.jpg" },
+                { name: "", role: "CTED Dean", image: "/cteddean.jpg" },
+                { name: "Directors and Staffs", role: "Director and Staffs", image: "/directorsandstaffs.jpg" },
               ].map((leader) => (
                 <div key={leader.name} className="text-center">
                   <div className="rounded-full w-32 h-32 mx-auto mb-4 overflow-hidden">
                     <img
-                      src="/lexi.jpg"
+                      src={leader.image}
                       alt={leader.name}
                       className="w-full h-full object-cover"
                     />

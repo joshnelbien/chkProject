@@ -13,11 +13,12 @@ function ManageAccount() {
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   const fetchPlayer = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/userAccounts/players-profile/${id}`
+        `${API}/userAccounts/players-profile/${id}`
       );
       setPlayer(res.data);
     } catch (error) {
@@ -127,7 +128,7 @@ function ManageAccount() {
               <div className="flex flex-col md:flex-row md:items-center md:space-x-6 mb-8">
                 <div className="flex justify-center md:justify-start mb-4 md:mb-0">
                   <img
-                    src={`http://localhost:5000/userAccounts/player-photo/${player.id}`}
+                    src={`${API}/userAccounts/player-photo/${player.id}`}
                     alt="Profile"
                     className="w-28 h-28 rounded-full object-cover border-4 border-green-600 shadow-md"
                     onError={(e) => (e.target.src = "/lexi.jpg")}
