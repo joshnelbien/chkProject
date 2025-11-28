@@ -12,6 +12,8 @@ function AdminAccounts() {
   const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmDeleteAdmin, setConfirmDeleteAdmin] = useState(null);
+  const [search, setSearch] = useState("");
+
   const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
@@ -21,7 +23,7 @@ function AdminAccounts() {
   const fetchAdmins = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/adminAccounts/admins`);
+      const res = await axios.get(`${API}/adminAccounts/admins/archieved`);
       setAdmins(res.data);
     } catch (error) {
       console.error("Error fetching admins:", error);
@@ -40,13 +42,10 @@ function AdminAccounts() {
     setIsModalOpen(false);
   };
 
-  // **Callback to refresh table and modal after verification**
   const handleUpdateAdmin = (updatedAdmin) => {
-    // Update the admin in the state
     setAdmins((prev) =>
       prev.map((a) => (a.id === updatedAdmin.id ? updatedAdmin : a))
     );
-    // Update modal data
     setSelectedAdmin(updatedAdmin);
   };
 
@@ -54,22 +53,24 @@ function AdminAccounts() {
     setConfirmDeleteAdmin(admin);
   };
 
-  // Cancel deletion
+  const handleSearch = () => {
+    console.log("Searching for:", search);
+  };
   const handleCancelDelete = () => {
     setConfirmDeleteAdmin(null);
   };
 
-  // Confirm deletion
   const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`${API}/adminAccounts/${confirmDeleteAdmin.id}`);
-      alert("Admin deleted successfully");
+      await axios.patch(`${API}/adminAccounts/${confirmDeleteAdmin.id}/archive`);
+      alert("Admin Archived successfully");
 
-      // Update table after deletion
-      setAdmins((prev) => prev.filter((a) => a.id !== confirmDeleteAdmin.id));
+      setAdmins((prev) =>
+        prev.filter((a) => a.id !== confirmDeleteAdmin.id)
+      );
     } catch (error) {
-      console.error("Error deleting admin:", error);
-      alert(error.response?.data?.message || "Failed to delete admin.");
+      console.error("Error archiving admin:", error);
+      alert(error.response?.data?.message || "Failed to archive admin.");
     } finally {
       setConfirmDeleteAdmin(null);
     }
@@ -83,6 +84,37 @@ function AdminAccounts() {
         <main className="flex-1 p-4">
           <div className="bg-white rounded-lg shadow-md p-6">
             <h1 className="text-2xl font-bold mb-4">Admin Accounts</h1>
+
+            <div className="relative w-64 mb-4">
+              <input
+                type="text"
+                placeholder="Search admin..."
+                className="border border-gray-400 p-2 pr-12 w-full rounded-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-500"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              <button
+                onClick={handleSearch}
+                className="absolute right-1 top-1/2 -translate-y-1/2 hover:bg-gray-300 px-2 py-1  rounded-sm shadow-sm"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-black"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="black"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-4.35-4.35M10 18a8 8 0 110-16 8 8 0 010 16z"
+                  />
+                </svg>
+              </button>
+            </div>
+
             {loading ? (
               <p>Loading admins...</p>
             ) : (
@@ -99,49 +131,67 @@ function AdminAccounts() {
                     </tr>
                   </thead>
                   <tbody className="bg-white text-gray-700">
-                    {admins.map((admin) => (
-                      <tr key={admin.id}>
-                        <td className="px-4 py-2 border">{admin.lastName} {admin.firstName}</td>
-                        <td className="px-4 py-2 border">{admin.email}</td>
-                        <td className="px-4 py-2 border">{admin.sports}</td>
-                        <td className="px-4 py-2 border">{admin.isVerified ? "Yes" : "No"}</td>
-                        <td className="px-4 py-2 border">{admin.isSuperAdminVerified ? "Yes" : "No"}</td>
-                        <td className="px-4 py-2 border">
-                          <button
-                            className="bg-blue-600 text-white px-3 py-1 rounded-md mr-2 hover:bg-blue-700"
-                            onClick={() => openModal(admin)}
-                          >
-                            View
-                          </button>
-                          <button
-                            className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
-                            onClick={() => handleDeleteClick(admin)}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {admins
+                      .filter((admin) => {
+                        const term = search.toLowerCase();
+                        return (
+                          admin.firstName.toLowerCase().includes(term) ||
+                          admin.lastName.toLowerCase().includes(term) ||
+                          admin.email.toLowerCase().includes(term) ||
+                          admin.sports.toLowerCase().includes(term)
+                        );
+                      })
+                      .map((admin) => (
+                        <tr key={admin.id}>
+                          <td className="px-4 py-2 border">
+                            {admin.lastName} {admin.firstName}
+                          </td>
+                          <td className="px-4 py-2 border">{admin.email}</td>
+                          <td className="px-4 py-2 border">{admin.sports}</td>
+                          <td className="px-4 py-2 border">
+                            {admin.isVerified ? "Yes" : "No"}
+                          </td>
+                          <td className="px-4 py-2 border">
+                            {admin.isSuperAdminVerified ? "Yes" : "No"}
+                          </td>
+                          <td className="px-4 py-2 border">
+                            <button
+                              className="bg-blue-600 text-white px-3 py-1 rounded-md mr-2 hover:bg-blue-700"
+                              onClick={() => openModal(admin)}
+                            >
+                              View
+                            </button>
+                            <button
+                              className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
+                              onClick={() => handleDeleteClick(admin)}
+                            >
+                              Archive
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
             )}
+
             {confirmDeleteAdmin && (
               <ConfirmModal
-                message={`Are you sure you want to delete ${confirmDeleteAdmin.firstName} ${confirmDeleteAdmin.lastName}?`}
+                message={`Are you sure you want to Archive ${confirmDeleteAdmin.firstName} ${confirmDeleteAdmin.lastName}?`}
                 onConfirm={handleConfirmDelete}
                 onCancel={handleCancelDelete}
               />
             )}
           </div>
         </main>
+
         <Footer />
 
         {isModalOpen && selectedAdmin && (
           <AdminModal
             admin={selectedAdmin}
             onClose={closeModal}
-            onUpdate={handleUpdateAdmin} // Pass the callback
+            onUpdate={handleUpdateAdmin}
           />
         )}
       </div>

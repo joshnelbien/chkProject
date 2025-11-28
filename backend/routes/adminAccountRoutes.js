@@ -154,6 +154,19 @@ router.get("/admins", async (req, res) => {
   }
 });
 
+router.get("/admins/archieved", async (req, res) => {
+  try {
+    const admins = await Admin.findAll({
+      where:{isArchived: false}
+    });
+
+    res.json(admins);
+  } catch (error) {
+    console.error("Error fetching admins:", error);
+    res.status(500).json({ error: "Server error fetching admins." });
+  }
+});
+
 
 
 router.get("/coaches-profile/:id", async (req, res) => {
@@ -244,6 +257,25 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting admin:", error);
     res.status(500).json({ success: false, message: "Server error while deleting admin" });
+  }
+});
+
+router.patch("/:id/archive", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const admin = await Admin.findByPk(id);
+    if (!admin) {
+      return res.status(404).json({ success: false, message: "Admin not found" });
+    }
+
+    admin.isArchived = true;
+    await admin.save();
+
+    res.json({ success: true, message: "Admin archived successfully" });
+  } catch (error) {
+    console.error("Error archiving admin:", error);
+    res.status(500).json({ success: false, message: "Server error while archiving admin" });
   }
 });
 

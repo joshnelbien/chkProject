@@ -60,6 +60,10 @@ const Admin = sequelize.define(
       type: DataTypes.BLOB("long"),
       allowNull: true,
     },
+    isArchived: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
 
   },
   {
