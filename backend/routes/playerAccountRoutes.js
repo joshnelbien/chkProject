@@ -370,6 +370,9 @@ router.post("/player-login", async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Incorrect password." });
     }
+    if (player.status === "Pending") {
+      return res.status(402).json({ message: "Please Wait to be Approved By the Coaching Staff" })
+    }
 
     const token = jwt.sign(
       { id: player.id, email: player.email },
@@ -390,6 +393,7 @@ router.post("/player-login", async (req, res) => {
         course: player.course,
         yearLevel: player.yearLevel,
         sport: player.sport,
+        status: player.status,
       },
     });
   } catch (error) {

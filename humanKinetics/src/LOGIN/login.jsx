@@ -395,7 +395,7 @@ function Login() {
           setShowVerificationModal(true);
         } else {
           console.log("❌ Falling back to alert for:", loginType);
-          // If no specific condition matches, show the actual error message
+          
           alert(error.response.data.message || "Login failed!");
         }
       } else {

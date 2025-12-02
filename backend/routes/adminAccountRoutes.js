@@ -344,6 +344,10 @@ router.post("/admin-login", async (req, res) => {
       return res.status(401).json({ message: "Incorrect password." });
     }
 
+    if (admin.isSuperAdminVerified === false) {
+      return res.status(402).json({ message: "Please wait for the super admin verifies your account." });
+    }
+
     // Create token
     const token = jwt.sign(
       { id: admin.id, email: admin.email },

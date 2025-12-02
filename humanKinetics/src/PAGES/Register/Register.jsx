@@ -137,7 +137,7 @@ const SuccessModal = ({ isOpen, onClose, onLoginRedirect, onOpenGmail }) => {
             <X className="w-5 h-5" />
           </button>
         </div>
-        
+
         <p className="text-gray-600 mb-2">
           Your account has been created successfully.
         </p>
@@ -220,6 +220,29 @@ const Register = () => {
     e.preventDefault();
     setStatus({ type: null, message: null }); // Clear previous messages
 
+    // ✅ Check if user is under 18
+    if (formData.bDay) {
+      const today = new Date();
+      const birthDate = new Date(formData.bDay);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      const dayDiff = today.getDate() - birthDate.getDate();
+
+      // Adjust if birthday hasn't occurred yet this year
+      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+        age--;
+      }
+
+      if (age < 18) {
+        setStatus({
+          type: "error",
+          message: "Registration not allowed. You must be 18 years or older.",
+        });
+        return; // Stop submission
+      }
+    }
+
+    // ✅ Password match check
     if (formData.password !== formData.confirmPassword) {
       setStatus({
         type: "error",
@@ -228,6 +251,7 @@ const Register = () => {
       return;
     }
 
+    // ✅ Terms of Service check
     if (!formData.agreedToTerms) {
       setStatus({
         type: "error",
@@ -239,56 +263,35 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      // 1. Prepare data for the API call
       const dataToSend = { ...formData };
 
-      // 2. Make the API request
-      const response = await fetch(
-        `${API}/userAccounts/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dataToSend),
-        }
-      );
+      const response = await fetch(`${API}/userAccounts/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend),
+      });
 
-      // 3. Process the response defensively
       let result = {};
       try {
-        // Attempt to parse the body as JSON (works for 201 success and 409/400 errors with JSON bodies)
         result = await response.json();
       } catch (parseError) {
-        // Catch the SyntaxError: Unexpected end of JSON input here.
-        console.error(
-          "JSON Parsing Error (Server returned non-JSON/empty body):",
-          parseError
-        );
-
-        // If the parsing failed, try to determine what went wrong based on the status.
+        console.error("JSON Parsing Error:", parseError);
         if (response.ok) {
-          // Success status (200-299) but no JSON body. This is unexpected but treat as success.
           result.message =
-            "Registration successful, but the server response was malformed.";
+            "Registration successful, but server response was malformed.";
         } else {
-          // Error status (4xx, 5xx) and no JSON error message.
           const errorText = await response.text();
           console.error("Server Error Response Text:", errorText);
           result.message =
-            "A server error occurred, and the response was unreadable. Check your console for details.";
+            "A server error occurred, and the response was unreadable.";
         }
       }
 
-      // 4. Handle Success or Explicit Error Message
       if (response.ok) {
-        // HTTP Status 201 Created (Success)
         setStatus({
           type: "success",
-          message:
-            result.message || "Registration successful! You can now sign in.",
+          message: result.message || "Registration successful! You can now sign in.",
         });
-        // Optionally reset form data on success
         setFormData({
           firstName: "",
           lastName: "",
@@ -304,27 +307,22 @@ const Register = () => {
         });
         setShowSuccessModal(true);
       } else {
-        // HTTP Status 400, 409, 500 (Error)
-        // Use the message parsed from the JSON result (or the fallback message if parsing failed)
         setStatus({
           type: "error",
-          message:
-            result.message ||
-            "An unexpected error occurred. Please try again later.",
+          message: result.message || "An unexpected error occurred. Please try again later.",
         });
       }
     } catch (error) {
-      // This catch handles network errors (e.g., server offline)
       console.error("Fetch Error:", error);
       setStatus({
         type: "error",
-        message:
-          "Network error: Could not connect to the registration service.",
+        message: "Network error: Could not connect to the registration service.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   // Define shared disabled state
   const isDisabled = isSubmitting || status.type === "success";
@@ -492,8 +490,21 @@ const Register = () => {
                     id="studentNumber"
                     name="studentNumber"
                     value={formData.studentNumber}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 2024-0001"
+                    onChange={(e) => {
+                      // Remove non-digit characters
+                      let value = e.target.value.replace(/\D/g, "");
+
+                      // Limit to max 7 digits
+                      if (value.length > 7) value = value.slice(0, 7);
+
+                      // Insert dash after first 2 digits
+                      if (value.length > 2) {
+                        value = value.slice(0, 2) + "-" + value.slice(2);
+                      }
+
+                      setFormData({ ...formData, studentNumber: value });
+                    }}
+                    placeholder="e.g., 20-00001"
                     required
                     disabled={isDisabled}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-green-700 focus:border-green-700 transition duration-150 shadow-sm text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
