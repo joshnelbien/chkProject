@@ -8,6 +8,28 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer, onUpdateP
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const API = import.meta.env.VITE_BBACKEND_URL;
 
+  const handleKick = async (player) => {
+    const confirmKick = confirm(`Remove ${player.firstName} ${player.lastName} from the team?`);
+    if (!confirmKick) return;
+
+    try {
+      const response = await fetch(`${API}/userAccounts/player-kick/${player.id}`, {
+        method: "PUT"
+      });
+
+      if (response.ok) {
+        alert("Player kicked — status set to Pending.");
+        if (onUpdatePlayer) onUpdatePlayer(); // refresh UI
+      } else {
+        alert("Kick failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error.");
+    }
+  };
+
+
   const calculateAge = (bDay) => {
     if (!bDay) return "—"; // fallback if no date
 
@@ -53,7 +75,7 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer, onUpdateP
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center overflow-auto p-4"
     >
       <div
-        className="bg-white w-full max-w-3xl rounded-2xl p-6 shadow-lg" 
+        className="bg-white w-full max-w-3xl rounded-2xl p-6 shadow-lg"
       >
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
@@ -189,9 +211,15 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer, onUpdateP
                     <div className="flex gap-2 mt-3">
                       <button
                         onClick={() => handleOpenUpdate(p)}
-                        className="px-3 py-1 text-xs bg-green-600 text-white rounded-full hover:bg-green-700"
+                        className="px-3 py-1 text-md bg-green-600 text-white rounded-full hover:bg-green-700"
                       >
                         Update
+                      </button>
+                      <button
+                        onClick={() => handleKick(p)}
+                        className="px-3 py-1 text-md bg-red-600 text-white rounded-full hover:bg-red-700"
+                      >
+                        Kick
                       </button>
 
                     </div>

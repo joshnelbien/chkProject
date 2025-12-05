@@ -256,6 +256,31 @@ router.get("/players-profile/:id", async (req, res) => {
   }
 });
 
+
+router.put("/player-kick/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const player = await playerAccounts.findByPk(id);
+
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+
+    await player.update({
+      teamId: null,
+      status: "Pending" // <— STATUS RESET
+    });
+
+    return res.json({ message: "Player removed from team & status set to Pending.", player });
+
+  } catch (error) {
+    console.error("Error updating player:", error);
+    return res.status(500).json({ message: "Server error updating player." });
+  }
+});
+
+
+
 router.put(
   "/players-update/:id",
   upload.fields([

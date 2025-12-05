@@ -84,7 +84,7 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
       if (response.ok) {
         setShowConfirmation(false);
         setShowSuccess(true);
-        
+
         // Call the onUpdate callback to refresh data in parent component
         if (onUpdate) {
           onUpdate();
@@ -125,48 +125,63 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
             <section>
               <h3 className="font-semibold text-gray-700 mb-2">👤 Basic Info</h3>
               <div className="grid grid-cols-2 gap-3">
-                {["firstName","lastName","studentNumber","email","course","yearLevel","sport","bDay","jerseyNo","position"]
-                .map((field) => (
-                  <input 
-                    key={field}
-                    name={field}
-                    value={form[field]}
-                    onChange={handleChange}
-                    placeholder={field}
-                    className="border p-2 rounded w-full"
-                  />
-                ))}
+                {["firstName", "lastName", "studentNumber", "email", "course", "yearLevel", "sport", "bDay"]
+                  .map((field) => (
+                    <input
+                      key={field}
+                      name={field}
+                      value={form[field]}
+                      disabled   // 🔒 not editable
+                      className="border p-2 rounded w-full bg-gray-100 cursor-not-allowed"
+                    />
+                  ))}
+
+                {/* Editable Fields */}
+                <input
+                  name="jerseyNo"
+                  value={form.jerseyNo}
+                  onChange={handleChange}
+                  placeholder="jerseyNo"
+                  className="border p-2 rounded w-full"
+                />
+
+                <input
+                  name="position"
+                  value={form.position}
+                  onChange={handleChange}
+                  placeholder="position"
+                  className="border p-2 rounded w-full"
+                />
               </div>
             </section>
 
             {/* EMERGENCY */}
             <section>
-              <h3 className="font-semibold text-gray-700 mb-2 " >🚨 Emergency Contact</h3>
+              <h3 className="font-semibold text-gray-700 mb-2">🚨 Emergency Contact</h3>
               <div className="grid grid-cols-2 gap-3">
-              {["emergencyName","emergencyRelation","emergencyAddress","emergencyContact","preferredHospital"]
-              .map((field) => (
-                <input
-                  key={field}
-                  name={field}
-                  value={form[field]}
-                  onChange={handleChange}
-                  placeholder={field}
-                  className="border p-2 rounded w-full "
-                />
-              ))}
+                {["emergencyName", "emergencyRelation", "emergencyAddress", "emergencyContact", "preferredHospital"]
+                  .map((field) => (
+                    <input
+                      key={field}
+                      name={field}
+                      value={form[field]}
+                      disabled      // ❗ cannot edit
+                      className="border p-2 rounded w-full bg-gray-100 cursor-not-allowed"
+                    />
+                  ))}
               </div>
             </section>
 
             {/* STATS SLIDERS */}
             <section>
               <h3 className="font-semibold text-gray-700 mb-2">⚽ Performance Attributes</h3>
-              {["strength","speed","agility","endurance"].map((stat) => (
+              {["strength", "speed", "agility", "endurance"].map((stat) => (
                 <div key={stat}>
                   <div className="flex justify-between text-sm">
                     <label className="capitalize">{stat}</label>
                     <span>{form[stat]}%</span>
                   </div>
-                  <input 
+                  <input
                     type="range"
                     min="0" max="100"
                     name={stat}
@@ -182,14 +197,14 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
 
           {/* Buttons */}
           <div className="flex justify-end gap-3 mt-4">
-            <button 
+            <button
               className="px-4 py-2 bg-gray-300 rounded-full hover:bg-gray-400 transition-colors"
               onClick={onClose}
               disabled={updating}
             >
               Cancel
             </button>
-            <button 
+            <button
               className="px-5 py-2 bg-green-700 text-white rounded-full hover:bg-green-800 transition-colors disabled:bg-green-400"
               onClick={handleUpdateClick}
               disabled={updating}
@@ -210,14 +225,14 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
               Are you sure you want to update {player.firstName} {player.lastName}'s information?
             </p>
             <div className="flex justify-end gap-3">
-              <button 
+              <button
                 className="px-4 py-2 bg-gray-300 rounded-full hover:bg-gray-400 transition-colors"
                 onClick={handleCancelConfirmation}
                 disabled={updating}
               >
                 Cancel
               </button>
-              <button 
+              <button
                 className="px-5 py-2 bg-green-700 text-white rounded-full hover:bg-green-800 transition-colors disabled:bg-green-400"
                 onClick={handleConfirmUpdate}
                 disabled={updating}
@@ -238,7 +253,7 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
             <p className="text-gray-600 mb-4">
               Player information has been updated successfully!
             </p>
-            <button 
+            <button
               className="px-5 py-2 bg-green-700 text-white rounded-full hover:bg-green-800 transition-colors"
               onClick={handleSuccessClose}
             >
