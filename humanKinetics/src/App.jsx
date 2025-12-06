@@ -36,6 +36,7 @@ import AdminAccounts from "./SUPERADMINPAGES/AdminAccounts";
 import Logs from "./SUPERADMINPAGES/Logs";
 import PlayersAccount from "./SUPERADMINPAGES/PlayersAccount";
 import SuperAdminMedalTally from "./SUPERADMINPAGES/medalTally";
+import Staffs from "./SUPERADMINPAGES/staffs";
 import "./index.css";
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/adminRegister" element={<AdminRegister />} />
           <Route path="/super-adminMedalTally" element={<SuperAdminMedalTally />} />
+          <Route path="/super-adminStaffs" element={<Staffs />} />
           <Route path="*" element={<NotFound />} />
 
           {/* SUPERADMIN PAGES */}

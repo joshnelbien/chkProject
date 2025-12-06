@@ -35,6 +35,7 @@ function Sidebar({ isOpen }) {
           <SidebarLink to="/super-adminPlayer" label="Player" />
           <SidebarLink to="/super-adminLogs" label="Logs" />
           <SidebarLink to="/super-adminMedalTally" label="Medal Tally" />
+          <SidebarLink to="/super-adminStaffs" label="Staffs" />
           <LogoutButton onClick={handleLogoutClick} />
         </ul>
 
