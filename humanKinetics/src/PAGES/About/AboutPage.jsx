@@ -1,10 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Footer from "../../Footer/Footer";
 import NavigationBar from "../../NavigationBar/NavigationBar";
+import ViewStaffModal from "./ViewStaffModal"; // Make sure this path is correct
 
 function AboutPage() {
-
   const [activeTab, setActiveTab] = useState("Mission");
+  const [staffs, setStaffs] = useState([]);
+  const [viewStaff, setViewStaff] = useState(null); // State for modal
+  const API = import.meta.env.VITE_BBACKEND_URL;
+
+  useEffect(() => {
+    fetchStaffs();
+  }, []);
+
+  const fetchStaffs = async () => {
+    try {
+      const res = await axios.get(`${API}/staffs/staff`);
+      setStaffs(res.data);
+    } catch (error) {
+      console.error("Error fetching staffs:", error);
+    }
+  };
 
   const tabContent = {
     Mission: (
@@ -17,7 +34,6 @@ function AboutPage() {
         associates.
       </p>
     ),
-
     Vision: (
       <p className="text-gray-700 leading-relaxed">
         The College of Human Kinetics aims to be the leading institution in its
@@ -27,7 +43,6 @@ function AboutPage() {
         knowledge that supports healthy individuals and communities.
       </p>
     ),
-
     Philosophy: (
       <p className="text-gray-700 leading-relaxed">
         The College of Human Kinetics develops academic and professional
@@ -38,7 +53,6 @@ function AboutPage() {
         physical and health education.
       </p>
     ),
-
     Objectives: (
       <ul className="list-disc ml-6 text-gray-700 space-y-2">
         <li>
@@ -56,7 +70,6 @@ function AboutPage() {
         </li>
       </ul>
     ),
-
     Values: (
       <ul className="list-disc ml-6 text-gray-700 space-y-2">
         <li>Cooperation</li>
@@ -73,14 +86,14 @@ function AboutPage() {
       <NavigationBar />
 
       <main className="flex-grow pt-16">
-        {/* Hero */}
+        {/* Hero Section */}
         <section className="bg-gray-600 h-[30vh] flex flex-col justify-center p-8 text-white">
           <h1 className="text-5xl font-bold mb-2">About Our Website</h1>
           <p className="text-lg">Learn more about us.</p>
         </section>
 
+        {/* History Section */}
         <section className="bg-gray-100 p-8">
-          {/* History Section */}
           <div className="bg-white rounded-lg p-6 mb-8 shadow-md grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <h2 className="text-3xl font-bold mb-4 text-gray-700">
@@ -117,15 +130,14 @@ function AboutPage() {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`py-2 px-4 font-semibold whitespace-nowrap ${activeTab === tab
-                    ? "border-b-4 border-blue-500 text-blue-600"
-                    : "text-gray-500 hover:text-blue-500"
+                      ? "border-b-4 border-blue-500 text-blue-600"
+                      : "text-gray-500 hover:text-blue-500"
                     }`}
                 >
                   {tab}
                 </button>
               ))}
             </div>
-
             <div className="text-gray-700 text-lg">{tabContent[activeTab]}</div>
           </div>
 
@@ -145,34 +157,54 @@ function AboutPage() {
                 Recognized sports programs
               </p>
             </div>
-
           </div>
 
-          {/* Leadership */}
+          {/* Leadership Section */}
           <div className="bg-white rounded-lg p-6 shadow-md">
             <h2 className="text-3xl font-bold mb-8 text-gray-700">
               Our Leadership
             </h2>
-            <div className="flex flex-col md:flex-row justify-around items-center space-y-8 md:space-y-0 md:space-x-8">
-              {[
-                { name: "Dr. Preciosa D. Villacruel,LPT", role: "University President", image: "/president.jpg" },
-                { name: "", role: "CTED Dean", image: "/cteddean.jpg" },
-                { name: "Prof. Evan Jesusco, LPT, EDD(CAND.) CPAPHS", role: "Director of Institute of Human Kinetics", image: "/director.jpg" },
-              ].map((leader) => (
-                <div key={leader.name} className="text-center">
-                  <div className="rounded-full w-32 h-32 mx-auto mb-4 overflow-hidden">
-                    <img
-                      src={leader.image}
-                      alt={leader.name}
-                      className="w-full h-full object-cover"
-                    />
+            <div className="flex flex-col md:flex-row flex-wrap justify-start items-center gap-8">
+              {staffs.length > 0 ? (
+                staffs.map((staff) => (
+                  <div
+                    key={staff.id}
+                    className="text-center w-60 md:w-64 lg:w-72 bg-white border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-6"
+                  >
+                    <div className="rounded-full w-32 h-32 mx-auto mb-4 overflow-hidden border-2 border-gray-300">
+                      <img
+                        src={staff.imageURL || "/placeholder.png"}
+                        alt={staff.firstName + " " + staff.lastName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <h4 className="font-semibold text-lg">
+                      {staff.firstName} {staff.lastName}
+                    </h4>
+                    <p className="text-sm text-gray-500">{staff.position}</p>
+
+                    {/* View Button */}
+                    <button
+                      onClick={() => setViewStaff(staff)}
+                      className="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                    >
+                      View
+                    </button>
                   </div>
-                  <h4 className="font-semibold text-lg">{leader.name}</h4>
-                  <p className="text-sm text-gray-500">{leader.role}</p>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-gray-500">No leadership data available.</p>
+              )}
             </div>
           </div>
+
+          {/* Staff Modal */}
+          {viewStaff && (
+            <ViewStaffModal
+              staff={viewStaff}
+              onClose={() => setViewStaff(null)}
+            />
+          )}
         </section>
       </main>
 
