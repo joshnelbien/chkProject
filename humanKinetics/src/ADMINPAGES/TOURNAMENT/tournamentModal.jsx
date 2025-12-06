@@ -20,13 +20,15 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
   });
   const [showConfirmation, setShowConfirmation] = useState(false);
 
+  // Player selection state
+  const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+
   // Fetch all teams for this admin/user
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const res = await axios.get(
-          `${API}/teams/getTeams/${id}`
-        );
+        const res = await axios.get(`${API}/teams/getTeams/${id}`);
         setTeams(res.data);
 
         // Fetch players for each team
@@ -41,9 +43,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
   // Fetch players for a team
   const fetchPlayersForTeam = async (teamId) => {
     try {
-      const res = await axios.get(
-        `${API}/teams/player/${teamId}`
-      );
+      const res = await axios.get(`${API}/teams/player/${teamId}`);
       setPlayersByTeam((prev) => ({ ...prev, [teamId]: res.data }));
     } catch (err) {
       console.error(`Error fetching players for team ${teamId}:`, err);
@@ -64,6 +64,30 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
       sport: selectedTeam?.sport || "",
       teamName: selectedTeam?.teamName || "",
     });
+
+    // Reset player selection
+    setSelectedPlayers([]);
+    setSelectAll(false);
+  };
+
+  // Handle individual player checkbox
+  const handlePlayerCheck = (playerId) => {
+    setSelectedPlayers((prev) =>
+      prev.includes(playerId)
+        ? prev.filter((id) => id !== playerId)
+        : [...prev, playerId]
+    );
+  };
+
+  // Handle Select All checkbox
+  const handleSelectAll = () => {
+    if (!selectAll) {
+      const allPlayerIds = playersByTeam[formData.id]?.map((p) => p.id) || [];
+      setSelectedPlayers(allPlayerIds);
+    } else {
+      setSelectedPlayers([]);
+    }
+    setSelectAll(!selectAll);
   };
 
   // Show confirmation modal on submit
@@ -75,14 +99,32 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
   // Confirm submission and send POST request
   const confirmSubmit = async () => {
     try {
-      console.log("Submitting tournament:", formData);
+      // Map selected player objects to "FirstName LastName" format or use IDs
+      const selectedPlayerNames = selectedPlayers
+        .map((playerId) => {
+          const player = playersByTeam[formData.id].find((p) => p.id === playerId);
+          return player ? `${player.firstName} ${player.lastName}` : null;
+        })
+        .filter(Boolean); // remove nulls if any
+
+      // Convert to format: "player1","player2","player3"
+      const playersString = selectedPlayerNames.map((p) => `"${p}"`).join(",");
+
+      const submissionData = {
+        ...formData,
+        players: playersString
+      };
+
+      console.log("Submitting tournament:", submissionData);
+
       const response = await axios.post(
         `${API}/tournament/tournaments`,
-        formData
+        submissionData
       );
+
       console.log("✅ Tournament added:", response.data);
 
-      if (onSubmit) onSubmit(formData); // optional callback
+      if (onSubmit) onSubmit(submissionData); // optional callback
       setShowConfirmation(false);
       handleClose();
     } catch (error) {
@@ -91,6 +133,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
       setShowConfirmation(false);
     }
   };
+
 
   const cancelSubmit = () => setShowConfirmation(false);
 
@@ -104,6 +147,8 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
       teams: "",
       id: "",
     });
+    setSelectedPlayers([]);
+    setSelectAll(false);
     onClose();
   };
 
@@ -147,6 +192,43 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
               </select>
             </div>
 
+            {/* Player Selection */}
+            {formData.id && playersByTeam[formData.id]?.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">
+                  Select Players
+                </label>
+
+                <div className="mb-2 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                    id="selectAll"
+                  />
+                  <label htmlFor="selectAll" className="text-gray-700 font-medium">
+                    Select All
+                  </label>
+                </div>
+
+                <div className="max-h-48 overflow-y-auto border rounded-lg p-2">
+                  {playersByTeam[formData.id].map((player) => (
+                    <div key={player.id} className="flex items-center gap-2 mb-1">
+                      <input
+                        type="checkbox"
+                        checked={selectedPlayers.includes(player.id)}
+                        onChange={() => handlePlayerCheck(player.id)}
+                        id={`player-${player.id}`}
+                      />
+                      <label htmlFor={`player-${player.id}`} className="text-gray-700">
+                        {player.firstName} {player.lastName}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Tournament Fields */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -172,6 +254,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
                 value={formData.sport}
                 onChange={handleChange}
                 required
+                disabled
                 className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
               />
             </div>
@@ -272,7 +355,7 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
                 <strong>
                   {teams.find((t) => t.id === formData.id)?.teamName}
                 </strong>
-                "?
+                " with {selectedPlayers.length} selected players?
               </p>
 
               <div className="flex gap-3">
