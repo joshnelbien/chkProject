@@ -93,11 +93,14 @@ function CoachesPage() {
 
   // TEAM SPORTS LIST
   const TEAM_SPORTS = [
-    "basketball",
-    "volleyball",
+    "basketball-men",
+    "basketball-women",
+    "volleyball-men",
+    "volleyball-women",
+    "cheerdance",
     "futsal",
-    "sepak takraw",
-    "table tennis",
+    "sepak-takraw",
+    "table-tennis",
     "badminton",
   ];
 

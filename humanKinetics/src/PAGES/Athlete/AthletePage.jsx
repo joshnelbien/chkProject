@@ -62,11 +62,13 @@ function AthletePage() {
   const [filterType, setFilterType] = useState("all"); // "all" | "team" | "combat"
 
   const TEAM_SPORTS = [
-    "basketball",
-    "volleyball",
+    "basketball-men",
+    "volleyball-men",
+    "volleyball-women",
+    "cheerdance",
     "futsal",
-    "sepak takraw",
-    "table tennis",
+    "sepak-takraw",
+    "table-tennis",
     "badminton",
   ];
 
