@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../sequelize");
+const PerformanceHistory = require("./performanceDB");
 
 const playerAccounts = sequelize.define("playerAccounts", {
   id: {
@@ -170,6 +171,27 @@ strength:{
     type: DataTypes.STRING,
     defaultValue: "70",
   },
+  accuracy:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
+  tactics:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
+  strategy:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
+  physicalFitness:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
+   teamCoordination:{
+    type: DataTypes.STRING,
+    defaultValue: "70",
+  },
+  
   // 🖼️ Profile Picture
   profilePicture: {
     type: DataTypes.BLOB("long"),
@@ -183,6 +205,7 @@ strength:{
 
 
 });
-
+playerAccounts.hasMany(PerformanceHistory, { foreignKey: "id" });
+PerformanceHistory.belongsTo(playerAccounts, { foreignKey: "playerId" });
 
 module.exports = playerAccounts;

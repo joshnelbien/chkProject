@@ -36,6 +36,9 @@ const MedalTallyRoutes = require("./routes/medalTallyRoutes");
 const Staffs = require("./db/model/staffsDB");
 const staffRoutes = require("./routes/staffRoutes");
 
+const PerformanceHistory = require("./db/model/performanceDB");
+const performanceRoutes = require("./routes/performanceRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -55,6 +58,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
     await Teams.sync({ alter: true });
     await Attendance.sync({ alter: true });
     await Logs.sync({ alter: true });
+    await PerformanceHistory.sync({ alter: true });
     await MedalTally.sync({ alter: true });
     await Staffs.sync({ alter: true });
     console.log("Database ready.");
@@ -73,6 +77,7 @@ app.use("/attendance", AttendanceRoutes);
 app.use("/logs", LogsRoutes);
 app.use("/medalTally", MedalTallyRoutes);
 app.use("/staffs", staffRoutes);
+app.use("/performance", performanceRoutes);
 
 app.post("/contact", async (req, res) => {
   const { fullName, email, subject, message } = req.body;

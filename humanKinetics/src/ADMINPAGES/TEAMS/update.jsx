@@ -58,6 +58,11 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
     speed: player.speed || 70,
     agility: player.agility || 70,
     endurance: player.endurance || 70,
+    accuracy: player.accuracy || 70,
+    tactics: player.tactics || 70,
+    strategy: player.strategy || 70,
+    physicalFitness: player.physicalFitness || 70,
+    teamCoordination: player.teamCoordination || 70,
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -175,7 +180,7 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
             {/* STATS SLIDERS */}
             <section>
               <h3 className="font-semibold text-gray-700 mb-2">⚽ Performance Attributes</h3>
-              {["strength", "speed", "agility", "endurance"].map((stat) => (
+              {["strength", "speed", "agility", "endurance", "accuracy", "tactics", "strategy", "physicalFitness", "teamCoordination"].map((stat) => (
                 <div key={stat}>
                   <div className="flex justify-between text-sm">
                     <label className="capitalize">{stat}</label>

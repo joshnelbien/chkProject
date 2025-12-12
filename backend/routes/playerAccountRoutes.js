@@ -8,6 +8,7 @@ const { Resend } = require('resend');
 const { Op, where } = require("sequelize");
 const multer = require("multer");
 const playerAccounts = require("../db/model/playerAccountsDb");
+const PerformanceHistory = require("../db/model/performanceDB");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
@@ -23,23 +24,44 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 router.put("/update-performance/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body; // object sent from frontend
+    const updates = req.body;
 
-    // Find the player
     const player = await playerAccounts.findByPk(id);
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
 
-    // Update the player
+    // Save old stats before updating
+    const oldStats = {
+      strength: player.strength,
+      speed: player.speed,
+      agility: player.agility,
+      endurance: player.endurance,
+      accuracy: player.accuracy,
+      tactics: player.tactics,
+      strategy: player.strategy,
+      physicalFitness: player.physicalFitness,
+      teamCoordination: player.teamCoordination,
+    };
+
+    // 1️⃣ Update the main profile
     await player.update(updates);
 
-    return res.json({ message: "Player updated successfully!", player });
+    // 2️⃣ Log performance history
+    await PerformanceHistory.create({
+      playerId: id,
+      ...updates, // save new stats
+      updatedBy: req.user?.username || "Coach",
+    });
+
+    res.json({
+      message: "Player performance updated & logged!",
+      oldStats,
+      newStats: updates,
+    });
   } catch (error) {
     console.error("Error updating performance:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error updating performance" });
+    res.status(500).json({ message: "Server error updating performance" });
   }
 });
 
