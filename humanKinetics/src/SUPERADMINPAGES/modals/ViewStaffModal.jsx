@@ -8,6 +8,7 @@ function ViewStaffModal({ staff, onClose, refresh }) {
     lastName: staff.lastName,
     position: staff.position,
     description: staff.description,
+    headings: staff.headings,
     image: null,
   });
 
@@ -95,6 +96,7 @@ function ViewStaffModal({ staff, onClose, refresh }) {
           </div>
         ) : (
           <div className="text-center">
+            
             <p><strong>Name:</strong> {staff.firstName} {staff.lastName}</p>
             <p><strong>Position:</strong> {staff.position}</p>
             <p className="mt-2"><strong>Description:</strong><br /> {staff.description}</p>

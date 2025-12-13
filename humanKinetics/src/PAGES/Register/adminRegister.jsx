@@ -362,15 +362,18 @@ const AdminRegister = () => {
                     <option value="" disabled>
                       Select Sport
                     </option>
-                    <option value="Basketball">Basketball</option>
-                    <option value="Volleyball">Volleyball</option>
-                    <option value="Futsal">Futsal</option>
-                    <option value="Sepak Takraw">Sepak Takraw</option>
-                    <option value="Table Tennis">Table Tennis</option>
-                    <option value="Badminton">Badminton</option>
-                    <option value="Taekwondo">Taekwondo</option>
-                    <option value="Arnis">Arnis</option>
-                    <option value="Karate-Do">Karate-Do</option>
+                    <option value="basketball-men">Basketball Men</option>
+                    <option value="basketball-women">Basketball Women</option>
+                    <option value="volleyball-men">Volleyball Men</option>
+                    <option value="volleyball-women">Volleyball Women</option>
+                    <option value="cheerdance">CheerDance</option>
+                    <option value="futsal">Futsal</option>
+                    <option value="sepak-takraw">Sepak Takraw</option>
+                    <option value="table-tennis">Table Tennis</option>
+                    <option value="badminton">Badminton</option>
+                    <option value="taekwondo">Taekwondo</option>
+                    <option value="arnis">Arnis</option>
+                    <option value="karate-do">Karate-Do</option>
                   </select>
                 </div>
                 </div>

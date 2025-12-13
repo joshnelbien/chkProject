@@ -7,6 +7,7 @@ function AddStaffModal({ onClose, refresh }) {
     lastName: "",
     position: "",
     description: "",
+
   });
 
   const [image, setImage] = useState(null);
@@ -51,12 +52,18 @@ function AddStaffModal({ onClose, refresh }) {
           value={form.lastName}
           onChange={(e) => setForm({ ...form, lastName: e.target.value })}
         />
-        <input
+
+        <select
           className="w-full border p-2 mb-2"
-          placeholder="Position"
           value={form.position}
           onChange={(e) => setForm({ ...form, position: e.target.value })}
-        />
+        >
+          <option value="">Select Position</option>
+          <option value="School Founder">School Founder</option>
+          <option value="Sports Dean">Sports Dean</option>
+          <option value="Head Coach">Head Coach</option>
+          <option value="CHK Teacher">CHK Teacher</option>
+        </select>
 
         <textarea
           className="w-full border p-2 mb-2"
@@ -64,6 +71,7 @@ function AddStaffModal({ onClose, refresh }) {
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
+
 
         {/* IMAGE UPLOAD + PREVIEW */}
         <input

@@ -10,13 +10,15 @@ const upload = multer({ storage });
 // ============== ADD STAFF ================= //
 router.post("/staff", upload.single("image"), async (req, res) => {
     try {
-        const { firstName, lastName, position, description } = req.body;
+        const { firstName, lastName, position, description, headings } = req.body;
 
         const newStaff = await Staffs.create({
             firstName,
             lastName,
             position,
+            headings,
             description,
+            headings,
             image: req.file ? req.file.buffer : null, // <== BLOB stored here
         });
 

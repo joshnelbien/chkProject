@@ -1,158 +1,120 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Footer from "../../FOOTER/footer";
 import Navbar from "../../NAVBAR/navbar";
 import Sidebar from "../../SIDEBAR/sidebar";
 
 function Staff() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [staff, setStaff] = useState([]);
+  const API = import.meta.env.VITE_BBACKEND_URL;
+
+  useEffect(() => {
+    axios
+      .get(`${API}/staffs/staff`)
+      .then(res => setStaff(res.data))
+      .catch(err => console.error(err));
+  }, []);
+
+  const groupedStaff = (position) =>
+    staff.filter(s => s.position === position);
+
+  /* ---------------- COMPONENTS ---------------- */
+
+  const Avatar = ({ image }) => (
+    <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center shrink-0">
+      {image ? (
+        <img src={image} alt="Staff" className="w-full h-full object-cover" />
+      ) : (
+        <span className="text-xs text-gray-500">No Image</span>
+      )}
+    </div>
+  );
+
+  const StaffCard = ({ staff }) => (
+    <div className="bg-white rounded-xl shadow p-5 flex gap-4 hover:shadow-lg transition">
+      <Avatar image={staff.imageURL} />
+
+      <div className="flex flex-col">
+        <h3 className="text-lg font-semibold text-gray-800">
+          {staff.firstName || "—"} {staff.lastName || ""}
+        </h3>
+
+        <span className="text-sm font-medium text-green-700 mb-1">
+          {staff.position || "Position not specified"}
+        </span>
+
+        <p className="text-sm text-gray-600">
+          {staff.description?.trim()
+            ? staff.description
+            : "No description provided."}
+        </p>
+      </div>
+    </div>
+  );
+
+  const Section = ({ title, position }) => {
+    const items = groupedStaff(position);
+
+    return (
+      <div className="mb-10">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          {title}
+        </h2>
+
+        {items.length === 0 ? (
+          <div className="bg-white rounded-xl p-6 shadow text-gray-500 italic">
+            No records available.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            {items.map(s => (
+              <StaffCard key={s.id} staff={s} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  /* ---------------- LAYOUT ---------------- */
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* Main Container */}
-      <div
-        className={`flex flex-col flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        }`}
-      >
-        {/* Navbar */}
+      <div className={`flex flex-col flex-1 ${sidebarOpen ? "ml-64" : "ml-0"}`}>
         <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        {/* Main Content */}
         <main className="flex-grow p-6 mt-16">
-          <h1 className="text-2xl font-bold text-green-700 mb-6">
+          <h1 className="text-2xl font-bold text-green-700 mb-8">
             PLSP Leadership & Staff
           </h1>
 
-          {/* School Founder Section */}
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              School Founder
-            </h2>
-            <div className="flex items-center space-x-4">
-              <div className="w-24 h-24 bg-gray-200 rounded-full"></div>
-              <div>
-                <h3 className="text-xl font-bold">Dr. James Mitchell</h3>
-                <p className="text-green-700 font-semibold">
-                  School Founder & President
-                </p>
-                <p className="text-gray-600 italic">
-                  Establishing excellence in sports education and athletic
-                  development
-                </p>
-                <div className="flex space-x-2 mt-2">
-                  <span className="px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-700">
-                    PhD Sports Science
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-700">
-                    MBA Sports Management
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Section
+            title="School Founder"
+            position="School Founder"
+          />
 
-          {/* Sports Dean Section */}
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Sports Dean
-            </h2>
-            <div className="flex items-center space-x-4">
-              <div className="w-24 h-24 bg-gray-200 rounded-full"></div>
-              <div>
-                <h3 className="text-xl font-bold">Dr. Sarah Anderson</h3>
-                <p className="text-green-700 font-semibold">Dean of Sports</p>
-                <p className="text-gray-600">20+ years in Sports Education</p>
-                <ul className="list-disc list-inside text-gray-700 mt-2">
-                  <li>Athletic Program Oversight</li>
-                  <li>Sports Curriculum Development</li>
-                  <li>Coach Management</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <Section
+            title="Sports Dean"
+            position="Sports Dean"
+          />
 
-          {/* Head Coaches Section */}
-          <div className="bg-white p-6 rounded-lg shadow mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Head Coaches
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-full"></div>
-                <div>
-                  <h3 className="text-lg font-bold">Robert Thompson</h3>
-                  <p className="text-green-700 font-semibold">
-                    Head Coach - Basketball
-                  </p>
-                  <p className="text-gray-600 text-sm">15 years Experience</p>
-                  <div className="flex space-x-2 mt-1">
-                    <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-700">
-                      FIBA Level 3
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-700">
-                      Advanced Training
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-full"></div>
-                <div>
-                  <h3 className="text-lg font-bold">Maria Rodriguez</h3>
-                  <p className="text-green-700 font-semibold">
-                    Head Coach - Volleyball
-                  </p>
-                  <p className="text-gray-600 text-sm">12 years Experience</p>
-                  <div className="flex space-x-2 mt-1">
-                    <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-700">
-                      FIVB Level 2
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-700">
-                      Youth Development
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Section
+            title="Head Coaches"
+            position="Head Coach"
+          />
 
-          {/* CHK Teachers Section */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              CHK Teachers
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-full"></div>
-                <div>
-                  <h3 className="text-lg font-bold">Prof. Michael Chen</h3>
-                  <p className="text-green-700 font-semibold">
-                    Sports Psychology
-                  </p>
-                  <p className="text-gray-600 text-sm">
-                    Athletic Mental Training
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="w-20 h-20 bg-gray-200 rounded-full"></div>
-                <div>
-                  <h3 className="text-lg font-bold">Dr. Emily White</h3>
-                  <p className="text-green-700 font-semibold">Sports Science</p>
-                  <p className="text-gray-600 text-sm">Performance Analysis</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Section
+            title="CHK Teachers"
+            position="CHK Teacher"
+          />
         </main>
 
-        {/* Footer */}
         <Footer />
       </div>
     </div>

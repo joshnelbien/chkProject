@@ -3,7 +3,7 @@ function Footer() {
     <footer className="w-full h-16 bg-[#1E4620] shadow flex items-center justify-between px-6 z-10 mt-auto">
       {/* Left side */}
       <p className="text-sm text-white">
-        © {new Date().getFullYear()} Pamantasan ng Lungsod ng San Pablo - College of Human Kinetics
+        © {new Date().getFullYear()} Pamantasan ng Lungsod ng San Pablo - Institute of Human Kinetics
       </p>
 
       {/* Right side */}

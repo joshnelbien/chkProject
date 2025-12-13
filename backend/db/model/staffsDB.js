@@ -26,7 +26,6 @@ const Staffs = sequelize.define("Staffs", {
     description: {
         type: DataTypes.STRING,
     },
-
     image: {
         type: DataTypes.BLOB("long"), 
         allowNull: true,

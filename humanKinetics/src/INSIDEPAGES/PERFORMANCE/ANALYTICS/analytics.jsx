@@ -19,6 +19,7 @@ import { useParams } from "react-router-dom";
 function Analytics() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { id } = useParams();
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   const [analytics, setAnalytics] = useState({
     attendanceRate: 0,
@@ -36,10 +37,10 @@ function Analytics() {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/performance/analytics/${id}`);
+        const res = await axios.get(`${API}/performance/analytics/${id}`);
         setAnalytics(res.data);
 
-        const historyRes = await axios.get(`http://localhost:5000/performance/${id}`);
+        const historyRes = await axios.get(`${API}/performance/${id}`);
         setHistory(historyRes.data);
       } catch (error) {
         console.error("Failed to load analytics:", error);
