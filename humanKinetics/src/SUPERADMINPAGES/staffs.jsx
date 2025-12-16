@@ -8,6 +8,7 @@ import AddStaffModal from "./modals/AddStaffModal";
 import ConfirmModal from "./modals/ConfirmModal";
 import ViewStaffModal from "./modals/ViewStaffModal";
 
+
 function Staffs() {
     const [staffs, setStaffs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,6 +17,7 @@ function Staffs() {
     const [addModalOpen, setAddModalOpen] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(null);
     const [viewStaff, setViewStaff] = useState(null);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const API = import.meta.env.VITE_BBACKEND_URL;
 
@@ -41,7 +43,7 @@ function Staffs() {
             await axios.delete(`${API}/staffs/staff/${confirmDelete.id}`);
             setStaffs(prev => prev.filter(s => s.id !== confirmDelete.id));
             setConfirmDelete(null);
-            alert("Staff removed successfully.");
+            setShowSuccess(true);
         } catch (error) {
             alert("Failed to delete staff.");
         }
@@ -100,7 +102,7 @@ function Staffs() {
                                             />
                                         </div>
                                         <h3 className="font-semibold text-lg">
-                                           Name: {staff.lastName} {staff.firstName}
+                                            Name: {staff.lastName} {staff.firstName}
                                         </h3>
                                         <p className="text-sm text-gray-500">Position: {staff.position}</p>
                                         <p className="text-sm text-gray-600 mt-2">Description: {staff.description}</p>
@@ -141,11 +143,18 @@ function Staffs() {
                                 onCancel={() => setConfirmDelete(null)}
                             />
                         )}
+                        {showSuccess && (
+                            <SuccessModal
+                                message="Staff archived successfully!"
+                                onClose={() => setShowSuccess(false)}
+                            />
+                        )}
                     </div>
                 </main>
 
                 <Footer />
             </div>
+
         </div>
     );
 }

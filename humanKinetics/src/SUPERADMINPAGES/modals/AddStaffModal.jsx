@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
+import SuccessModal from "./successModal";
 
 function AddStaffModal({ onClose, refresh }) {
+  const [showSuccess, setShowSuccess] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -9,6 +11,10 @@ function AddStaffModal({ onClose, refresh }) {
     description: "",
 
   });
+
+  const addStaffClose = () => {
+    onclose();
+  }
 
   const [image, setImage] = useState(null);
   const API = import.meta.env.VITE_BBACKEND_URL;
@@ -26,9 +32,8 @@ function AddStaffModal({ onClose, refresh }) {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Staff added successfully!");
-      refresh();
-      onClose();
+      setShowSuccess(true); // ✅ show modal
+      refresh();            // optional
     } catch (error) {
       alert("Failed to add staff.");
     }
@@ -59,10 +64,14 @@ function AddStaffModal({ onClose, refresh }) {
           onChange={(e) => setForm({ ...form, position: e.target.value })}
         >
           <option value="">Select Position</option>
-          <option value="School Founder">School Founder</option>
-          <option value="Sports Dean">Sports Dean</option>
-          <option value="Head Coach">Head Coach</option>
-          <option value="CHK Teacher">CHK Teacher</option>
+          <option value="CITY MAYOR/CHAIR, PLSP BOARD OF REGENTS">CITY MAYOR/CHAIR, PLSP BOARD OF REGENTS</option>
+          <option value="EXECUTIVE ASSISTANT FOR PLSP">EXECUTIVE ASSISTANT FOR PLSP</option>
+          <option value="UNIVERSITY PRESIDENT">UNIVERSITY PRESIDENT</option>
+          <option value="COLLEGE ADMINISTRATOR">COLLEGE ADMINISTRATOR</option>
+          <option value="DIRECTOR, INSTITUTE OF HUMAN KINETICS">DIRECTOR, INSTITUTE OF HUMAN KINETICS</option>
+          <option value="SECRETARY IHK">SECRETARY IHK</option>
+          <option value="DEAN COLLEGE OF TEACHER EDUCATION">DEAN COLLEGE OF TEACHER EDUCATION</option>
+          <option value="PE LECTURERS AND SPORTS COACHES">PE LECTURERS AND SPORTS COACHES</option>
         </select>
 
         <textarea
@@ -89,6 +98,16 @@ function AddStaffModal({ onClose, refresh }) {
             Save
           </button>
         </div>
+
+        {showSuccess && (
+          <SuccessModal
+            message="Staff added successfully!"
+            onClose={() => {
+              setShowSuccess(false); // close success modal
+              onClose();             // close AddStaffModal
+            }}
+          />
+        )}
       </div>
     </div>
   );

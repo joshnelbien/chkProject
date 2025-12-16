@@ -32,7 +32,7 @@ function Staff() {
   );
 
   const StaffCard = ({ staff }) => (
-    <div className="bg-white rounded-xl shadow p-5 flex gap-4 hover:shadow-lg transition">
+    <div className="bg-white rounded-xl shadow-md p-5 flex gap-2 hover:shadow-xl transition transform hover:-translate-y-1">
       <Avatar image={staff.imageURL} />
 
       <div className="flex flex-col">
@@ -57,17 +57,17 @@ function Staff() {
     const items = groupedStaff(position);
 
     return (
-      <div className="mb-10">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+      <div className="mb-10 p-6 rounded-2xl bg-gradient-to-r from-green-50 via-white to-green-50 shadow-inner">
+        <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b border-green-200 pb-2">
           {title}
         </h2>
 
         {items.length === 0 ? (
-          <div className="bg-white rounded-xl p-6 shadow text-gray-500 italic">
+          <div className="bg-white rounded-xl p-6 shadow text-gray-500 italic text-center">
             No records available.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map(s => (
               <StaffCard key={s.id} staff={s} />
             ))}
@@ -80,7 +80,7 @@ function Staff() {
   /* ---------------- LAYOUT ---------------- */
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-green-50">
       <Sidebar
         isOpen={sidebarOpen}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -90,28 +90,48 @@ function Staff() {
         <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
         <main className="flex-grow p-6 mt-16">
-          <h1 className="text-2xl font-bold text-green-700 mb-8">
+          <h1 className="text-3xl font-bold text-green-700 mb-10 text-center">
             PLSP Leadership & Staff
           </h1>
 
           <Section
-            title="School Founder"
-            position="School Founder"
+            title="CITY MAYOR/CHAIR, PLSP BOARD OF REGENTS"
+            position="CITY MAYOR/CHAIR, PLSP BOARD OF REGENTS"
           />
 
           <Section
-            title="Sports Dean"
-            position="Sports Dean"
+            title="EXECUTIVE ASSISTANT FOR PLSP"
+            position="EXECUTIVE ASSISTANT FOR PLSP"
           />
 
           <Section
-            title="Head Coaches"
-            position="Head Coach"
+            title="UNIVERSITY PRESIDENT"
+            position="UNIVERSITY PRESIDENT"
           />
 
           <Section
-            title="CHK Teachers"
-            position="CHK Teacher"
+            title="COLLEGE ADMINISTRATOR"
+            position="COLLEGE ADMINISTRATOR"
+          />
+
+          <Section
+            title="DIRECTOR, INSTITUTE OF HUMAN KINETICS"
+            position="DIRECTOR, INSTITUTE OF HUMAN KINETICS"
+          />
+
+          <Section
+            title="SECRETARY IHK"
+            position="SECRETARY IHK"
+          />
+
+          <Section
+            title="DEAN COLLEGE OF TEACHER EDUCATION"
+            position="DEAN COLLEGE OF TEACHER EDUCATION"
+          />
+
+          <Section
+            title="PE LECTURERS AND SPORTS COACHES"
+            position="PE LECTURERS AND SPORTS COACHES"
           />
         </main>
 
