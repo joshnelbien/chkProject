@@ -203,6 +203,13 @@ strength:{
     allowNull: true,
   },
 
+  achievements:{
+    type:DataTypes.STRING
+  },
+  isArchived: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
 
 });
 playerAccounts.hasMany(PerformanceHistory, { foreignKey: "id" });

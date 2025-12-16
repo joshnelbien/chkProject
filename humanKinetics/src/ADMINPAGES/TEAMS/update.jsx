@@ -14,45 +14,17 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
     bDay: player.bDay || "",
     jerseyNo: player.jerseyNo || "",
     position: player.position || "",
-
-    // Health Basic Info
-    height: player.height || "",
-    weight: player.weight || "",
-    bmi: player.bmi || "",
-    bloodType: player.bloodType || "",
-    restingHeartRate: player.restingHeartRate || "",
-    bloodPressure: player.bloodPressure || "",
-    allergies: player.allergies || "",
-
-    // Medical History
-    chronicIllness: player.chronicIllness || "",
-    hospitalization: player.hospitalization || "",
-    surgery: player.surgery || "",
-    familyHistory: player.familyHistory || "",
-    vaccineRecord: player.vaccineRecord || "",
-
-    // Current Health
-    medications: player.medications || "",
-    injuries: player.injuries || "",
-    illnesses: player.illnesses || "",
-    sleepHours: player.sleepHours || "",
-    dietPlan: player.dietPlan || "",
-    fitnessLevel: player.fitnessLevel || "",
-    lastCheckup: player.lastCheckup || "",
-    clearedForActivity: player.clearedForActivity || "",
-    doctorInfo: player.doctorInfo || "",
-
-    // Sports Injury / Therapy
-    sportsInjuries: player.sportsInjuries || "",
-    therapyRecords: player.therapyRecords || "",
-
+    achievements: Array.isArray(player.achievements)
+      ? player.achievements
+      : player.achievements
+        ? player.achievements.split(",").map(a => a.trim())
+        : [],
     // Emergency Contact
     emergencyName: player.emergencyName || "",
     emergencyRelation: player.emergencyRelation || "",
     emergencyAddress: player.emergencyAddress || "",
     emergencyContact: player.emergencyContact || "",
     preferredHospital: player.preferredHospital || "",
-
     // Stats
     strength: player.strength || 70,
     speed: player.speed || 70,
@@ -68,6 +40,28 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [newAchievement, setNewAchievement] = useState("");
+
+
+  const addAchievement = () => {
+    if (!newAchievement.trim()) return;
+
+    setForm({
+      ...form,
+      achievements: [...form.achievements, newAchievement.trim()],
+    });
+
+    setNewAchievement("");
+  };
+
+  const removeAchievement = (index) => {
+    setForm({
+      ...form,
+      achievements: form.achievements.filter((_, i) => i !== index),
+    });
+  };
+
+
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -78,33 +72,56 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
   };
 
   const handleConfirmUpdate = async () => {
-    try {
-      setUpdating(true);
-      const response = await fetch(`${API}/userAccounts/update-performance/${player.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+  try {
+    setUpdating(true);
 
-      if (response.ok) {
-        setShowConfirmation(false);
-        setShowSuccess(true);
+    const formData = new FormData();
 
-        // Call the onUpdate callback to refresh data in parent component
-        if (onUpdate) {
-          onUpdate();
-        }
+    Object.entries(form).forEach(([key, value]) => {
+      if (value === null || value === undefined) return;
+
+      // 🔥 achievements as comma-separated STRING
+      if (key === "achievements") {
+        formData.append("achievements", value.join(", "));
       } else {
-        throw new Error("Update failed");
+        formData.append(key, value);
       }
-    } catch (err) {
-      alert("❌ Update failed");
-      console.log(err);
-      setShowConfirmation(false);
-    } finally {
-      setUpdating(false);
+    });
+
+    if (form.profilePicture instanceof File) {
+      formData.append("profilePicture", form.profilePicture);
     }
-  };
+
+    if (form.medicalCertificate instanceof File) {
+      formData.append("medicalCertificate", form.medicalCertificate);
+    }
+
+    const response = await fetch(
+      `${API}/userAccounts/players-update/${player.id}`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Update failed");
+    }
+
+    setShowConfirmation(false);
+    setShowSuccess(true);
+
+    if (onUpdate) onUpdate();
+  } catch (err) {
+    console.error(err);
+    alert("❌ Update failed");
+    setShowConfirmation(false);
+  } finally {
+    setUpdating(false);
+  }
+};
+
+
 
   const handleSuccessClose = () => {
     setShowSuccess(false);
@@ -157,6 +174,48 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
                   placeholder="position"
                   className="border p-2 rounded w-full"
                 />
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-1">
+                    🏆 Achievements
+                  </label>
+
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      value={newAchievement}
+                      onChange={(e) => setNewAchievement(e.target.value)}
+                      placeholder="Add achievement (e.g. MVP 2024)"
+                      className="border p-2 rounded w-full"
+                    />
+                    <button
+                      type="button"
+                      onClick={addAchievement}
+                      className="px-4 bg-green-700 text-white rounded hover:bg-green-800"
+                    >
+                      Add
+                    </button>
+                  </div>
+
+                  {/* Achievement List */}
+                  <ul className="space-y-2">
+                    {form.achievements.map((item, index) => (
+                      <li
+                        key={index}
+                        className="flex justify-between items-center bg-gray-100 px-3 py-2 rounded"
+                      >
+                        <span>{item}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeAchievement(index)}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
               </div>
             </section>
 

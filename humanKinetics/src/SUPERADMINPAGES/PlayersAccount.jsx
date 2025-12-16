@@ -23,7 +23,7 @@ function PlayerAccounts() {
   const fetchPlayers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/userAccounts/player`);
+      const res = await axios.get(`${API}/userAccounts/player/superadmin`);
       setPlayers(res.data);
     } catch (error) {
       console.error("Error fetching players:", error);
@@ -52,16 +52,24 @@ function PlayerAccounts() {
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
+
     try {
-      await axios.delete(`${API}/userAccounts/player/${confirmDelete.id}`);
-      setPlayers((prev) => prev.filter((p) => p.id !== confirmDelete.id));
+      await axios.put(
+        `${API}/userAccounts/player/archive/${confirmDelete.id}`
+      );
+
+      setPlayers((prev) =>
+        prev.filter((p) => p.id !== confirmDelete.id)
+      );
+
       closeConfirmDelete();
-      alert("Player deleted successfully!");
+      alert("Player archived successfully!");
     } catch (error) {
-      console.error("Error deleting player:", error);
-      alert("Failed to delete player.");
+      console.error("Error archiving player:", error);
+      alert("Failed to archive player.");
     }
   };
+
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -175,7 +183,7 @@ function PlayerAccounts() {
 
             {confirmDelete && (
               <ConfirmModal
-                message={`Are you sure you want to delete ${confirmDelete.firstName} ${confirmDelete.lastName}?`}
+                message={`Are you sure you want to Archive ${confirmDelete.firstName} ${confirmDelete.lastName}?`}
                 onConfirm={handleDelete}
                 onCancel={closeConfirmDelete}
               />

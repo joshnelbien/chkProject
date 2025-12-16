@@ -82,7 +82,7 @@ function EditAccountModal({ open, onClose, player, onSave }) {
         course: player.course || "",
         yearLevel: player.yearLevel || "",
         sport: player.sport || "",
-
+        
         //  Basic Health Info
         height: player.height || "",
         weight: player.weight || "",
@@ -372,16 +372,18 @@ function EditAccountModal({ open, onClose, player, onSave }) {
                 value={formData.sport}
                 onChange={handleChange}
                 options={[
-                  "Basketball",
-                  "Volleyball",
-                  "Football",
-                  "Badminton",
-                  "Athletics",
-                  "Swimming",
-                  "Tennis",
-                  "Table Tennis",
-                  "Taekwondo",
-                  "Esports",
+                   "basketball-men",
+                    "basketball-women",
+                    "volleyball-men",
+                    "volleyball-women",
+                    "cheerdance",
+                    "futsal",
+                    "sepak-takraw",
+                    "table-tennis",
+                    "badminton",
+                    "taekwondo",
+                    "arnis",
+                    "karate-do",
                 ]}
               />
             </div>

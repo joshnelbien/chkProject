@@ -260,10 +260,11 @@ function TeamDetailsModal({ open, onClose, team, players, onAddPlayer, onUpdateP
       {showAddModal && (
         <AddPlayerModal
           onClose={() => setShowAddModal(false)}
+          onUpdatePlayer={onUpdatePlayer}
           teamId={team.id}
           onSelectPlayer={(player) => {
             setShowAddModal(false);
-            if (onAddPlayer) onAddPlayer(player); // trigger refresh
+            if (onAddPlayer) onAddPlayer(player);
           }}
         />
       )}

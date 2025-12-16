@@ -16,7 +16,7 @@ export default function ConfirmModal({ message, onConfirm, onCancel }) {
             onClick={onConfirm}
             className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
           >
-            Delete
+            Archive
           </button>
         </div>
       </div>

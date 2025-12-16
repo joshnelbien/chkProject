@@ -191,18 +191,45 @@ router.get("/verify-email", async (req, res) => {
   }
 });
 
-router.delete("/player/:id", async (req, res) => {
+router.put("/player/archive/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await playerAccounts.destroy({ where: { id } });
-    if (deleted) {
-      res.json({ success: true, message: "Player deleted successfully." });
-    } else {
-      res.status(404).json({ success: false, message: "Player not found." });
+
+    const player = await playerAccounts.findByPk(id);
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        message: "Player not found",
+      });
     }
+
+    await player.update({ isArchived: true });
+
+    res.json({
+      success: true,
+      message: "Player archived successfully",
+    });
   } catch (error) {
-    console.error("Error deleting player:", error);
-    res.status(500).json({ success: false, message: "Server error." });
+    console.error("Error archiving player:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
+router.get("/player/superadmin", async (req, res) => {
+  try {
+    const players = await playerAccounts.findAll({
+      where: {
+        isArchived: false,
+      },
+    });
+
+    res.json(players);
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -312,26 +339,31 @@ router.put(
   async (req, res) => {
     try {
       const { id } = req.params;
-
       const player = await playerAccounts.findByPk(id);
+
       if (!player) {
         return res.status(404).json({ message: "Player not found" });
       }
 
-      // Copy all fields from req.body
+      // Copy all body fields
       const updatedData = { ...req.body };
 
-      // Attach uploaded profile picture
-      if (req.files.profilePicture) {
+      // Attach files if present
+      if (req.files?.profilePicture) {
         updatedData.profilePicture = req.files.profilePicture[0].buffer;
       }
 
-      // Attach uploaded medical certificate
-      if (req.files.medicalCertificate) {
-        updatedData.medicalCertificate = req.files.medicalCertificate[0].buffer;
+      if (req.files?.medicalCertificate) {
+        updatedData.medicalCertificate =
+          req.files.medicalCertificate[0].buffer;
       }
 
-      // Perform update
+      // ✅ achievements is ALREADY a STRING (comma-separated)
+      // Nothing to parse, nothing to join
+      if (updatedData.achievements) {
+        updatedData.achievements = String(updatedData.achievements);
+      }
+
       await player.update(updatedData);
 
       res.status(200).json({
