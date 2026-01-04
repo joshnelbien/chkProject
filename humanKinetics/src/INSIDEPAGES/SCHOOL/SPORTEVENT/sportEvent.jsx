@@ -108,7 +108,7 @@ function SportEvent() {
                       <strong>Time:</strong> {event.startTime} - {event.endTime}
                     </p>
                     <p>
-                      <strong>Venue:</strong> {event.venue || "TBA"}
+                      <strong>Venue:</strong> {event.location || "TBA"}
                     </p>
                   </div>
                   {event.isCompleted && (

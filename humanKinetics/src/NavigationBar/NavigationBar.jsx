@@ -59,7 +59,7 @@ function NavigationBar() {
                 Pamantasan ng Lungsod ng San Pablo
               </h1>
               <h2 className="text-[8px] md:text-base text-gray-300">
-                College of Human Kinetics
+                 Institute of Human Kinetics.
               </h2>
             </div>
           </div>

@@ -67,11 +67,12 @@ function AdminTournament() {
       const payload = {
         ...scheduleForm,
         teamId: selectedTournament.id,
-        teamName: selectedTournament.teamName, // ensure using tournament ID
+        teamName: selectedTournament.teamName, 
         sport: selectedTournament.sport,
+        location: selectedTournament.location,
       };
 
-      console.log("📤 Sending Schedule to backend:", payload); // <-- log here
+      console.log("📤 Sending Schedule to backend:", payload); 
 
       await axios.post(
         `${API}/tournament/tournaments/${selectedTournament.id}/schedule`,
@@ -89,6 +90,7 @@ function AdminTournament() {
         opponent: "",
         teamId: selectedTournament.id,
         teamName: selectedTournament.teamName,
+        location: selectedTournament.location,
         sports: selectedTournament.sport,
       });
       setSelectedTournament(null);
@@ -348,6 +350,9 @@ function AdminTournament() {
                 </p>
                 <p>
                   <strong>Date:</strong> {scheduleForm.date}
+                </p>
+                <p>
+                  <strong>location:</strong> {selectedTournament.location}
                 </p>
                 <p>
                   <strong>Time:</strong> {scheduleForm.startTime} -{" "}

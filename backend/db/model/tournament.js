@@ -22,6 +22,7 @@ const TournamentSchedule = sequelize.define("tournament_schedules", {
   date: { type: DataTypes.DATEONLY, allowNull: false },
   startTime: { type: DataTypes.STRING, allowNull: false },
   endTime: { type: DataTypes.STRING, allowNull: false },
+  location: { type: DataTypes.STRING },
   opponent: { type: DataTypes.STRING, allowNull: false },
   teamId: { type: DataTypes.STRING },
   status: { type: DataTypes.STRING, defaultValue: "Pending" },
