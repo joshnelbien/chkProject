@@ -423,7 +423,7 @@ function Login() {
                   Pamantasan ng Lungsod ng San Pablo
                 </h1>
                 <h2 className="text-sm md:text-base text-gray-500">
-                  College of Human Kinetics
+                   Institute of Human Kinetics.
                 </h2>
               </div>
             </div>
@@ -637,7 +637,7 @@ function Login() {
 
       <footer className="w-full py-4 text-center text-gray-500 text-sm bg-white">
         <p className="text-gray-500">
-          &copy; 2024 Pamantasan ng Lungsod ng San Pablo - College of Human
+          &copy; 2024 Pamantasan ng Lungsod ng San Pablo - Institute of Human
           Kinetics. All rights reserved.
         </p>
       </footer>
