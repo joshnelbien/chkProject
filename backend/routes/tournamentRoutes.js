@@ -89,6 +89,25 @@ router.put("/tournaments/:id", async (req, res) => {
   }
 });
 
+
+router.put("/tournaments/status/:id", async (req, res) => {
+  try {
+    const { status } = req.body; // "Postponed", "Cancelled", "Ongoing", etc.
+    const tournament = await TournamentSchedule.findByPk(req.params.id);
+
+    if (!tournament) {
+      return res.status(404).json({ error: "Tournament match not found" });
+    }
+
+    await tournament.update({ status });
+
+    res.json({ message: `Tournament status updated to ${status}`, tournament });
+  } catch (error) {
+    console.error("❌ Error updating tournament status:", error);
+    res.status(500).json({ error: "Failed to update tournament" });
+  }
+});
+
 // 🟡 (Optional) Fetch all tournaments
 router.get("/tournaments-activities", async (req, res) => {
   try {
@@ -103,6 +122,24 @@ router.get("/tournaments-activities", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch tournaments" });
   }
 });
+
+router.get("/tournaments-home", async (req, res) => {
+  try {
+    const tournaments = await Tournament.findAll({
+      where: { isCompleted: false }, // Only show upcoming/ongoing ones
+      order: [['startDate', 'ASC']], // Show the one starting soonest first
+      limit: 2, // Only take the top 2 for the homepage "Upcoming Events"
+      include: {
+        model: TournamentSchedule,
+        as: "schedules",
+      },
+    });
+    res.json({ success: true, data: tournaments });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Failed to fetch tournaments" });
+  }
+});
+
 
 router.get("/tournaments-Schedules", async (req, res) => {
   try {

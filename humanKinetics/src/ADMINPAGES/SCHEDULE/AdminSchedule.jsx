@@ -40,11 +40,11 @@ function AdminSchedule() {
             updated[date] = updated[date].map((e) =>
               e.id === selectedEvent.id
                 ? {
-                    ...e,
-                    status: "Done",
-                    homeScore,
-                    opponentScore,
-                  }
+                  ...e,
+                  status: "Done",
+                  homeScore,
+                  opponentScore,
+                }
                 : e
             );
           });
@@ -62,18 +62,24 @@ function AdminSchedule() {
 
   const handleAction = async (event, action) => {
     try {
+      let url = "";
       const payload = {
-        id: event.id, // use the schedule's UUID primary key
         status: action,
+        // If it's a training, your existing API expects 'id' in the body
+        id: event.id
       };
 
-      const res = await axios.put(
-        `${API}/trainingSchedule/training-updates`,
-        payload
-      );
+      if (event.type === "Training") {
+        url = `${API}/trainingSchedule/training-updates`;
+      } else {
+        // For tournaments, we use the new status endpoint with ID in URL
+        url = `${API}/tournament/tournaments/status/${event.id}`;
+      }
+
+      const res = await axios.put(url, payload);
 
       if (res.status === 200) {
-        // Update local state
+        // Update local state instantly
         setScheduleData((prev) => {
           const newData = { ...prev };
           Object.keys(newData).forEach((date) => {
@@ -84,11 +90,11 @@ function AdminSchedule() {
           return newData;
         });
 
-        alert(`✅ Status updated to "${action}" for ${event.title}`);
+        alert(`✅ ${event.type} marked as ${action}`);
       }
     } catch (error) {
       console.error("❌ Error updating status:", error);
-      alert("Failed to update status. Please try again.");
+      alert("Failed to update status. Check console for details.");
     }
   };
 
@@ -221,11 +227,10 @@ function AdminSchedule() {
                 <button
                   key={status}
                   onClick={() => setFilterStatus(status)}
-                  className={`px-4 py-2 rounded-full font-semibold shadow ${
-                    filterStatus === status
+                  className={`px-4 py-2 rounded-full font-semibold shadow ${filterStatus === status
                       ? "bg-white text-green-700"
                       : "text-gray-600"
-                  }`}
+                    }`}
                 >
                   {status}
                 </button>
@@ -326,21 +331,21 @@ function AdminSchedule() {
                                 <span
                                   className={
                                     Number(event.homeScore) >
-                                    Number(event.opponentScore)
+                                      Number(event.opponentScore)
                                       ? "text-green-600 font-bold"
                                       : Number(event.homeScore) <
                                         Number(event.opponentScore)
-                                      ? "text-red-600 font-bold"
-                                      : "text-gray-600 font-bold"
+                                        ? "text-red-600 font-bold"
+                                        : "text-gray-600 font-bold"
                                   }
                                 >
                                   {Number(event.homeScore) >
-                                  Number(event.opponentScore)
+                                    Number(event.opponentScore)
                                     ? "WIN"
                                     : Number(event.homeScore) <
                                       Number(event.opponentScore)
-                                    ? "LOSE"
-                                    : "DRAW"}
+                                      ? "LOSE"
+                                      : "DRAW"}
                                 </span>
                               </p>
                             </td>
@@ -383,11 +388,10 @@ function AdminSchedule() {
                               <button
                                 onClick={() => handleAction(event, "Start")}
                                 disabled={event.status === "Start"}
-                                className={`px-3 py-1 rounded-lg transition ${
-                                  event.status === "Start"
+                                className={`px-3 py-1 rounded-lg transition ${event.status === "Start"
                                     ? "bg-gray-400 text-white cursor-not-allowed"
                                     : "bg-green-600 text-white hover:bg-green-700"
-                                }`}
+                                  }`}
                               >
                                 Start
                               </button>
@@ -447,11 +451,10 @@ function AdminSchedule() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1 rounded-full border ${
-                        page === currentPage
+                      className={`px-3 py-1 rounded-full border ${page === currentPage
                           ? "bg-green-600 text-white border-green-600"
                           : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                      }`}
+                        }`}
                     >
                       {page}
                     </button>
@@ -479,10 +482,10 @@ function OverviewCard({ label, value, color }) {
     color === "green"
       ? "text-green-600"
       : color === "yellow"
-      ? "text-yellow-600"
-      : color === "red"
-      ? "text-red-600"
-      : "text-gray-900";
+        ? "text-yellow-600"
+        : color === "red"
+          ? "text-red-600"
+          : "text-gray-900";
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md text-center sm:text-left">

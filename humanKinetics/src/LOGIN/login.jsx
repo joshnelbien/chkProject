@@ -19,11 +19,41 @@ function Login() {
   const [showMissingFieldsModal, setShowMissingFieldsModal] = useState(false);
   const [showWrongPasswordModal, setShowWrongPasswordModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [stats, setStats] = useState({ studentAthletes: 0, expertCoaches: 0 });
   const [loggedInId, setLoggedInId] = useState(null);
 
   const timeoutRef = useRef(null);
 
   // Cleanup timeout on unmount
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1. Fetch Counts
+        const countRes = await fetch("http://localhost:5000/adminAccounts/counts");
+        const countData = await countRes.json();
+        if (countData.success) {
+          setStats({
+            studentAthletes: countData.data.playersInTeam,
+            expertCoaches: countData.data.verifiedAdmins
+          });
+        }
+
+        // 2. Fetch Latest Events
+        const eventRes = await fetch("http://localhost:5000/tournament/tournaments-home");
+        const eventData = await eventRes.json();
+        if (eventData.success) {
+          setEvents(eventData.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch homepage data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -484,19 +514,19 @@ function Login() {
               </p>
               <div className="flex space-x-6 text-2xl font-bold">
                 <div>
-                  <span className="block">500+</span>
+                  <span className="block">{stats.studentAthletes}+</span>
                   <span className="text-sm font-normal text-gray-200">
                     Active Athletes
                   </span>
                 </div>
                 <div>
-                  <span className="block">50+</span>
+                  <span className="block">{stats.studentAthletes}</span>
                   <span className="text-sm font-normal text-gray-200">
                     Expert Coaches
                   </span>
                 </div>
                 <div>
-                  <span className="block">4</span>
+                  <span className="block">12</span>
                   <span className="text-sm font-normal text-gray-200">
                     Sports Programs
                   </span>
@@ -595,7 +625,7 @@ function Login() {
               </div>
 
               <a
-                href="#"
+                href="/forgot-password"
                 className="block text-right text-sm text-green-700 hover:underline mb-6"
               >
                 Forgot Password?

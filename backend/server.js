@@ -39,6 +39,8 @@ const staffRoutes = require("./routes/staffRoutes");
 const PerformanceHistory = require("./db/model/performanceDB");
 const performanceRoutes = require("./routes/performanceRoutes");
 
+const forgotPasswordRoutes = require("./routes/forgotpassword");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -78,7 +80,7 @@ app.use("/logs", LogsRoutes);
 app.use("/medalTally", MedalTallyRoutes);
 app.use("/staffs", staffRoutes);
 app.use("/performance", performanceRoutes);
-
+app.use("/forgot-password", forgotPasswordRoutes);
 app.post("/contact", async (req, res) => {
   const { fullName, email, subject, message } = req.body;
 

@@ -32,12 +32,15 @@ import ProgramPage from "./PAGES/Programs/ProgramPage";
 import Register from "./PAGES/Register/Register";
 import AdminRegister from "./PAGES/Register/adminRegister";
 import NotFound from "./notFound/NotFound";
+
 import AdminAccounts from "./SUPERADMINPAGES/AdminAccounts";
 import Logs from "./SUPERADMINPAGES/Logs";
 import PlayersAccount from "./SUPERADMINPAGES/PlayersAccount";
 import SuperAdminMedalTally from "./SUPERADMINPAGES/medalTally";
 import Staffs from "./SUPERADMINPAGES/staffs";
 import "./index.css";
+import ForgotPassword from "./LOGIN/ForgotPassword";
+import ResetPassword from "./LOGIN/ResetPassword";
 
 function App() {
   const API = import.meta.env.VITE_BBACKEND_URL;
@@ -53,8 +56,10 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/athletes" element={<AthletePage />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/overView/:id" element={<OverView />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/adminRegister" element={<AdminRegister />} />
           <Route path="/super-adminMedalTally" element={<SuperAdminMedalTally />} />
           <Route path="/super-adminStaffs" element={<Staffs />} />

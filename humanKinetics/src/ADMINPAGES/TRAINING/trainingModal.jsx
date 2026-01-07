@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 
 export default function TrainingModal({ isOpen, onClose, onSubmit }) {
   const { id } = useParams(); // Admin/User ID
-  console.log("Fetched id:", id);
 
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);

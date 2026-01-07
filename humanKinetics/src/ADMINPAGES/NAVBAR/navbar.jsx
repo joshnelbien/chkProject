@@ -17,7 +17,7 @@ function Navbar() {
           <h1 className="text-lg font-semibold">
             Pamantasan ng Lungsod ng San Pablo
           </h1>
-          <p className="text-sm text-gray-300">College of Human Kinetics</p>
+          <p className="text-sm text-gray-300">Insitute of Human Kinetics</p>
         </div>
       </div>
     </div>

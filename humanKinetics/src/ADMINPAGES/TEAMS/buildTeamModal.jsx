@@ -1,17 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Added useEffect
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-function BuildTeamModal({ open, onClose, onTeamCreated }) {
+function BuildTeamModal({ open, onClose, onTeamCreated, data }) {
   const { id } = useParams();
   const API = import.meta.env.VITE_BBACKEND_URL;
+
   const [formData, setFormData] = useState({
     teamId: id,
     teamName: "",
-    sport: "",
+    sport: "", // Start empty or with a fallback
     coach: "",
     description: "",
   });
+
+  // Sync state when data prop changes or modal opens
+  useEffect(() => {
+    if (open && data?.sports) {
+      setFormData((prev) => ({
+        ...prev,
+        sport: data.sports,
+        teamId: id // Ensure id is also synced
+      }));
+    }
+  }, [open, data, id]);
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdTeamData, setCreatedTeamData] = useState(null);
 
@@ -22,12 +35,12 @@ function BuildTeamModal({ open, onClose, onTeamCreated }) {
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
     setFormData({
+      teamId: id,
       teamName: "",
-      sport: "",
+      sport: data?.sports || "", // Reset back to default sport
       coach: "",
       description: "",
     });
-    // Call onTeamCreated with the created team data
     if (createdTeamData) {
       onTeamCreated(createdTeamData);
     }
@@ -37,20 +50,12 @@ function BuildTeamModal({ open, onClose, onTeamCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        `${API}/teams/createTeams`,
-        formData
-      );
-      console.log("✅ Team Created:", res.data);
-      
-      // Store the created team data
+      const res = await axios.post(`${API}/teams/createTeams`, formData);
       setCreatedTeamData(res.data);
-      
-      // Show success modal
       setShowSuccessModal(true);
-      
     } catch (err) {
       console.error("❌ Error creating team:", err);
+      alert("Failed to create team. Please try again.");
     }
   };
 
@@ -146,6 +151,7 @@ function BuildTeamModal({ open, onClose, onTeamCreated }) {
             <input
               type="text"
               name="sport"
+              readOnly
               value={formData.sport}
               onChange={handleChange}
               required

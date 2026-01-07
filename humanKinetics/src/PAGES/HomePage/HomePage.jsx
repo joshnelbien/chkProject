@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Footer from "../../Footer/Footer";
 import NavigationBar from "../../NavigationBar/NavigationBar";
 
@@ -6,6 +6,36 @@ function HomePage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [stats, setStats] = useState({ studentAthletes: 0, expertCoaches: 0 });
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1. Fetch Counts
+        const countRes = await fetch("http://localhost:5000/adminAccounts/counts");
+        const countData = await countRes.json();
+        if (countData.success) {
+          setStats({
+            studentAthletes: countData.data.playersInTeam,
+            expertCoaches: countData.data.verifiedAdmins
+          });
+        }
+
+        // 2. Fetch Latest Events
+        const eventRes = await fetch("http://localhost:5000/tournament/tournaments-home");
+        const eventData = await eventRes.json();
+        if (eventData.success) {
+          setEvents(eventData.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch homepage data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   const heroContent = [
     {
@@ -93,9 +123,8 @@ function HomePage() {
             {heroContent.map((_, index) => (
               <div
                 key={index}
-                className={`w-3 h-3 rounded-full cursor-pointer ${
-                  currentIndex === index ? "bg-white" : "bg-white opacity-50"
-                }`}
+                className={`w-3 h-3 rounded-full cursor-pointer ${currentIndex === index ? "bg-white" : "bg-white opacity-50"
+                  }`}
                 onClick={() => setCurrentIndex(index)}
               ></div>
             ))}
@@ -122,7 +151,7 @@ function HomePage() {
                     Sports Programs
                   </a>
                 </li>
-                     <li>
+                <li>
                   <a href="coaches" className="text-blue-500 hover:underline text-lg">
                     Coaching Staff
                   </a>
@@ -130,39 +159,34 @@ function HomePage() {
               </ul>
             </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h3 className="text-2xl font-semibold mb-4 text-[#1A237E]">
-                Latest News
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-lg">New Sports Complex</h4>
-                  <p className="text-sm text-gray-500">March 20, 2024</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-lg">Athlete Recognition</h4>
-                  <p className="text-sm text-gray-500">March 18, 2024</p>
-                </div>
-              </div>
-            </div>
+            
 
             <div className="bg-white rounded-lg p-6 shadow-md">
               <h3 className="text-2xl font-semibold mb-4 text-[#1A237E]">
                 Upcoming Events
               </h3>
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-lg text-[#1A237E]">
-                    LCUAA Championships
-                  </h4>
-                  <p className="text-sm text-gray-500">April 5-10, 2024</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-lg text-[#1A237E]">
-                    Sports Festival
-                  </h4>
-                  <p className="text-sm text-gray-500">April 15-20, 2024</p>
-                </div>
+                {events.length > 0 ? (
+                  events.map((event) => (
+                    <div key={event.id} className="border-b last:border-0 pb-2">
+                      <h4 className="font-semibold text-lg text-[#1A237E]">
+                        {event.tournamentName}
+                      </h4>
+                      <p className="text-sm text-gray-600 font-medium">
+                        {event.sport} • {event.location}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(event.startDate).toLocaleDateString('en-US', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">No upcoming events scheduled.</p>
+                )}
               </div>
             </div>
           </div>
@@ -172,28 +196,27 @@ function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="bg-[#1E4620] text-white rounded-full w-24 h-24 flex items-center justify-center mx-auto text-4xl font-bold mb-2">
-                14
+                12
               </div>
-              <p className="text-lg font-medium text-gray-700">
-                Sports Programs
-              </p>
+              <p className="text-lg font-medium text-gray-700">Sports Programs</p>
             </div>
+
             <div>
               <div className="bg-[#1A237E] text-white rounded-full w-24 h-24 flex items-center justify-center mx-auto text-4xl font-bold mb-2">
-                250+
+                {/* Dynamic Player Count */}
+                {stats.studentAthletes}+
               </div>
-              <p className="text-lg font-medium text-gray-700">
-                Student Athletes
-              </p>
+              <p className="text-lg font-medium text-gray-700">Student Athletes</p>
             </div>
+
             <div>
               <div className="bg-[#B71C1C] text-white rounded-full w-24 h-24 flex items-center justify-center mx-auto text-4xl font-bold mb-2">
-                30
+                {/* Dynamic Coach Count */}
+                {stats.studentAthletes}
               </div>
-              <p className="text-lg font-medium text-gray-700">
-                Expert Coaches
-              </p>
+              <p className="text-lg font-medium text-gray-700">Expert Coaches</p>
             </div>
+
             <div>
               <div className="bg-[#F9A825] text-white rounded-full w-24 h-24 flex items-center justify-center mx-auto text-4xl font-bold mb-2">
                 50+

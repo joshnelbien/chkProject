@@ -10,6 +10,7 @@ import TeamDetailsModal from "./TeamDetailsModal";
 function AdminTeam() {
   const { id } = useParams(); // ✅ Admin/User ID from route
   const [teams, setTeams] = useState([]);
+  const [admin, setAdmin] = useState([]);
   const [playersByTeam, setPlayersByTeam] = useState({});
   const [openModal, setOpenModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -38,6 +39,13 @@ function AdminTeam() {
           `${API}/teams/getTeams/${id}`
         );
         console.log(" Teams fetched:", res.data);
+
+        const resAdmin = await axios.get(
+          `${API}/adminAccounts/coaches-profile/${id}`
+        );
+        console.log(" Teams fetched:", resAdmin.data);
+
+        setAdmin(resAdmin.data);
         setTeams(res.data);
 
         // After teams are fetched, fetch players for each team
@@ -202,6 +210,7 @@ function AdminTeam() {
       {/* Build Team Modal */}
       <BuildTeamModal
         open={openModal}
+        data={admin}
         onClose={() => setOpenModal(false)}
         onTeamCreated={handleTeamCreated}
       />

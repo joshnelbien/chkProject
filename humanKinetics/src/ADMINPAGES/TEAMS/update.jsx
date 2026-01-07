@@ -507,14 +507,6 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
                   />
                 </div>
               ))}
-            </section>
-
-            {/* TRAINING PROGRAMS */}
-            <section>
-              <h3 className="font-semibold text-gray-700 mb-2">
-                🏋️ Training Program ({player.sport})
-              </h3>
-
               {(SPORT_TRAINING_FIELDS[player.sport] || []).map(
                 ({ key, label }) => (
                   <div key={key} className="mb-2">
@@ -541,6 +533,8 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
                 </p>
               )}
             </section>
+
+            
           </div>
 
           {/* Buttons */}

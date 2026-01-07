@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import PlayerProfileModal from "./PlayerProfileModal"; // ⬅ import the new modal
+import { useParams } from "react-router-dom";
 
 function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
   const [players, setPlayers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState(null); // ⬅ For viewing profile
-
+  const { id } = useParams();
   const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         const res = await axios.get(`${API}/userAccounts/players`);
+        const resAdmin = await axios.get(`${API}/adminAccounts/coaches-profile/${id}`);
+        console.log("Admin Data:", resAdmin.data.sports); // 🔍 Debug admin data
         const pendingPlayers = res.data.filter(
-          (player) => player.status === "Pending"
+          (player) => player.status === "Pending" && player.sport.toLowerCase() === resAdmin.data.sports.toLowerCase()
         );
         setPlayers(pendingPlayers);
       } catch (err) {

@@ -5,10 +5,48 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const multer = require("multer");
 const { Op } = require("sequelize");
-const Admin = require("../db/model/adminAccountDB");
 require("dotenv").config();
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+
+const Admin = require("../db/model/adminAccountDB");
+const Players = require("../db/model/playerAccountsDb");
+
+router.get("/counts", async (req, res) => {
+  try {
+    const [adminCount, playerCount] = await Promise.all([
+      // Count Admins where isSuperAdminVerified is true
+      Admin.count({
+        where: {
+          isSuperAdminVerified: true
+        }
+      }),
+      
+      // Count Players where status is 'in team'
+      Players.count({
+        where: {
+          status: 'In Team'
+        }
+      }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        verifiedAdmins: adminCount,
+        playersInTeam: playerCount,
+        totalFiltered: adminCount + playerCount
+      }
+    });
+  } catch (error) {
+    console.error("Sequelize Filter Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving filtered account counts",
+      error: error.message
+    });
+  }
+});
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -157,7 +195,7 @@ router.get("/admins", async (req, res) => {
 router.get("/admins/archieved", async (req, res) => {
   try {
     const admins = await Admin.findAll({
-      where:{isArchived: false}
+      where: { isArchived: false }
     });
 
     res.json(admins);

@@ -79,18 +79,21 @@ function AthletePage() {
     axios
       .get(`${API}/userAccounts/players`)
       .then((res) => {
-        const mapped = res.data.map((p) => ({
-          name: `${p.firstName} ${p.lastName}`,
-          sport: p.sport.toLowerCase(),
-          year: p.yearLevel,
-          achievements: p.achievements
-            ? p.achievements.split(",")
-            : ["No achievements listed"],
-          email: p.email,
-          image: p.profilePicture
-            ? `data:image/jpeg;base64,${p.profilePicture}` // <- fixed here
-            : "/lexi.jpg",
-        }));
+        // Filter first, then map the data
+        const mapped = res.data
+          .filter((p) => p.status === "In Team") // Frontend safeguard
+          .map((p) => ({
+            name: `${p.firstName} ${p.lastName}`,
+            sport: p.sport.toLowerCase(),
+            year: p.yearLevel,
+            achievements: p.achievements
+              ? p.achievements.split(",")
+              : ["No achievements listed"],
+            email: p.email,
+            image: p.profilePicture
+              ? `data:image/jpeg;base64,${p.profilePicture}`
+              : "/lexi.jpg",
+          }));
 
         setAthletes(mapped);
       })
@@ -139,31 +142,28 @@ function AthletePage() {
               <div className="flex space-x-2 bg-white rounded-full p-1 border border-gray-300">
                 <button
                   onClick={() => setFilterType("all")}
-                  className={`py-2 px-6 rounded-full font-semibold ${
-                    filterType === "all"
+                  className={`py-2 px-6 rounded-full font-semibold ${filterType === "all"
                       ? "bg-green-700 text-white"
                       : "text-gray-700"
-                  }`}
+                    }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setFilterType("team")}
-                  className={`py-2 px-6 rounded-full font-semibold ${
-                    filterType === "team"
+                  className={`py-2 px-6 rounded-full font-semibold ${filterType === "team"
                       ? "bg-green-700 text-white"
                       : "text-gray-700"
-                  }`}
+                    }`}
                 >
                   Team Sports
                 </button>
                 <button
                   onClick={() => setFilterType("combat")}
-                  className={`py-2 px-6 rounded-full font-semibold ${
-                    filterType === "combat"
+                  className={`py-2 px-6 rounded-full font-semibold ${filterType === "combat"
                       ? "bg-green-700 text-white"
                       : "text-gray-700"
-                  }`}
+                    }`}
                 >
                   Individual Sports
                 </button>
