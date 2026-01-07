@@ -480,33 +480,7 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
               <h3 className="font-semibold text-gray-700 mb-2">
                 ⚽ Performance Attributes
               </h3>
-              {[
-                "strength",
-                "speed",
-                "agility",
-                "endurance",
-                "accuracy",
-                "tactics",
-                "strategy",
-                "physicalFitness",
-                "teamCoordination",
-              ].map((stat) => (
-                <div key={stat}>
-                  <div className="flex justify-between text-sm">
-                    <label className="capitalize">{stat}</label>
-                    <span>{form[stat]}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    name={stat}
-                    value={form[stat]}
-                    onChange={handleChange}
-                    className="w-full accent-green-600"
-                  />
-                </div>
-              ))}
+              
               {(SPORT_TRAINING_FIELDS[player.sport] || []).map(
                 ({ key, label }) => (
                   <div key={key} className="mb-2">
