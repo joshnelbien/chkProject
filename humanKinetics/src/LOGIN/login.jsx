@@ -21,7 +21,7 @@ function Login() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [stats, setStats] = useState({ studentAthletes: 0, expertCoaches: 0 });
   const [loggedInId, setLoggedInId] = useState(null);
-
+  
   const timeoutRef = useRef(null);
 
   // Cleanup timeout on unmount
@@ -30,7 +30,7 @@ function Login() {
     const fetchData = async () => {
       try {
         // 1. Fetch Counts
-        const countRes = await fetch("http://localhost:5000/adminAccounts/counts");
+        const countRes = await fetch(`${API}/adminAccounts/counts`);
         const countData = await countRes.json();
         if (countData.success) {
           setStats({
@@ -40,7 +40,7 @@ function Login() {
         }
 
         // 2. Fetch Latest Events
-        const eventRes = await fetch("http://localhost:5000/tournament/tournaments-home");
+        const eventRes = await fetch(`${API}/tournament/tournaments-home`);
         const eventData = await eventRes.json();
         if (eventData.success) {
           setEvents(eventData.data);

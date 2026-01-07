@@ -8,12 +8,13 @@ function HomePage() {
   const [touchEnd, setTouchEnd] = useState(0);
   const [stats, setStats] = useState({ studentAthletes: 0, expertCoaches: 0 });
   const [events, setEvents] = useState([]);
+  const API = import.meta.env.VITE_BBACKEND_URL;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // 1. Fetch Counts
-        const countRes = await fetch("http://localhost:5000/adminAccounts/counts");
+        const countRes = await fetch(`${API}/adminAccounts/counts`);
         const countData = await countRes.json();
         if (countData.success) {
           setStats({
@@ -23,7 +24,7 @@ function HomePage() {
         }
 
         // 2. Fetch Latest Events
-        const eventRes = await fetch("http://localhost:5000/tournament/tournaments-home");
+        const eventRes = await fetch(`${API}/tournament/tournaments-home`);
         const eventData = await eventRes.json();
         if (eventData.success) {
           setEvents(eventData.data);
