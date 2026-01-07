@@ -20,6 +20,7 @@ function BuildTeamModal({ open, onClose, onTeamCreated, data }) {
       setFormData((prev) => ({
         ...prev,
         sport: data.sports,
+        coach: data.lastName + ", " + data.firstName || "",
         teamId: id // Ensure id is also synced
       }));
     }
@@ -38,7 +39,7 @@ function BuildTeamModal({ open, onClose, onTeamCreated, data }) {
       teamId: id,
       teamName: "",
       sport: data?.sports || "", // Reset back to default sport
-      coach: "",
+      coach: data?.lastName + ", " + data?.firstName || "",
       description: "",
     });
     if (createdTeamData) {

@@ -544,7 +544,7 @@ router.post("/player-login", async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Incorrect password." });
     }
-    if (player.status === "Pending") {
+    if (player.status === "Pending" || player.status === "Rejected") {
       return res
         .status(402)
         .json({ message: "Please Wait to be Approved By the Coaching Staff" });

@@ -283,210 +283,77 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                 value={formData.workoutDetails}
                 onChange={handleChange}
                 required
-                disabled={!selectedTeam} // Disable if no team is selected yet
+                disabled={!selectedTeam}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 bg-white"
               >
-                <option value="">-- {selectedTeam ? `Select ${selectedTeam.sport} Drill` : 'Select a team first'} --</option>
+                <option value="">
+                  -- {selectedTeam ? `Select ${selectedTeam.sport.replace('-', ' ')} Drill` : 'Select a team first'} --
+                </option>
 
-                {/* BASKETBALL */}
-                {selectedTeam?.sport.toLowerCase() === "basketball" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Speed & Acceleration">Speed & Acceleration</option>
-                      <option value="Vertical Jump / Explosive Power">Vertical Jump / Explosive Power</option>
-                      <option value="Agility & Change of Direction">Agility & Change of Direction</option>
-                      <option value="Cardiovascular Endurance">Cardiovascular Endurance</option>
-                      <option value="Shooting Accuracy">Shooting Accuracy</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="20m Sprint">20m Sprint</option>
-                      <option value="Vertical Jump">Vertical Jump</option>
-                      <option value="Illinois Agility">Illinois Agility</option>
-                      <option value="Yo-Yo Intermittent Recovery">Yo-Yo Intermittent Recovery</option>
-                      <option value="Spot Shooting & Free-Throw Drills">Spot Shooting & Free-Throw Drills</option>
-                    </optgroup>
-                  </>
-                )}
+                {selectedTeam && (() => {
+                  const sport = selectedTeam.sport.toLowerCase();
 
-                {/* VOLLEYBALL */}
-                {selectedTeam?.sport.toLowerCase() === "volleyball" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Vertical Jump Height">Vertical Jump Height</option>
-                      <option value="Reaction Time">Reaction Time</option>
-                      <option value="Upper Body Power">Upper Body Power</option>
-                      <option value="Agility">Agility</option>
-                      <option value="Serve Accuracy">Serve Accuracy</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="Spike Jump Test">Spike Jump Test</option>
-                      <option value="Reaction Ball Drill">Reaction Ball Drill</option>
-                      <option value="Medicine Ball Throw Test">Medicine Ball Throw Test</option>
-                      <option value="T-Test Agility Drill">T-Test Agility Drill</option>
-                      <option value="Target Serve Accuracy Test">Target Serve Accuracy Test</option>
-                    </optgroup>
-                  </>
-                )}
+                  // Map multi-gender sports to a single set of metrics/programs
+                  let sportKey = sport;
+                  if (sport.includes("basketball")) sportKey = "basketball";
+                  if (sport.includes("volleyball")) sportKey = "volleyball";
 
-                {/* CHEERDANCE */}
-                {selectedTeam?.sport.toLowerCase() === "cheerdance" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Flexibility">Flexibility</option>
-                      <option value="Balance & Stability">Balance & Stability</option>
-                      <option value="Muscular Endurance">Muscular Endurance</option>
-                      <option value="Coordination">Coordination</option>
-                      <option value="Explosive Power (Jumps)">Explosive Power (Jumps)</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="Sit-and-Reach Test">Sit-and-Reach Test</option>
-                      <option value="Stork Balance Test">Stork Balance Test</option>
-                      <option value="Core Endurance Hold Test">Core Endurance Hold Test</option>
-                      <option value="Routine Synchronization Evaluation">Routine Synchronization Evaluation</option>
-                      <option value="Standing Long Jump Test">Standing Long Jump Test</option>
-                    </optgroup>
-                  </>
-                )}
+                  const data = {
+                    basketball: {
+                      metrics: ["Speed & Acceleration", "Vertical Jump / Explosive Power", "Agility & Change of Direction", "Cardiovascular Endurance", "Shooting Accuracy"],
+                      programs: ["20m Sprint", "Vertical Jump", "Illinois Agility", "Yo-Yo Intermittent Recovery", "Spot Shooting & Free-Throw Drills"]
+                    },
+                    volleyball: {
+                      metrics: ["Vertical Jump Height", "Reaction Time", "Upper Body Power", "Agility", "Serve Accuracy"],
+                      programs: ["Spike Jump Test", "Reaction Ball Drill", "Medicine Ball Throw Test", "T-Test Agility Drill", "Target Serve Accuracy Test"]
+                    },
+                    cheerdance: {
+                      metrics: ["Flexibility", "Balance & Stability", "Muscular Endurance", "Coordination", "Explosive Power (Jumps)"],
+                      programs: ["Sit-and-Reach Test", "Stork Balance Test", "Core Endurance Hold Test", "Routine Synchronization Evaluation", "Standing Long Jump Test"]
+                    },
+                    futsal: {
+                      metrics: ["Speed", "Agility", "Aerobic Endurance", "Ball Control", "Shooting Accuracy"],
+                      programs: ["30m Sprint Test", "Zigzag Agility Test", "Cooper Test", "Dribbling Cone Test", "Goal Target Shooting Drill"]
+                    },
+                    "sepak-takraw": {
+                      metrics: ["Leg Explosive Power", "Flexibility", "Balance", "Reaction Time", "Coordination"],
+                      programs: ["Vertical Jump Test", "Hip & Hamstring Flexibility Test", "Single-Leg Balance Test", "Reaction Light Drill", "Ball Juggling Count Test"]
+                    },
+                    "table-tennis": {
+                      metrics: ["Reaction Time", "Hand-Eye Coordination", "Speed", "Accuracy", "Endurance"],
+                      programs: ["Reaction Timer Test", "Ball Tracking Drill", "Short Sprint Test", "Target Placement Drill", "Rally Endurance Test"]
+                    },
+                    badminton: {
+                      metrics: ["Agility", "Speed", "Endurance", "Smash Power", "Accuracy"],
+                      programs: ["Shuttle Run Test", "10–20m Sprint Test", "Multistage Fitness Test", "Smash Speed Test", "Target Shot Accuracy Drill"]
+                    },
+                    taekwondo: {
+                      metrics: ["Kicking Speed", "Explosive Power", "Flexibility", "Reaction Time", "Balance"],
+                      programs: ["Kick Speed Sensor Test", "Standing Long Jump", "Split Flexibility Test", "Reaction Pad Drill", "One-Leg Stability Test"]
+                    },
+                    arnis: {
+                      metrics: ["Hand Speed", "Reaction Time", "Coordination", "Endurance", "Accuracy"],
+                      programs: ["Stick Speed Drill", "Reaction Light Test", "Pattern Coordination Drill", "Continuous Striking Test", "Target Strike Accuracy Test"]
+                    },
+                    "karate-do": {
+                      metrics: ["Explosive Power", "Speed", "Balance", "Reaction Time", "Technique Precision"],
+                      programs: ["Vertical Jump Test", "Punch Speed Test", "Balance Stability Test", "Reaction Timing Drill", "Kata Performance Scoring"]
+                    }
+                  };
 
-                {/* FUTSAL */}
-                {selectedTeam?.sport.toLowerCase() === "futsal" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Speed">Speed</option>
-                      <option value="Agility">Agility</option>
-                      <option value="Aerobic Endurance">Aerobic Endurance</option>
-                      <option value="Ball Control">Ball Control</option>
-                      <option value="Shooting Accuracy">Shooting Accuracy</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="30m Sprint Test">30m Sprint Test</option>
-                      <option value="Zigzag Agility Test">Zigzag Agility Test</option>
-                      <option value="Cooper Test">Cooper Test</option>
-                      <option value="Dribbling Cone Test">Dribbling Cone Test</option>
-                      <option value="Goal Target Shooting Drill">Goal Target Shooting Drill</option>
-                    </optgroup>
-                  </>
-                )}
+                  const selectedData = data[sportKey];
 
-                {/* SEPAK TAKRAW */}
-                {selectedTeam?.sport.toLowerCase() === "sepak takraw" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Leg Explosive Power">Leg Explosive Power</option>
-                      <option value="Flexibility">Flexibility</option>
-                      <option value="Balance">Balance</option>
-                      <option value="Reaction Time">Reaction Time</option>
-                      <option value="Coordination">Coordination</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="Vertical Jump Test">Vertical Jump Test</option>
-                      <option value="Hip & Hamstring Flexibility Test">Hip & Hamstring Flexibility Test</option>
-                      <option value="Single-Leg Balance Test">Single-Leg Balance Test</option>
-                      <option value="Reaction Light Drill">Reaction Light Drill</option>
-                      <option value="Ball Juggling Count Test">Ball Juggling Count Test</option>
-                    </optgroup>
-                  </>
-                )}
+                  if (!selectedData) return null;
 
-                {/* TABLE TENNIS */}
-                {selectedTeam?.sport.toLowerCase() === "table tennis" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Reaction Time">Reaction Time</option>
-                      <option value="Hand-Eye Coordination">Hand-Eye Coordination</option>
-                      <option value="Speed">Speed</option>
-                      <option value="Accuracy">Accuracy</option>
-                      <option value="Endurance">Endurance</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="Reaction Timer Test">Reaction Timer Test</option>
-                      <option value="Ball Tracking Drill">Ball Tracking Drill</option>
-                      <option value="Short Sprint Test">Short Sprint Test</option>
-                      <option value="Target Placement Drill">Target Placement Drill</option>
-                      <option value="Rally Endurance Test">Rally Endurance Test</option>
-                    </optgroup>
-                  </>
-                )}
-
-                {/* BADMINTON */}
-                {selectedTeam?.sport.toLowerCase() === "badminton" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Agility">Agility</option>
-                      <option value="Speed">Speed</option>
-                      <option value="Endurance">Endurance</option>
-                      <option value="Smash Power">Smash Power</option>
-                      <option value="Accuracy">Accuracy</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="Shuttle Run Test">Shuttle Run Test</option>
-                      <option value="10–20m Sprint Test">10–20m Sprint Test</option>
-                      <option value="Multistage Fitness Test">Multistage Fitness Test</option>
-                      <option value="Smash Speed Test">Smash Speed Test</option>
-                      <option value="Target Shot Accuracy Drill">Target Shot Accuracy Drill</option>
-                    </optgroup>
-                  </>
-                )}
-
-                {/* TAEKWONDO */}
-                {selectedTeam?.sport.toLowerCase() === "taekwondo" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Kicking Speed">Kicking Speed</option>
-                      <option value="Explosive Power">Explosive Power</option>
-                      <option value="Flexibility">Flexibility</option>
-                      <option value="Reaction Time">Reaction Time</option>
-                      <option value="Balance">Balance</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="Kick Speed Sensor Test">Kick Speed Sensor Test</option>
-                      <option value="Standing Long Jump">Standing Long Jump</option>
-                      <option value="Split Flexibility Test">Split Flexibility Test</option>
-                      <option value="Reaction Pad Drill">Reaction Pad Drill</option>
-                      <option value="One-Leg Stability Test">One-Leg Stability Test</option>
-                    </optgroup>
-                  </>
-                )}
-
-                {/* ARNIS */}
-                {selectedTeam?.sport.toLowerCase() === "arnis" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Hand Speed">Hand Speed</option>
-                      <option value="Reaction Time">Reaction Time</option>
-                      <option value="Coordination">Coordination</option>
-                      <option value="Endurance">Endurance</option>
-                      <option value="Accuracy">Accuracy</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="Stick Speed Drill">Stick Speed Drill</option>
-                      <option value="Reaction Light Test">Reaction Light Test</option>
-                      <option value="Pattern Coordination Drill">Pattern Coordination Drill</option>
-                      <option value="Continuous Striking Test">Continuous Striking Test</option>
-                      <option value="Target Strike Accuracy Test">Target Strike Accuracy Test</option>
-                    </optgroup>
-                  </>
-                )}
-
-                {/* KARATE-DO */}
-                {selectedTeam?.sport.toLowerCase() === "karate-do" && (
-                  <>
-                    <optgroup label="Performance Metrics">
-                      <option value="Explosive Power">Explosive Power</option>
-                      <option value="Speed">Speed</option>
-                      <option value="Balance">Balance</option>
-                      <option value="Reaction Time">Reaction Time</option>
-                      <option value="Technique Precision">Technique Precision</option>
-                    </optgroup>
-                    <optgroup label="Training Programs">
-                      <option value="Vertical Jump Test">Vertical Jump Test</option>
-                      <option value="Punch Speed Test">Punch Speed Test</option>
-                      <option value="Balance Stability Test">Balance Stability Test</option>
-                      <option value="Reaction Timing Drill">Reaction Timing Drill</option>
-                      <option value="Kata Performance Scoring">Kata Performance Scoring</option>
-                    </optgroup>
-                  </>
-                )}
+                  return (
+                    <>
+                     
+                      <optgroup label="Training Programs">
+                        {selectedData.programs.map(p => <option key={p} value={p}>{p}</option>)}
+                      </optgroup>
+                    </>
+                  );
+                })()}
               </select>
             </div>
 
