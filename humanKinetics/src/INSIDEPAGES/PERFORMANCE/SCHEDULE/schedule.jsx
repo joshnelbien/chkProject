@@ -72,13 +72,10 @@ function Schedule() {
 
   const handleTimeOut = async (sched) => {
     try {
-      const res = await axios.post(
-        `${API}/attendance/time-out`,
-        {
-          userId: id,
-          scheduleId: sched.id,
-        }
-      );
+      const res = await axios.post(`${API}/attendance/time-out`, {
+        userId: id,
+        scheduleId: sched.id,
+      });
 
       setMyTeamSchedules((prev) =>
         prev.map((s) =>
@@ -102,7 +99,9 @@ function Schedule() {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const trainingRes = await axios.get(`${API}/trainingSchedule/training-schedule`);
+        const trainingRes = await axios.get(
+          `${API}/trainingSchedule/training-schedule`
+        );
         const trainingSchedules = trainingRes.data.schedules || [];
 
         const merged = {};
@@ -155,22 +154,22 @@ function Schedule() {
                   timeOut: att.data.timeOut,
                   status: att.data?.status || sched.status,
                   title: sched.teamName, // Ensure title is present for Training
-                  type: "Training"
+                  type: "Training",
                 };
               } else {
-                return { 
-                    ...sched, 
-                    status: sched.status || "Pending",
-                    title: sched.teamName,
-                    type: "Training" 
+                return {
+                  ...sched,
+                  status: sched.status || "Pending",
+                  title: sched.teamName,
+                  type: "Training",
                 };
               }
             } catch (err) {
-              return { 
-                ...sched, 
+              return {
+                ...sched,
                 status: sched.status || "Pending",
                 title: sched.teamName,
-                type: "Training"
+                type: "Training",
               };
             }
           })
@@ -321,7 +320,9 @@ function Schedule() {
                       <p className="text-sm font-medium text-blue-700">
                         {sched.type}
                       </p>
-                      <p className="text-gray-700">📅 {formatDate(sched.date)}</p>
+                      <p className="text-gray-700">
+                        📅 {formatDate(sched.date)}
+                      </p>
                       <p className="text-gray-700">
                         🕒 {sched.startTime} - {sched.endTime}
                       </p>

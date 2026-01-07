@@ -360,46 +360,119 @@ router.put(
   async (req, res) => {
     try {
       const { id } = req.params;
+      const { sport } = req.body; // <- get sport from form data
       const player = await playerAccounts.findByPk(id);
 
-      if (!player) {
-        return res.status(404).json({ message: "Player not found" });
-      }
+      if (!player) return res.status(404).json({ message: "Player not found" });
 
-      // Copy all body fields
       const updatedData = { ...req.body };
 
-      // Attach files if present
-      if (req.files?.profilePicture) {
+      if (req.files?.profilePicture)
         updatedData.profilePicture = req.files.profilePicture[0].buffer;
-      }
-
-      if (req.files?.medicalCertificate) {
+      if (req.files?.medicalCertificate)
         updatedData.medicalCertificate = req.files.medicalCertificate[0].buffer;
-      }
-
-      // ✅ achievements is ALREADY a STRING (comma-separated)
-      // Nothing to parse, nothing to join
-      if (updatedData.achievements) {
+      if (updatedData.achievements)
         updatedData.achievements = String(updatedData.achievements);
-      }
 
       await player.update(updatedData);
 
+      // Save performance history
+      const historyData = {
+        playerId: player.id,
+        sport: sport || player.sport,
+        updatedBy: req.body.updatedBy || "system",
+        notes: req.body.notes || "",
+        strength: updatedData.strength || "70",
+        speed: updatedData.speed || "70",
+        // ... all other metrics
+        strength: updatedData.strength || "70",
+        speed: updatedData.speed || "70",
+        agility: updatedData.agility || "70",
+        endurance: updatedData.endurance || "70",
+        accuracy: updatedData.accuracy || "70",
+        tactics: updatedData.tactics || "70",
+        strategy: updatedData.strategy || "70",
+        physicalFitness: updatedData.physicalFitness || "70",
+        teamCoordination: updatedData.teamCoordination || "70",
+        // ================= BASKETBALL =================
+        basketballSpeed: updatedData.basketballSpeed || "70",
+        basketballVerticalJump: updatedData.basketballVerticalJump || "70",
+        basketballAgility: updatedData.basketballAgility || "70",
+        basketballEndurance: updatedData.basketballEndurance || "70",
+        basketballShootingAccuracy:
+          updatedData.basketballShootingAccuracy || "70",
+        // ================= VOLLEYBALL =================
+        volleyballVerticalJump: updatedData.volleyballVerticalJump || "70",
+        volleyballReactionTime: updatedData.volleyballReactionTime || "70",
+        volleyballUpperBodyPower: updatedData.volleyballUpperBodyPower || "70",
+        volleyballAgility: updatedData.volleyballAgility || "70",
+        volleyballServeAccuracy: updatedData.volleyballServeAccuracy || "70",
+        // ================= CHEERDANCE =================
+        cheerdanceFlexibility: updatedData.cheerdanceFlexibility || "70",
+        cheerdanceBalance: updatedData.cheerdanceBalance || "70",
+        cheerdanceMuscularEndurance:
+          updatedData.cheerdanceMuscularEndurance || "70",
+        cheerdanceCoordination: updatedData.cheerdanceCoordination || "70",
+        cheerdanceExplosivePower: updatedData.cheerdanceExplosivePower || "70",
+        // ================= FUTSAL =================
+        futsalSpeed: updatedData.futsalSpeed || "70",
+        futsalAgility: updatedData.futsalAgility || "70",
+        futsalAerobicEndurance: updatedData.futsalAerobicEndurance || "70",
+        futsalBallControl: updatedData.futsalBallControl || "70",
+        futsalShootingAccuracy: updatedData.futsalShootingAccuracy || "70",
+        // ================= SEPAK TAKRAW =================
+        takrawLegPower: updatedData.takrawLegPower || "70",
+        takrawFlexibility: updatedData.takrawFlexibility || "70",
+        takrawBalance: updatedData.takrawBalance || "70",
+        takrawReactionTime: updatedData.takrawReactionTime || "70",
+        takrawCoordination: updatedData.takrawCoordination || "70",
+        // ================= TABLE TENNIS =================
+        tableTennisReactionTime: updatedData.tableTennisReactionTime || "70",
+        tableTennisHandEyeCoordination:
+          updatedData.tableTennisHandEyeCoordination || "70",
+        tableTennisSpeed: updatedData.tableTennisSpeed || "70",
+        tableTennisAccuracy: updatedData.tableTennisAccuracy || "70",
+        tableTennisEndurance: updatedData.tableTennisEndurance || "70",
+        // ================= BADMINTON =================
+        badmintonAgility: updatedData.badmintonAgility || "70",
+        badmintonSpeed: updatedData.badmintonSpeed || "70",
+        badmintonEndurance: updatedData.badmintonEndurance || "70",
+        badmintonSmashPower: updatedData.badmintonSmashPower || "70",
+        badmintonAccuracy: updatedData.badmintonAccuracy || "70",
+        // ================= TAEKWONDO =================
+        taekwondoKickingSpeed: updatedData.taekwondoKickingSpeed || "70",
+        taekwondoExplosivePower: updatedData.taekwondoExplosivePower || "70",
+        taekwondoFlexibility: updatedData.taekwondoFlexibility || "70",
+        taekwondoReactionTime: updatedData.taekwondoReactionTime || "70",
+        taekwondoBalance: updatedData.taekwondoBalance || "70",
+        // ================= ARNIS =================
+        arnisHandSpeed: updatedData.arnisHandSpeed || "70",
+        arnisReactionTime: updatedData.arnisReactionTime || "70",
+        arnisCoordination: updatedData.arnisCoordination || "70",
+        arnisEndurance: updatedData.arnisEndurance || "70",
+        arnisAccuracy: updatedData.arnisAccuracy || "70",
+        // ================= KARATE =================
+        karateExplosivePower: updatedData.karateExplosivePower || "70",
+        karateSpeed: updatedData.karateSpeed || "70",
+        karateBalance: updatedData.karateBalance || "70",
+        karateReactionTime: updatedData.karateReactionTime || "70",
+        karateTechniquePrecision: updatedData.karateTechniquePrecision || "70",
+      };
+
+      await PerformanceHistory.create(historyData);
+
       res.status(200).json({
-        message: "Player updated successfully",
+        message: "Player updated and performance history recorded successfully",
         player,
       });
     } catch (error) {
       console.error("Error updating player:", error);
-      res.status(500).json({
-        message: "Failed to update player",
-        error: error.message,
-      });
+      res
+        .status(500)
+        .json({ message: "Failed to update player", error: error.message });
     }
   }
 );
-
 router.get("/player-photo/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -437,7 +510,7 @@ router.get("/medical-certificate/:id", async (req, res) => {
     }
 
     res.setHeader("Content-Type", contentType);
-    res.send(player.medicalCertificate); // assuming this is a Buffer or Blob in DB
+    res.send(player.medicalCertificate);
   } catch (error) {
     console.error("Error fetching medical certificate:", error);
     res.status(500).send("Server error fetching medical certificate.");
