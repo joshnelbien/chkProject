@@ -14,7 +14,9 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
     const fetchPlayers = async () => {
       try {
         const res = await axios.get(`${API}/userAccounts/players`);
-        const pendingPlayers = res.data.filter((player) => player.status === "Pending");
+        const pendingPlayers = res.data.filter(
+          (player) => player.status === "Pending"
+        );
         setPlayers(pendingPlayers);
       } catch (err) {
         console.error("Error fetching players:", err);
@@ -22,6 +24,25 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
     };
     fetchPlayers();
   }, []);
+
+  const handleRejectPlayer = async (player) => {
+    try {
+      setLoading(true);
+
+      await axios.put(`${API}/userAccounts/reject/${player.id}`, {
+        playerId: player.id,
+        status: "Rejected",
+      });
+
+      alert(`${player.firstName} ${player.lastName} has been rejected.`);
+      setPlayers((prev) => prev.filter((p) => p.id !== player.id));
+    } catch (err) {
+      alert("Failed to reject player.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddPlayer = async (player) => {
     try {
@@ -31,7 +52,9 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
         teamId: teamId,
       });
 
-      alert(`${player.firstName} ${player.lastName} has been added to the team!`);
+      alert(
+        `${player.firstName} ${player.lastName} has been added to the team!`
+      );
       if (onSelectPlayer) onSelectPlayer(player);
       setPlayers((prev) => prev.filter((p) => p.id !== player.id));
     } catch {
@@ -46,18 +69,29 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
   );
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black bg-opacity-50 flex justify-center items-center" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4" onClick={(e) => e.stopPropagation()}>
-
+    <div
+      className="fixed inset-0 z-[60] bg-black bg-opacity-50 flex justify-center items-center"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b">
-          <h2 className="text-xl font-semibold text-green-700">Select Player</h2>
+          <h2 className="text-xl font-semibold text-green-700">
+            Select Player
+          </h2>
           <button onClick={onClose}>✕</button>
         </div>
 
         {/* Search */}
         <div className="p-4">
-          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search players..."
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search players..."
             className="border w-full px-4 py-2 rounded-full"
           />
         </div>
@@ -65,10 +99,17 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
         {/* List */}
         <div className="p-4 max-h-[60vh] overflow-y-auto">
           {filteredPlayers.map((player) => (
-            <div key={player.id} className="border p-4 flex justify-between rounded-lg">
+            <div
+              key={player.id}
+              className="border p-4 flex justify-between rounded-lg"
+            >
               <div>
-                <p className="font-semibold">{player.firstName} {player.lastName}</p>
-                <p className="text-sm text-gray-500">{player.sport} • {player.course}</p>
+                <p className="font-semibold">
+                  {player.firstName} {player.lastName}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {player.sport} • {player.course}
+                </p>
               </div>
 
               <div className="flex gap-2">
@@ -87,13 +128,26 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
                 >
                   {loading ? "Adding..." : "Add"}
                 </button>
+
+                <button
+                  disabled={loading}
+                  onClick={() => handleRejectPlayer(player)}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full"
+                >
+                  Reject
+                </button>
               </div>
             </div>
           ))}
         </div>
 
         <div className="flex justify-end p-4 border-t">
-          <button onClick={onClose} className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full">Close</button>
+          <button
+            onClick={onClose}
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full"
+          >
+            Close
+          </button>
         </div>
       </div>
 

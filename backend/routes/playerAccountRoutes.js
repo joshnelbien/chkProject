@@ -4,7 +4,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Resend } = require('resend');
+const { Resend } = require("resend");
 const { Op, where } = require("sequelize");
 const multer = require("multer");
 const playerAccounts = require("../db/model/playerAccountsDb");
@@ -17,7 +17,7 @@ const fs = require("fs");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const sgMail = require('@sendgrid/mail');
+const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Assuming you're using Express + Sequelize
@@ -153,7 +153,6 @@ router.post("/register", async (req, res) => {
     await sgMail.send(msg);
     console.log("📧 Email sent successfully!");
 
-
     res.status(201).json({
       message:
         "Registration successful! Please check your email to verify your account.",
@@ -288,7 +287,6 @@ router.get("/player/count", async (req, res) => {
   }
 });
 
-
 router.get("/players-profile/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -305,7 +303,6 @@ router.get("/players-profile/:id", async (req, res) => {
   }
 });
 
-
 router.put("/player-kick/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -317,18 +314,42 @@ router.put("/player-kick/:id", async (req, res) => {
 
     await player.update({
       teamId: null,
-      status: "Pending" // <— STATUS RESET
+      status: "Pending", // <— STATUS RESET
     });
 
-    return res.json({ message: "Player removed from team & status set to Pending.", player });
-
+    return res.json({
+      message: "Player removed from team & status set to Pending.",
+      player,
+    });
   } catch (error) {
     console.error("Error updating player:", error);
     return res.status(500).json({ message: "Server error updating player." });
   }
 });
 
+router.put("/reject/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const player = await playerAccounts.findByPk(id);
 
+    if (!player) {
+      return res.status(404).json({ message: "Player not found" });
+    }
+
+    await player.update({
+      teamId: null,
+      status: "Rejected",
+    });
+
+    return res.json({
+      message: "Player removed from team & status set to Rejected.",
+      player,
+    });
+  } catch (error) {
+    console.error("Error updating player:", error);
+    return res.status(500).json({ message: "Server error updating player." });
+  }
+});
 
 router.put(
   "/players-update/:id",
@@ -354,8 +375,7 @@ router.put(
       }
 
       if (req.files?.medicalCertificate) {
-        updatedData.medicalCertificate =
-          req.files.medicalCertificate[0].buffer;
+        updatedData.medicalCertificate = req.files.medicalCertificate[0].buffer;
       }
 
       // ✅ achievements is ALREADY a STRING (comma-separated)
@@ -409,7 +429,9 @@ router.get("/medical-certificate/:id", async (req, res) => {
       contentType = player.medicalCertificateType;
     } else {
       // Fallback based on extension
-      const ext = path.extname(player.medicalCertificateName || "").toLowerCase();
+      const ext = path
+        .extname(player.medicalCertificateName || "")
+        .toLowerCase();
       if (ext === ".pdf") contentType = "application/pdf";
       else contentType = "image/jpeg";
     }
@@ -450,7 +472,9 @@ router.post("/player-login", async (req, res) => {
       return res.status(401).json({ message: "Incorrect password." });
     }
     if (player.status === "Pending") {
-      return res.status(402).json({ message: "Please Wait to be Approved By the Coaching Staff" })
+      return res
+        .status(402)
+        .json({ message: "Please Wait to be Approved By the Coaching Staff" });
     }
 
     const token = jwt.sign(
