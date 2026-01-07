@@ -580,27 +580,27 @@ const Register = () => {
                         Select your course
                       </option>
 
-                      <option value="BEEd">BACHELOR OF ELEMENTARY EDUCATION</option>
-                      <option value="BSNED">BACHELOR OF SPECIAL NEEDS EDUCATION</option>
-                      <option value="BSEd">BACHELOR OF SECONDARY EDUCATION</option>
-                      <option value="BSCpE">BACHELOR OF SCIENCE IN COMPUTER ENGINEERING</option>
-                      <option value="BSIE">BACHELOR OF SCIENCE IN INDUSTRIAL ENGINEERING</option>
-                      <option value="BSN">BACHELOR OF SCIENCE IN NURSING</option>
-                      <option value="BPEd">BACHELOR OF PHYSICAL EDUCATION</option>
-                      <option value="BSBA">BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION</option>
-                      <option value="BSEntrep">BACHELOR OF SCIENCE IN ENTREPRENEURSHIP</option>
-                      <option value="BSOA">BACHELOR OF SCIENCE IN OFFICE ADMINISTRATION</option>
                       <option value="BSA">BACHELOR OF SCIENCE IN ACCOUNTANCY</option>
                       <option value="BSAIS">BACHELOR OF SCIENCE IN ACCOUNTING INFORMATION SYSTEM</option>
-                      <option value="BSMA">BACHELOR OF SCIENCE IN MANAGEMENT ACCOUNTING</option>
-                      <option value="BSIT">BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY</option>
-                      <option value="BSIS">BACHELOR OF SCIENCE IN INFORMATION SYSTEMS</option>
-                      <option value="BSPsych">BACHELOR OF SCIENCE IN PSYCHOLOGY</option>
                       <option value="BAComm">BACHELOR OF ARTS IN COMMUNICATION</option>
-                      <option value="BSEcon">BACHELOR OF SCIENCE IN ECONOMICS</option>
-                      <option value="BPA">BACHELOR OF PUBLIC ADMINISTRATION</option>
+                      <option value="BEEd">BACHELOR OF ELEMENTARY EDUCATION</option>
                       <option value="BAPolSci">BACHELOR OF ARTS IN POLITICAL SCIENCE</option>
+                      <option value="BPA">BACHELOR OF PUBLIC ADMINISTRATION</option>
+                      <option value="BPEd">BACHELOR OF PHYSICAL EDUCATION</option>
+                      <option value="BSBA">BACHELOR OF SCIENCE IN BUSINESS ADMINISTRATION</option>
+                      <option value="BSCpE">BACHELOR OF SCIENCE IN COMPUTER ENGINEERING</option>
+                      <option value="BSEcon">BACHELOR OF SCIENCE IN ECONOMICS</option>
+                      <option value="BSEd">BACHELOR OF SECONDARY EDUCATION</option>
+                      <option value="BSEntrep">BACHELOR OF SCIENCE IN ENTREPRENEURSHIP</option>
                       <option value="BSHM">BACHELOR OF SCIENCE IN HOSPITALITY MANAGEMENT</option>
+                      <option value="BSIE">BACHELOR OF SCIENCE IN INDUSTRIAL ENGINEERING</option>
+                      <option value="BSIS">BACHELOR OF SCIENCE IN INFORMATION SYSTEMS</option>
+                      <option value="BSIT">BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY</option>
+                      <option value="BSMA">BACHELOR OF SCIENCE IN MANAGEMENT ACCOUNTING</option>
+                      <option value="BSN">BACHELOR OF SCIENCE IN NURSING</option>
+                      <option value="BSNED">BACHELOR OF SPECIAL NEEDS EDUCATION</option>
+                      <option value="BSOA">BACHELOR OF SCIENCE IN OFFICE ADMINISTRATION</option>
+                      <option value="BSPsych">BACHELOR OF SCIENCE IN PSYCHOLOGY</option>
                       <option value="BSTM">BACHELOR OF SCIENCE IN TOURISM MANAGEMENT</option>
                     </select>
                   </div>
