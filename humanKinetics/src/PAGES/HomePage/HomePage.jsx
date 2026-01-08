@@ -218,12 +218,7 @@ function HomePage() {
               <p className="text-lg font-medium text-gray-700">Expert Coaches</p>
             </div>
 
-            <div>
-              <div className="bg-[#F9A825] text-white rounded-full w-24 h-24 flex items-center justify-center mx-auto text-4xl font-bold mb-2">
-                50+
-              </div>
-              <p className="text-lg font-medium text-gray-700">Championships</p>
-            </div>
+            
           </div>
         </section>
       </main>

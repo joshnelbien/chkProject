@@ -375,29 +375,7 @@ const Register = () => {
             </ul>
           </div>
 
-          {/* Stats Section */}
-          <div className="flex justify-start space-x-6 md:space-x-8 mt-12 pt-8 border-t border-green-700">
-            <div>
-              <p className="text-3xl md:text-4xl font-bold text-green-300">
-                500+
-              </p>
-              <p className="text-xs md:text-sm text-gray-400">
-                Active Athletes
-              </p>
-            </div>
-            <div>
-              <p className="text-3xl md:text-4xl font-bold text-green-300">
-                50+
-              </p>
-              <p className="text-xs md:text-sm text-gray-400">Expert Coaches</p>
-            </div>
-            <div>
-              <p className="text-3xl md:text-4xl font-bold text-green-300">4</p>
-              <p className="text-xs md:text-sm text-gray-400">
-                Sports Programs
-              </p>
-            </div>
-          </div>
+          
         </div>
 
         {/* Right Side: Registration Form (White/Light) */}
