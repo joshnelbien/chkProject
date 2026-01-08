@@ -9,6 +9,8 @@ function AboutPage() {
   const [staffs, setStaffs] = useState([]);
   const [viewStaff, setViewStaff] = useState(null); // State for modal
   const API = import.meta.env.VITE_BBACKEND_URL;
+  
+  const [stats, setStats] = useState({ studentAthletes: 0, expertCoaches: 0 });
 
   useEffect(() => {
     fetchStaffs();
@@ -22,6 +24,33 @@ function AboutPage() {
       console.error("Error fetching staffs:", error);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1. Fetch Counts
+        const countRes = await fetch(`${API}/adminAccounts/counts`);
+        const countData = await countRes.json();
+        if (countData.success) {
+          setStats({
+            studentAthletes: countData.data.playersInTeam,
+            expertCoaches: countData.data.verifiedAdmins
+          });
+        }
+
+        // 2. Fetch Latest Events
+        const eventRes = await fetch(`${API}/tournament/tournaments-home`);
+        const eventData = await eventRes.json();
+        if (eventData.success) {
+          setEvents(eventData.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch homepage data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const tabContent = {
     Mission: (
@@ -144,14 +173,14 @@ function AboutPage() {
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div className="bg-white rounded-lg p-6 shadow-md text-center">
-              <h3 className="text-red-500 text-5xl font-bold">30+</h3>
+              <h3 className="text-red-500 text-5xl font-bold">{stats.studentAthletes}+</h3>
               <p className="text-gray-700 font-semibold">Faculty</p>
               <p className="text-gray-500 text-sm">
                 Expert professors and coaches
               </p>
             </div>
             <div className="bg-white rounded-lg p-6 shadow-md text-center">
-              <h3 className="text-blue-500 text-5xl font-bold">14</h3>
+              <h3 className="text-blue-500 text-5xl font-bold">12</h3>
               <p className="text-gray-700 font-semibold">Sports Programs</p>
               <p className="text-gray-500 text-sm">
                 Recognized sports programs

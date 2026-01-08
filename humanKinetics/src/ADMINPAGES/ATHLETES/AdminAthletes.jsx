@@ -4,15 +4,102 @@ import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
 
+// Sport-specific metrics
+const SPORT_TRAINING_FIELDS = {
+  "basketball-men": [
+    { key: "basketballSpeed", label: "Speed" },
+    { key: "basketballVerticalJump", label: "Vertical Jump" },
+    { key: "basketballAgility", label: "Agility" },
+    { key: "basketballEndurance", label: "Endurance" },
+    { key: "basketballShootingAccuracy", label: "Shooting Accuracy" },
+  ],
+  "basketball-women": [
+    { key: "basketballSpeed", label: "Speed" },
+    { key: "basketballVerticalJump", label: "Vertical Jump" },
+    { key: "basketballAgility", label: "Agility" },
+    { key: "basketballEndurance", label: "Endurance" },
+    { key: "basketballShootingAccuracy", label: "Shooting Accuracy" },
+  ],
+  "volleyball-men": [
+    { key: "volleyballVerticalJump", label: "Vertical Jump" },
+    { key: "volleyballReactionTime", label: "Reaction Time" },
+    { key: "volleyballUpperBodyPower", label: "Upper Body Power" },
+    { key: "volleyballAgility", label: "Agility" },
+    { key: "volleyballServeAccuracy", label: "Serve Accuracy" },
+  ],
+  "volleyball-women": [
+    { key: "volleyballVerticalJump", label: "Vertical Jump" },
+    { key: "volleyballReactionTime", label: "Reaction Time" },
+    { key: "volleyballUpperBodyPower", label: "Upper Body Power" },
+    { key: "volleyballAgility", label: "Agility" },
+    { key: "volleyballServeAccuracy", label: "Serve Accuracy" },
+  ],
+  cheerdance: [
+    { key: "cheerdanceFlexibility", label: "Flexibility" },
+    { key: "cheerdanceBalance", label: "Balance" },
+    { key: "cheerdanceMuscularEndurance", label: "Muscular Endurance" },
+    { key: "cheerdanceCoordination", label: "Coordination" },
+    { key: "cheerdanceExplosivePower", label: "Explosive Power" },
+  ],
+  futsal: [
+    { key: "futsalSpeed", label: "Speed" },
+    { key: "futsalAgility", label: "Agility" },
+    { key: "futsalAerobicEndurance", label: "Aerobic Endurance" },
+    { key: "futsalBallControl", label: "Ball Control" },
+    { key: "futsalShootingAccuracy", label: "Shooting Accuracy" },
+  ],
+  "sepak-takraw": [
+    { key: "takrawLegPower", label: "Leg Power" },
+    { key: "takrawFlexibility", label: "Flexibility" },
+    { key: "takrawBalance", label: "Balance" },
+    { key: "takrawReactionTime", label: "Reaction Time" },
+    { key: "takrawCoordination", label: "Coordination" },
+  ],
+  "table-tennis": [
+    { key: "tableTennisReactionTime", label: "Reaction Time" },
+    { key: "tableTennisHandEyeCoordination", label: "Hand–Eye Coordination" },
+    { key: "tableTennisSpeed", label: "Speed" },
+    { key: "tableTennisAccuracy", label: "Accuracy" },
+    { key: "tableTennisEndurance", label: "Endurance" },
+  ],
+  badminton: [
+    { key: "badmintonAgility", label: "Agility" },
+    { key: "badmintonSpeed", label: "Speed" },
+    { key: "badmintonEndurance", label: "Endurance" },
+    { key: "badmintonSmashPower", label: "Smash Power" },
+    { key: "badmintonAccuracy", label: "Accuracy" },
+  ],
+  taekwondo: [
+    { key: "taekwondoKickingSpeed", label: "Kicking Speed" },
+    { key: "taekwondoExplosivePower", label: "Explosive Power" },
+    { key: "taekwondoFlexibility", label: "Flexibility" },
+    { key: "taekwondoReactionTime", label: "Reaction Time" },
+    { key: "taekwondoBalance", label: "Balance" },
+  ],
+  arnis: [
+    { key: "arnisHandSpeed", label: "Hand Speed" },
+    { key: "arnisReactionTime", label: "Reaction Time" },
+    { key: "arnisCoordination", label: "Coordination" },
+    { key: "arnisEndurance", label: "Endurance" },
+    { key: "arnisAccuracy", label: "Accuracy" },
+  ],
+  "karate-do": [
+    { key: "karateExplosivePower", label: "Explosive Power" },
+    { key: "karateSpeed", label: "Speed" },
+    { key: "karateBalance", label: "Balance" },
+    { key: "karateReactionTime", label: "Reaction Time" },
+    { key: "karateTechniquePrecision", label: "Technique Precision" },
+  ],
+};
+
 function AdminAthletes() {
   const [players, setPlayers] = useState([]);
   const API = import.meta.env.VITE_BBACKEND_URL;
+
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const res = await axios.get(
-          `${API}/userAccounts/players`
-        );
+        const res = await axios.get(`${API}/userAccounts/players`);
         console.log("📌 Fetched Players (Frontend):", res.data);
         setPlayers(res.data);
       } catch (error) {
@@ -25,16 +112,12 @@ function AdminAthletes() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Right section */}
       <div className="flex flex-col flex-grow">
         <Navbar />
 
-        {/* Main Content */}
         <main className="flex-grow overflow-y-auto p-4 sm:p-6 max-w-7xl mx-auto w-full mt-16 md:mt-20">
-          {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
             <div>
               <h2 className="text-2xl font-semibold text-green-700">
@@ -46,9 +129,7 @@ function AdminAthletes() {
             </div>
           </div>
 
-          {/* Search & Filters */}
           <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4 mb-6">
-            {/* Search */}
             <div className="relative w-full md:flex-grow">
               <input
                 type="text"
@@ -70,47 +151,45 @@ function AdminAthletes() {
                 />
               </svg>
             </div>
-
-            {/* Filter buttons */}
-            <div className="flex space-x-2">
-              <button className="px-4 py-2 bg-white rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100">
-                All Sports
-              </button>
-              <button className="px-4 py-2 bg-white rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100">
-                All Status
-              </button>
-            </div>
           </div>
 
-          {/* Athlete Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
             {players.length > 0 ? (
-              players.map((player) => (
-                <AthleteCard
-                  key={player.id}
-                  profileUrl={
-                    player.id
-                      ? `${API}/userAccounts/player-photo/${player.id}`
-                      : "/lexi.jpg" // fallback
-                  }
-                  name={`${player.firstName} ${player.lastName}`}
-                  number={player.studentNumber}
-                  sport={player.sport}
-                  role={player.course}
-                  status={player.status}
-                  attendance="--"
-                  performance="--"
-                  streak="--"
-                  improvement="--"
-                  metrics={{
-                    Strength: `${player.strength || 0}`,
-                    Speed: `${player.speed || 0}`,
-                    Agility: `${player.agility || 0}`,
-                    Endurance: `${player.endurance || 0}`,
-                  }}
-                  activities={[]}
-                />
-              ))
+              players.map((player) => {
+                // Get dynamic metrics based on sport
+                const metrics =
+                  SPORT_TRAINING_FIELDS[player.sport] || [
+                    { key: "strength", label: "Strength" },
+                    { key: "speed", label: "Speed" },
+                    { key: "agility", label: "Agility" },
+                    { key: "endurance", label: "Endurance" },
+                  ];
+
+                return (
+                  <AthleteCard
+                    key={player.id}
+                    profileUrl={
+                      player.id
+                        ? `${API}/userAccounts/player-photo/${player.id}`
+                        : "/lexi.jpg"
+                    }
+                    name={`${player.firstName} ${player.lastName}`}
+                    number={player.studentNumber}
+                    sport={player.sport}
+                    role={player.course}
+                    status={player.status}
+                    attendance="--"
+                    performance="--"
+                    streak="--"
+                    improvement="--"
+                    metrics={metrics.reduce((acc, m) => {
+                      acc[m.label] = player[m.key] || 0;
+                      return acc;
+                    }, {})}
+                    activities={[]}
+                  />
+                );
+              })
             ) : (
               <p className="text-gray-500 italic">No athletes found.</p>
             )}
@@ -123,7 +202,6 @@ function AdminAthletes() {
   );
 }
 
-/* ✅ Athlete Card */
 function AthleteCard({
   profileUrl,
   name,
@@ -140,15 +218,12 @@ function AthleteCard({
 }) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
-      {/* Header */}
       <div className="flex items-center mb-4">
         <img
-          src={profileUrl || "/lexi.jpg"} // fallback if profileUrl is null
+          src={profileUrl || "/lexi.jpg"}
           alt={name}
           className="w-16 h-16 rounded-full object-cover border-2 border-green-600"
-          onError={(e) => {
-            e.currentTarget.src = "/lexi.jpg"; // fallback if server URL fails
-          }}
+          onError={(e) => (e.currentTarget.src = "/lexi.jpg")}
         />
         <div className="ml-4 flex-grow">
           <div className="flex justify-between items-center">
@@ -170,7 +245,6 @@ function AthleteCard({
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-4 gap-4 text-center border-b pb-4 mb-4">
         <Stat label="Attendance" value={attendance} />
         <Stat label="Performance" value={performance} />
@@ -178,7 +252,6 @@ function AthleteCard({
         <Stat label="Improvement" value={improvement} isImprovement />
       </div>
 
-      {/* Performance Metrics */}
       <div className="mb-4">
         <p className="font-semibold text-gray-800 mb-2">Performance Metrics</p>
         {Object.entries(metrics).map(([label, value]) => (
@@ -197,16 +270,12 @@ function AthleteCard({
         ))}
       </div>
 
-      {/* Recent Activities */}
       <div>
         <p className="font-semibold text-gray-800 mb-2">Recent Activities</p>
         {activities.length > 0 ? (
           <div className="space-y-3">
             {activities.map((act, i) => (
-              <div
-                key={i}
-                className="flex justify-between items-center text-sm"
-              >
+              <div key={i} className="flex justify-between items-center text-sm">
                 <div>
                   <p className="font-medium text-gray-800">{act.date}</p>
                   <p className="text-gray-500 text-xs">{act.desc}</p>
@@ -216,16 +285,13 @@ function AthleteCard({
             ))}
           </div>
         ) : (
-          <p className="text-xs text-gray-400 italic">
-            No activity records yet.
-          </p>
+          <p className="text-xs text-gray-400 italic">No activity records yet.</p>
         )}
       </div>
     </div>
   );
 }
 
-/* ✅ Stat Component */
 function Stat({ label, value, isImprovement = false }) {
   return (
     <div>

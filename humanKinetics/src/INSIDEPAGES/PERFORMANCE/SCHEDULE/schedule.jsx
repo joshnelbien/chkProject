@@ -16,9 +16,10 @@ function Schedule() {
   const formatDate = (d) => {
     if (!d) return null;
     const date = new Date(d);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+    // Using UTC prevents the "one day off" bug
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -56,10 +57,10 @@ function Schedule() {
           prev.map((s) =>
             s.id === sched.id
               ? {
-                  ...s,
-                  status: "In Progress",
-                  timeIn: err.response.data.attendance?.timeIn,
-                }
+                ...s,
+                status: "In Progress",
+                timeIn: err.response.data.attendance?.timeIn,
+              }
               : s
           )
         );
@@ -97,92 +98,74 @@ function Schedule() {
 
   // Fetch only Training schedules
   useEffect(() => {
-    const fetchSchedules = async () => {
+    const loadAllData = async () => {
       try {
-        const trainingRes = await axios.get(
-          `${API}/trainingSchedule/training-schedule`
-        );
-        const trainingSchedules = trainingRes.data.schedules || [];
+        console.log("--- START LOADING DATA ---");
 
+        // 1. Get User Profile
+        const userRes = await axios.get(`${API}/userAccounts/players-profile/${id}`);
+        const teamId = userRes.data.teamId;
+        console.log("Logged in User Team ID:", teamId);
+
+        // 2. Fetch all Training Schedules
+        const trainingRes = await axios.get(`${API}/trainingSchedule/training-schedule`);
+
+        // LOG: Raw API Response
+        console.log("Raw API Response:", trainingRes.data);
+
+        const allSchedules = trainingRes.data.schedules || [];
+        console.log("Total Schedules Found:", allSchedules.length);
+
+        // 3. Prepare data for the Calendar
         const merged = {};
-
-        trainingSchedules.forEach((t) => {
+        allSchedules.forEach((t) => {
           const key = formatDate(t.date);
+
           if (!merged[key]) merged[key] = [];
           merged[key].push({
+            id: t.id,
             time: `${t.startTime} - ${t.endTime}`,
-            title: t.teamName,
+            // CHANGE THIS LINE: Use t.title because t.teamName is missing in your object
+            title: t.title || "Training",
             location: t.location,
-            participants: `Coach: ${t.coach}`,
-            type: "Training",
-            status: t.status,
-            teamName: t.teamName,
+            type: t.type || "Training",
+            isMyTeam: t.teamSchedule === teamId
           });
         });
 
+        // LOG: Final state of the Calendar Data object
+        console.log("Final scheduleData Object (Keys should match YYYY-MM-DD):", merged);
         setScheduleData(merged);
+
+        // 4. Prepare data for the "My Training Schedule" List
+        const myTeamFiltered = allSchedules.filter(sched => sched.teamSchedule === teamId);
+        console.log("Schedules matching User Team:", myTeamFiltered);
+
+        const updatedMySchedules = await Promise.all(
+          myTeamFiltered.map(async (sched) => {
+            try {
+              const att = await axios.get(`${API}/attendance/user/${id}/schedule/${sched.id}`);
+              return {
+                ...sched,
+                timeIn: att.data?.timeIn,
+                timeOut: att.data?.timeOut,
+                status: att.data?.status || sched.status || "Pending",
+                title: sched.teamName,
+                type: "Training",
+              };
+            } catch (err) {
+              return { ...sched, status: sched.status || "Pending", title: sched.teamName, type: "Training" };
+            }
+          })
+        );
+        setMyTeamSchedules(updatedMySchedules);
+
       } catch (e) {
         console.error("Error loading schedules:", e);
       }
     };
 
-    const fetchMyTeamSchedules = async () => {
-      try {
-        const res = await axios.get(
-          `${API}/userAccounts/players-profile/${id}`
-        );
-        const teamId = res.data.teamId;
-
-        const trainingRes = await axios.get(
-          `${API}/trainingSchedule/training-schedule`
-        );
-        const myTrainingSchedules = (trainingRes.data.schedules || []).filter(
-          (sched) => sched.teamSchedule === teamId
-        );
-
-        // Fetch attendance for each training schedule
-        const updatedSchedules = await Promise.all(
-          myTrainingSchedules.map(async (sched) => {
-            try {
-              const att = await axios.get(
-                `${API}/attendance/user/${id}/schedule/${sched.id}`
-              );
-              if (att.data) {
-                return {
-                  ...sched,
-                  timeIn: att.data.timeIn,
-                  timeOut: att.data.timeOut,
-                  status: att.data?.status || sched.status,
-                  title: sched.teamName, // Ensure title is present for Training
-                  type: "Training",
-                };
-              } else {
-                return {
-                  ...sched,
-                  status: sched.status || "Pending",
-                  title: sched.teamName,
-                  type: "Training",
-                };
-              }
-            } catch (err) {
-              return {
-                ...sched,
-                status: sched.status || "Pending",
-                title: sched.teamName,
-                type: "Training",
-              };
-            }
-          })
-        );
-
-        setMyTeamSchedules(updatedSchedules);
-      } catch (err) {
-        console.error("Error fetching team schedule:", err);
-      }
-    };
-
-    fetchSchedules();
-    fetchMyTeamSchedules();
+    loadAllData();
   }, [id, API]);
 
   // Calendar logic
@@ -213,9 +196,8 @@ function Schedule() {
       />
 
       <div
-        className={`flex flex-col flex-1 transition-all duration-300 ${
-          sidebarOpen ? "ml-64" : "ml-0"
-        }`}
+        className={`flex flex-col flex-1 transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-0"
+          }`}
       >
         <Navbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -266,13 +248,17 @@ function Schedule() {
             {daysArray.map((date, idx) => {
               const dateKey = date ? formatDate(date) : null;
               const events = dateKey ? scheduleData[dateKey] || [] : [];
+
+              // Filter based on search bar
               const filtered = events.filter((e) =>
                 e.title?.toLowerCase().includes(searchTerm.toLowerCase())
               );
+
               return (
-                <div key={idx} className="bg-white min-h-[120px] p-2 border">
+                <div key={idx} className="bg-white min-h-[120px] p-1 border hover:bg-gray-50 transition-colors">
                   {date && (
-                    <p className="text-gray-800 font-semibold text-sm">
+                    <p className={`text-sm font-bold p-1 ${formatDate(today) === dateKey ? "bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center" : "text-gray-800"
+                      }`}>
                       {date.getDate()}
                     </p>
                   )}
@@ -280,10 +266,14 @@ function Schedule() {
                     {filtered.map((event, i) => (
                       <div
                         key={i}
-                        className="p-1 rounded text-xs font-medium bg-green-100 text-green-700"
+                        className={`p-1 rounded text-[10px] leading-tight border-l-4 ${event.isMyTeam
+                          ? "bg-green-100 border-green-600 text-green-800 font-bold"
+                          : "bg-blue-50 border-blue-400 text-blue-700"
+                          }`}
+                        title={`${event.title} at ${event.location}`} // Tooltip on hover
                       >
-                        <p>{event.title}</p>
-                        <p className="text-[10px] opacity-70">{event.time}</p>
+                        <div className="truncate">{event.title}</div>
+                        <div className="opacity-80">{event.time}</div>
                       </div>
                     ))}
                   </div>
@@ -332,11 +322,10 @@ function Schedule() {
                         <button
                           onClick={() => handleTimeIn(sched)}
                           disabled={sched.status !== "Start"}
-                          className={`px-4 py-2 rounded-lg text-white ${
-                            sched.status !== "Start"
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-green-600 hover:bg-green-700"
-                          }`}
+                          className={`px-4 py-2 rounded-lg text-white ${sched.status !== "Start"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-green-600 hover:bg-green-700"
+                            }`}
                         >
                           Time In {sched.timeIn ? `(${sched.timeIn})` : ""}
                         </button>
@@ -344,11 +333,10 @@ function Schedule() {
                         <button
                           onClick={() => handleTimeOut(sched)}
                           disabled={sched.status !== "In Progress"}
-                          className={`px-4 py-2 rounded-lg text-white ${
-                            sched.status !== "In Progress"
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-red-600 hover:bg-red-700"
-                          }`}
+                          className={`px-4 py-2 rounded-lg text-white ${sched.status !== "In Progress"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-red-600 hover:bg-red-700"
+                            }`}
                         >
                           Time Out {sched.timeOut ? `(${sched.timeOut})` : ""}
                         </button>
