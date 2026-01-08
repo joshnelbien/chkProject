@@ -235,8 +235,8 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
       achievements: Array.isArray(player.achievements)
         ? player.achievements
         : player.achievements
-        ? player.achievements.split(",").map((a) => a.trim())
-        : [],
+          ? player.achievements.split(",").map((a) => a.trim())
+          : [],
 
       /* ================= EMERGENCY ================= */
       emergencyName: player.emergencyName || "",
@@ -337,7 +337,9 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
 
       setShowConfirmation(false);
       setShowSuccess(true);
-
+    
+        window.location.reload();
+   
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error(err);
@@ -480,7 +482,7 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
               <h3 className="font-semibold text-gray-700 mb-2">
                 ⚽ Performance Attributes
               </h3>
-              
+
               {(SPORT_TRAINING_FIELDS[player.sport] || []).map(
                 ({ key, label }) => (
                   <div key={key} className="mb-2">
@@ -508,7 +510,7 @@ function PlayersUpdate({ player, onClose, onUpdate }) {
               )}
             </section>
 
-            
+
           </div>
 
           {/* Buttons */}
