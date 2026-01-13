@@ -52,16 +52,15 @@ function AddPlayerModal({ onClose, onSelectPlayer, teamId }) {
       setLoading(true);
       await axios.put(`${API}/teams/player-addTeam`, {
         playerId: player.id,
-        teamId: teamId,
+        teamId: teamId, // This is the ID from the URL (useParams)
       });
 
-      alert(
-        `${player.firstName} ${player.lastName} has been added to the team!`
-      );
+      alert(`${player.firstName} ${player.lastName} has been added!`);
       if (onSelectPlayer) onSelectPlayer(player);
       setPlayers((prev) => prev.filter((p) => p.id !== player.id));
-    } catch {
-      alert("Failed to add player.");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add player. Check console for details.");
     } finally {
       setLoading(false);
     }

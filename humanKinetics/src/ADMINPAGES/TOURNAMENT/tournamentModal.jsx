@@ -3,151 +3,106 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function TournamentModal({ isOpen, onClose, onSubmit }) {
-  const { id } = useParams(); // Admin/User ID
-  const [teams, setTeams] = useState([]);
-  const [playersByTeam, setPlayersByTeam] = useState({});
+  const { id } = useParams();
   const API = import.meta.env.VITE_BBACKEND_URL;
+
+  const [coach, setCoach] = useState(null);
+  const [players, setPlayers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // Search state
+  const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
   const [formData, setFormData] = useState({
     tournamentName: "",
     sport: "",
     location: "",
     startDate: "",
     endDate: "",
-    teams: "",
-    teamName: "",
-    id: "", // selected team
+    teams: "", 
+    coachName: "",
     teamId: id,
   });
-  const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Player selection state
-  const [selectedPlayers, setSelectedPlayers] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
-
-  // Fetch all teams for this admin/user
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`${API}/teams/getTeams/${id}`);
-        setTeams(res.data);
+        const coachRes = await axios.get(`${API}/adminAccounts/coaches-profile/${id}`);
+        const coachData = coachRes.data;
+        setCoach(coachData);
 
-        // Fetch players for each team
-        res.data.forEach((team) => fetchPlayersForTeam(team.id));
+        setFormData((prev) => ({
+          ...prev,
+          sport: coachData.sports || "",
+          coachName: `${coachData.firstName} ${coachData.lastName}`,
+          teamId: id,
+        }));
+
+        const playerRes = await axios.get(`${API}/teams/player/${id}`);
+        const sortedPlayers = playerRes.data.sort((a, b) => a.firstName.localeCompare(b.firstName));
+        setPlayers(sortedPlayers);
       } catch (err) {
-        console.error("Error fetching teams:", err);
+        console.error("Error fetching data:", err);
       }
     };
-    fetchTeams();
-  }, [id]);
+    if (id && isOpen) fetchData();
+  }, [id, API, isOpen]);
 
-  // Fetch players for a team
-  const fetchPlayersForTeam = async (teamId) => {
-    try {
-      const res = await axios.get(`${API}/teams/player/${teamId}`);
-      setPlayersByTeam((prev) => ({ ...prev, [teamId]: res.data }));
-    } catch (err) {
-      console.error(`Error fetching players for team ${teamId}:`, err);
-    }
-  };
+  // Filter players based on search term
+  const filteredPlayers = players.filter(p => 
+    `${p.firstName} ${p.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  // Handle input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // Handle team selection
-  const handleTeamSelect = (e) => {
-    const selectedTeam = teams.find((t) => t.id === e.target.value);
-    setFormData({
-      ...formData,
-      id: e.target.value,
-      sport: selectedTeam?.sport || "",
-      teamName: selectedTeam?.teamName || "",
-    });
-
-    // Reset player selection
-    setSelectedPlayers([]);
-    setSelectAll(false);
-  };
-
-  // Handle individual player checkbox
   const handlePlayerCheck = (playerId) => {
     setSelectedPlayers((prev) =>
-      prev.includes(playerId)
-        ? prev.filter((id) => id !== playerId)
-        : [...prev, playerId]
+      prev.includes(playerId) ? prev.filter((pid) => pid !== playerId) : [...prev, playerId]
     );
   };
 
-  // Handle Select All checkbox
   const handleSelectAll = () => {
     if (!selectAll) {
-      const allPlayerIds = playersByTeam[formData.id]?.map((p) => p.id) || [];
-      setSelectedPlayers(allPlayerIds);
+      setSelectedPlayers(players.map((p) => p.id));
     } else {
       setSelectedPlayers([]);
     }
     setSelectAll(!selectAll);
   };
 
-  // Show confirmation modal on submit
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (selectedPlayers.length === 0) return alert("Please select at least one player.");
     setShowConfirmation(true);
   };
 
-  // Confirm submission and send POST request
   const confirmSubmit = async () => {
     try {
-      // Map selected player objects to "FirstName LastName" format or use IDs
       const selectedPlayerNames = selectedPlayers
         .map((playerId) => {
-          const player = playersByTeam[formData.id].find((p) => p.id === playerId);
-          return player ? `${player.firstName} ${player.lastName}` : null;
+          const p = players.find((player) => player.id === playerId);
+          return p ? `${p.firstName} ${p.lastName}` : null;
         })
-        .filter(Boolean); // remove nulls if any
-
-      // Convert to format: "player1","player2","player3"
-      const playersString = selectedPlayerNames.map((p) => `"${p}"`).join(",");
+        .filter(Boolean);
 
       const submissionData = {
         ...formData,
-        players: playersString
+        players: selectedPlayerNames.map(name => `"${name}"`).join(","),
+        playerCount: selectedPlayers.length
       };
 
-      console.log("Submitting tournament:", submissionData);
-
-      const response = await axios.post(
-        `${API}/tournament/tournaments`,
-        submissionData
-      );
-
-      console.log("✅ Tournament added:", response.data);
-
-      if (onSubmit) onSubmit(submissionData); // optional callback
-      setShowConfirmation(false);
+      await axios.post(`${API}/tournament/tournaments`, submissionData);
+      if (onSubmit) onSubmit(submissionData);
       handleClose();
     } catch (error) {
-      console.error("❌ Failed to submit tournament:", error);
-      alert("Error adding tournament. Check the backend.");
-      setShowConfirmation(false);
+      console.error("Submission failed:", error);
     }
   };
 
-
-  const cancelSubmit = () => setShowConfirmation(false);
-
   const handleClose = () => {
-    setFormData({
-      tournamentName: "",
-      sport: "",
-      location: "",
-      startDate: "",
-      endDate: "",
-      teams: "",
-      id: "",
-    });
+    setFormData({ tournamentName: "", sport: coach?.sports || "", location: "", startDate: "", endDate: "", teams: "", coachName: coach ? `${coach.firstName} ${coach.lastName}` : "", teamId: id });
     setSelectedPlayers([]);
+    setSearchTerm("");
     setSelectAll(false);
     onClose();
   };
@@ -156,222 +111,161 @@ export default function TournamentModal({ isOpen, onClose, onSubmit }) {
 
   return (
     <>
-      {/* Main Modal */}
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">🏀 Add Tournament</h2>
-            <button
-              onClick={handleClose}
-              className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-            >
-              ×
-            </button>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[95vh] overflow-y-auto border border-gray-100">
+          <div className="flex justify-between items-center mb-6 border-b pb-4">
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">🏆 TOURNAMENT SETUP</h2>
+            <button onClick={handleClose} className="text-gray-400 hover:text-red-500 transition-colors text-3xl font-light">×</button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Team Selection */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Select Team
-              </label>
-              <select
-                name="id"
-                value={formData.id}
-                onChange={handleTeamSelect}
-                required
-                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              >
-                <option value="">-- Select a team --</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.teamName.toUpperCase()} ({team.sport.toUpperCase()}) -{" "}
-                    {playersByTeam[team.id]?.length || 0} players
-                  </option>
-                ))}
-              </select>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Read-Only Info Section */}
+            <div className="bg-blue-50 p-3 rounded-lg grid grid-cols-2 gap-4 border border-blue-100">
+              <div>
+                <label className="block text-[10px] font-bold text-blue-600 uppercase tracking-widest">Head Coach</label>
+                <p className="text-sm font-semibold text-blue-900">{formData.coachName || "---"}</p>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-blue-600 uppercase tracking-widest">Sport Category</label>
+                <p className="text-sm font-semibold text-blue-900 uppercase">{formData.sport || "---"}</p>
+              </div>
             </div>
 
-            {/* Player Selection */}
-            {formData.id && playersByTeam[formData.id]?.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  Select Players
-                </label>
+            {/* Player Selection Section */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">Team Roster Selection</label>
+              
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Search player name..." 
+                  className="flex-1 text-sm border rounded-md px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
 
-                <div className="mb-2 flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={selectAll}
-                    onChange={handleSelectAll}
-                    id="selectAll"
-                  />
-                  <label htmlFor="selectAll" className="text-gray-700 font-medium">
-                    Select All
+              <div className="border rounded-xl overflow-hidden bg-gray-50 shadow-inner">
+                <div className="bg-gray-100 px-4 py-2 border-b flex justify-between items-center">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={selectAll} onChange={handleSelectAll} className="w-4 h-4 rounded text-blue-600" />
+                    <span className="text-xs font-bold text-gray-600 uppercase">Select All</span>
                   </label>
+                  <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">
+                    {selectedPlayers.length} / {players.length}
+                  </span>
                 </div>
-
-                <div className="max-h-48 overflow-y-auto border rounded-lg p-2">
-                  {playersByTeam[formData.id].map((player) => (
-                    <div key={player.id} className="flex items-center gap-2 mb-1">
-                      <input
-                        type="checkbox"
-                        checked={selectedPlayers.includes(player.id)}
-                        onChange={() => handlePlayerCheck(player.id)}
-                        id={`player-${player.id}`}
-                      />
-                      <label htmlFor={`player-${player.id}`} className="text-gray-700">
-                        {player.firstName} {player.lastName}
+                
+                <div className="max-h-44 overflow-y-auto p-2 space-y-1">
+                  {filteredPlayers.length > 0 ? (
+                    filteredPlayers.map((player) => (
+                      <label key={player.id} className="flex items-center gap-3 p-2 hover:bg-white hover:shadow-sm rounded-lg cursor-pointer transition-all border border-transparent hover:border-gray-200">
+                        <input
+                          type="checkbox"
+                          checked={selectedPlayers.includes(player.id)}
+                          onChange={() => handlePlayerCheck(player.id)}
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">{player.firstName} {player.lastName}</span>
                       </label>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-center text-xs text-gray-400 py-6 italic">No players found matching "{searchTerm}"</p>
+                  )}
                 </div>
               </div>
-            )}
-
-            {/* Tournament Fields */}
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Tournament Name
-              </label>
-              <input
-                type="text"
-                name="tournamentName"
-                value={formData.tournamentName}
-                onChange={handleChange}
-                required
-                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Sport
-              </label>
-              <input
-                type="text"
-                name="sport"
-                value={formData.sport}
-                onChange={handleChange}
-                required
-                disabled
-                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Location
-              </label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
+            {/* Input Fields with Explicit Labels */}
+            <div className="space-y-4 pt-2">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  Start Date
-                </label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Tournament Name</label>
                 <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate}
+                  type="text"
+                  name="tournamentName"
+                  placeholder="e.g. Regional Sports Meet 2026"
+                  value={formData.tournamentName}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                  className="w-full border-2 rounded-xl px-4 py-2.5 text-sm focus:border-blue-500 outline-none transition-all placeholder:text-gray-300"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  End Date
-                </label>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Venue / Location</label>
                 <input
-                  type="date"
-                  name="endDate"
-                  value={formData.endDate}
+                  type="text"
+                  name="location"
+                  placeholder="e.g. City Sports Complex"
+                  value={formData.location}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
+                  className="w-full border-2 rounded-xl px-4 py-2.5 text-sm focus:border-blue-500 outline-none transition-all placeholder:text-gray-300"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={formData.startDate}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-2 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">End Date</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={formData.endDate}
+                    onChange={handleChange}
+                    required
+                    className="w-full border-2 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">No. of Participant Teams</label>
+                <input
+                  type="number"
+                  name="teams"
+                  placeholder="Total teams in tournament"
+                  value={formData.teams}
+                  onChange={handleChange}
+                  required
+                  min="1"
+                  className="w-full border-2 rounded-xl px-4 py-2.5 text-sm focus:border-blue-500 outline-none transition-all"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">
-                Number of Teams
-              </label>
-              <input
-                type="number"
-                name="teams"
-                value={formData.teams}
-                onChange={handleChange}
-                required
-                min="1"
-                className="w-full border rounded-lg px-3 py-2 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="flex-1 bg-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-400 transition font-medium"
-              >
-                Close
-              </button>
-              <button
-                type="submit"
-                className="flex-1 bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition font-medium"
-              >
-                Add Tournament
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white rounded-xl py-4 font-black text-sm uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg hover:shadow-blue-200"
+            >
+              🚀 Finalize & Register
+            </button>
           </form>
         </div>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Overlay */}
       {showConfirmation && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-2xl shadow-lg w-full max-w-sm p-6">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-blue-600 text-xl">✓</span>
-              </div>
-
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Confirm Tournament Creation
-              </h3>
-
-              <p className="text-gray-600 mb-6">
-                Are you sure you want to create the tournament "
-                <strong>{formData.tournamentName}</strong>" for team "
-                <strong>
-                  {teams.find((t) => t.id === formData.id)?.teamName}
-                </strong>
-                " with {selectedPlayers.length} selected players?
-              </p>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={cancelSubmit}
-                  className="flex-1 bg-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-400 transition font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmSubmit}
-                  className="flex-1 bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 transition font-medium"
-                >
-                  Confirm
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-blue-900/80 flex items-center justify-center z-[100] p-4 backdrop-blur-md">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">📝</div>
+            <h3 className="text-xl font-black text-gray-900 mb-2">Review Entry</h3>
+            <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+              Registering <strong>{formData.tournamentName}</strong> with <strong>{selectedPlayers.length}</strong> players. Information will be shared with officials.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowConfirmation(false)} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl text-sm font-bold text-gray-700 transition-all">Back</button>
+              <button onClick={confirmSubmit} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg transition-all">Yes, Submit</button>
             </div>
           </div>
         </div>

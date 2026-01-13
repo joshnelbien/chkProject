@@ -14,23 +14,10 @@ router.post("/training-schedule", async (req, res) => {
       coach,
       focusAreas,
       date,
-      teamId,
-      id, // 👈 selected team id
+      teamId, 
     } = req.body;
 
-    // Validate required fields
-    if (
-      !title ||
-      !startTime ||
-      !endTime ||
-      !location ||
-      !coach ||
-      !focusAreas
-    ) {
-      return res.status(400).json({ message: "All fields are required." });
-    }
 
-    // Save to DB
     const newSchedule = await TrainingSchedule.create({
       title,
       startTime,
@@ -40,17 +27,13 @@ router.post("/training-schedule", async (req, res) => {
       coach,
       focusAreas,
       date,
-      teamId,
-      teamSchedule: id, // 👈 give it a proper field name
+      teamId: teamId, 
+      teamSchedule: teamId,
     });
 
-    return res.status(201).json({
-      message: "Training schedule added successfully.",
-      schedule: newSchedule,
-    });
+    return res.status(201).json({ message: "Success", schedule: newSchedule });
   } catch (error) {
-    console.error("Error inserting training schedule:", error);
-    res.status(500).json({ message: "Server error. Please try again." });
+    res.status(500).json({ message: "Server error" });
   }
 });
 

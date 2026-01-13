@@ -23,20 +23,34 @@ function Analytics() {
   const [user, setUser] = useState(null);
   const [sport, setSport] = useState("");
   const sportFields = {
-    basketball: [
-      "basketballSpeed",
-      "basketballVerticalJump",
-      "basketballAgility",
-      "basketballEndurance",
-      "basketballShootingAccuracy",
-    ],
-    volleyball: [
-      "volleyballVerticalJump",
-      "volleyballReactionTime",
-      "volleyballUpperBodyPower",
-      "volleyballAgility",
-      "volleyballServeAccuracy",
-    ],
+    "basketball-men": [
+    "basketballSpeed",
+    "basketballVerticalJump",
+    "basketballAgility",
+    "basketballEndurance",
+    "basketballShootingAccuracy",
+  ],
+  "basketball-women": [
+    "basketballSpeed",
+    "basketballVerticalJump",
+    "basketballAgility",
+    "basketballEndurance",
+    "basketballShootingAccuracy",
+  ],
+  "volleyball-men": [
+    "volleyballVerticalJump",
+    "volleyballReactionTime",
+    "volleyballUpperBodyPower",
+    "volleyballAgility",
+    "volleyballServeAccuracy",
+  ],
+  "volleyball-women": [
+    "volleyballVerticalJump",
+    "volleyballReactionTime",
+    "volleyballUpperBodyPower",
+    "volleyballAgility",
+    "volleyballServeAccuracy",
+  ],
     cheerdance: [
       "cheerdanceFlexibility",
       "cheerdanceBalance",

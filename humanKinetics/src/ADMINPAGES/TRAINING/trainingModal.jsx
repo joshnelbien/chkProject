@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function TrainingModal({ isOpen, onClose, onSubmit }) {
-  const { id } = useParams(); // Admin/User ID
-
+  const { id } = useParams();
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
-  const [playersByTeam, setPlayersByTeam] = useState({});
+  const [coach, setCoach] = useState([]);
   const API = import.meta.env.VITE_BBACKEND_URL;
-
   const [formData, setFormData] = useState({
     title: "",
     workoutDetails: "",
@@ -20,62 +18,61 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
     location: "",
     coach: "",
     focusAreas: "",
-    teamId: id, // Fetched params ID goes here
-    id: "", // Selected team ID goes here
+    teamId: id,
+    id: "",
   });
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Fetch teams for this user/admin
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchCoach = async () => {
       try {
-        const res = await axios.get(
-          `${API}/teams/getTeams/${id}`
-        );
-        setTeams(res.data);
+        const res = await axios.get(`${API}/adminAccounts/coaches-profile/${id}`);
+        setCoach(res.data);
 
-        // Fetch players per team
-        res.data.forEach((team) => fetchPlayersForTeam(team.id));
+        // Auto-fill the coach name and ensure teamId is set in formData
+        setFormData(prev => ({
+          ...prev,
+          coach: `${res.data.firstName} ${res.data.lastName}`,
+          teamId: id
+        }));
       } catch (err) {
-        console.error("Error fetching teams:", err);
+        console.error("Error fetching coach profile:", err);
       }
     };
+    if (id) fetchCoach();
+  }, [id, API]);
 
-    fetchTeams();
-  }, [id]);
-
-  // Fetch players for a specific team
-  const fetchPlayersForTeam = async (teamId) => {
-    try {
-      const res = await axios.get(
-        `${API}/teams/player/${teamId}`
+  useEffect(() => {
+    if (coach && coach.sports && teams.length > 0) {
+      // Find team where team.sport matches coach.sports (case-insensitive)
+      const matchingTeam = teams.find(
+        (t) => t.sport.toLowerCase() === coach.sports.toLowerCase()
       );
-      setPlayersByTeam((prev) => ({ ...prev, [teamId]: res.data }));
-    } catch (err) {
-      console.error(`Error fetching players for team ${teamId}:`, err);
+
+      if (matchingTeam) {
+        setSelectedTeam(matchingTeam);
+
+        // Update formData so the backend gets the correct IDs immediately
+        setFormData((prev) => ({
+          ...prev,
+          id: matchingTeam.id,
+          teamId: id, // from useParams
+        }));
+      }
     }
-  };
+  }, [coach, teams, id]);
+
+
 
   // Handle all text inputs
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle team selection
-  const handleTeamSelect = (e) => {
-    const selected = teams.find((t) => t.id.toString() === e.target.value);
-    setSelectedTeam(selected);
 
-    console.log("Selected team:", selected?.id);
 
-    setFormData({
-      ...formData,
-      id: selected?.id, // Selected team → "id"
-      teamId: id, // useParams ID → "teamId"
-    });
-  };
 
   // Show confirmation modal
   const handleSubmit = (e) => {
@@ -86,38 +83,86 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
   // Confirm submission → POST to backend
   const confirmSubmit = async () => {
     try {
+      // Ensure teamId is explicitly sent
+      const payload = {
+        ...formData,
+        teamId: id 
+      };
+
       const response = await axios.post(
         `${API}/trainingSchedule/training-schedule`,
-        formData
+        payload
       );
-      console.log("Training added:", response.data);
-
+      
       setShowSuccess(true);
       setShowConfirmation(false);
-
-      // Reset form
-      setFormData({
-        title: "",
-        date: "",
-        workoutDetails: "",
-        startTime: "",
-        endTime: "",
-        location: "",
-        coach: "",
-        focusAreas: "",
-        teamId: id,
-        id: "",
-      });
-
-      if (onSubmit) onSubmit(formData);
+      // Reset logic...
     } catch (error) {
       console.error("Failed to submit training:", error);
-      alert("❌ Error adding training schedule.");
-      setShowConfirmation(false);
     }
   };
 
   const cancelSubmit = () => setShowConfirmation(false);
+
+
+  // Inside your render or a helper function
+  const getSportData = (rawSport) => {
+    if (!rawSport) return null;
+
+    const sport = rawSport.toLowerCase();
+
+    // Define the mapping data
+    const data = {
+      basketball: {
+        metrics: ["Speed & Acceleration", "Vertical Jump / Explosive Power", "Agility & Change of Direction", "Cardiovascular Endurance", "Shooting Accuracy"],
+        programs: ["20m Sprint", "Vertical Jump", "Illinois Agility", "Yo-Yo Intermittent Recovery", "Spot Shooting & Free-Throw Drills"]
+      },
+      volleyball: {
+        metrics: ["Vertical Jump Height", "Reaction Time", "Upper Body Power", "Agility", "Serve Accuracy"],
+        programs: ["Spike Jump Test", "Reaction Ball Drill", "Medicine Ball Throw Test", "T-Test Agility Drill", "Target Serve Accuracy Test"]
+      },
+      cheerdance: {
+        metrics: ["Flexibility", "Balance & Stability", "Muscular Endurance", "Coordination", "Explosive Power (Jumps)"],
+        programs: ["Sit-and-Reach Test", "Stork Balance Test", "Core Endurance Hold Test", "Routine Synchronization Evaluation", "Standing Long Jump Test"]
+      },
+      futsal: {
+        metrics: ["Speed", "Agility", "Aerobic Endurance", "Ball Control", "Shooting Accuracy"],
+        programs: ["30m Sprint Test", "Zigzag Agility Test", "Cooper Test", "Dribbling Cone Test", "Goal Target Shooting Drill"]
+      },
+      "sepak-takraw": {
+        metrics: ["Leg Explosive Power", "Flexibility", "Balance", "Reaction Time", "Coordination"],
+        programs: ["Vertical Jump Test", "Hip & Hamstring Flexibility Test", "Single-Leg Balance Test", "Reaction Light Drill", "Ball Juggling Count Test"]
+      },
+      "table-tennis": {
+        metrics: ["Reaction Time", "Hand-Eye Coordination", "Speed", "Accuracy", "Endurance"],
+        programs: ["Reaction Timer Test", "Ball Tracking Drill", "Short Sprint Test", "Target Placement Drill", "Rally Endurance Test"]
+      },
+      badminton: {
+        metrics: ["Agility", "Speed", "Endurance", "Smash Power", "Accuracy"],
+        programs: ["Shuttle Run Test", "10–20m Sprint Test", "Multistage Fitness Test", "Smash Speed Test", "Target Shot Accuracy Drill"]
+      },
+      taekwondo: {
+        metrics: ["Kicking Speed", "Explosive Power", "Flexibility", "Reaction Time", "Balance"],
+        programs: ["Kick Speed Sensor Test", "Standing Long Jump", "Split Flexibility Test", "Reaction Pad Drill", "One-Leg Stability Test"]
+      },
+      arnis: {
+        metrics: ["Hand Speed", "Reaction Time", "Coordination", "Endurance", "Accuracy"],
+        programs: ["Stick Speed Drill", "Reaction Light Test", "Pattern Coordination Drill", "Continuous Striking Test", "Target Strike Accuracy Test"]
+      },
+      "karate-do": {
+        metrics: ["Explosive Power", "Speed", "Balance", "Reaction Time", "Technique Precision"],
+        programs: ["Vertical Jump Test", "Punch Speed Test", "Balance Stability Test", "Reaction Timing Drill", "Kata Performance Scoring"]
+      }
+    };
+
+    // Logic to strip "-men" or "-women" to find the correct key
+    let sportKey = sport;
+    if (sport.startsWith("basketball")) sportKey = "basketball";
+    if (sport.startsWith("volleyball")) sportKey = "volleyball";
+
+    return data[sportKey] || null;
+  };
+
 
   const closeSuccessModal = () => {
     setShowSuccess(false);
@@ -160,24 +205,16 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Team Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Select Team
+              <label className="block text-sm font-medium text-gray-700">
+                SPORTS
               </label>
-
-              <select
-                value={selectedTeam?.id || ""}
-                onChange={handleTeamSelect}
-                required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-              >
-                <option value="">-- Select a team --</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.teamName.toUpperCase()} ({team.sport.toUpperCase()}) -{" "}
-                    {playersByTeam[team.id]?.length || 0} players
-                  </option>
-                ))}
-              </select>
+              <input
+                type="text"
+                name="sportDisplay"
+                value={coach.sports || ""}
+                readOnly // Prevents users from changing the coach's assigned sport
+                className="mt-1 block w-full rounded-md border border-gray-100 bg-gray-50 px-3 py-2 text-gray-500"
+              />
             </div>
 
             {/* Title */}
@@ -265,10 +302,11 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
               <input
                 type="text"
                 name="coach"
-                value={formData.coach}
+                value={`${coach.firstName} ${coach.lastName}`}
                 onChange={handleChange}
                 placeholder="e.g., Coach Mike"
                 required
+                readOnly
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
               />
             </div>
@@ -283,75 +321,26 @@ export default function TrainingModal({ isOpen, onClose, onSubmit }) {
                 value={formData.workoutDetails}
                 onChange={handleChange}
                 required
-                disabled={!selectedTeam}
+                disabled={!coach.sports}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 bg-white"
               >
                 <option value="">
-                  -- {selectedTeam ? `Select ${selectedTeam.sport.replace('-', ' ')} Drill` : 'Select a team first'} --
+                  -- {coach.sports ? `Select Drill for ${coach.sports.replace('-', ' ')}` : 'Loading...'} --
                 </option>
 
-                {selectedTeam && (() => {
-                  const sport = selectedTeam.sport.toLowerCase();
-
-                  // Map multi-gender sports to a single set of metrics/programs
-                  let sportKey = sport;
-                  if (sport.includes("basketball")) sportKey = "basketball";
-                  if (sport.includes("volleyball")) sportKey = "volleyball";
-
-                  const data = {
-                    basketball: {
-                      metrics: ["Speed & Acceleration", "Vertical Jump / Explosive Power", "Agility & Change of Direction", "Cardiovascular Endurance", "Shooting Accuracy"],
-                      programs: ["20m Sprint", "Vertical Jump", "Illinois Agility", "Yo-Yo Intermittent Recovery", "Spot Shooting & Free-Throw Drills"]
-                    },
-                    volleyball: {
-                      metrics: ["Vertical Jump Height", "Reaction Time", "Upper Body Power", "Agility", "Serve Accuracy"],
-                      programs: ["Spike Jump Test", "Reaction Ball Drill", "Medicine Ball Throw Test", "T-Test Agility Drill", "Target Serve Accuracy Test"]
-                    },
-                    cheerdance: {
-                      metrics: ["Flexibility", "Balance & Stability", "Muscular Endurance", "Coordination", "Explosive Power (Jumps)"],
-                      programs: ["Sit-and-Reach Test", "Stork Balance Test", "Core Endurance Hold Test", "Routine Synchronization Evaluation", "Standing Long Jump Test"]
-                    },
-                    futsal: {
-                      metrics: ["Speed", "Agility", "Aerobic Endurance", "Ball Control", "Shooting Accuracy"],
-                      programs: ["30m Sprint Test", "Zigzag Agility Test", "Cooper Test", "Dribbling Cone Test", "Goal Target Shooting Drill"]
-                    },
-                    "sepak-takraw": {
-                      metrics: ["Leg Explosive Power", "Flexibility", "Balance", "Reaction Time", "Coordination"],
-                      programs: ["Vertical Jump Test", "Hip & Hamstring Flexibility Test", "Single-Leg Balance Test", "Reaction Light Drill", "Ball Juggling Count Test"]
-                    },
-                    "table-tennis": {
-                      metrics: ["Reaction Time", "Hand-Eye Coordination", "Speed", "Accuracy", "Endurance"],
-                      programs: ["Reaction Timer Test", "Ball Tracking Drill", "Short Sprint Test", "Target Placement Drill", "Rally Endurance Test"]
-                    },
-                    badminton: {
-                      metrics: ["Agility", "Speed", "Endurance", "Smash Power", "Accuracy"],
-                      programs: ["Shuttle Run Test", "10–20m Sprint Test", "Multistage Fitness Test", "Smash Speed Test", "Target Shot Accuracy Drill"]
-                    },
-                    taekwondo: {
-                      metrics: ["Kicking Speed", "Explosive Power", "Flexibility", "Reaction Time", "Balance"],
-                      programs: ["Kick Speed Sensor Test", "Standing Long Jump", "Split Flexibility Test", "Reaction Pad Drill", "One-Leg Stability Test"]
-                    },
-                    arnis: {
-                      metrics: ["Hand Speed", "Reaction Time", "Coordination", "Endurance", "Accuracy"],
-                      programs: ["Stick Speed Drill", "Reaction Light Test", "Pattern Coordination Drill", "Continuous Striking Test", "Target Strike Accuracy Test"]
-                    },
-                    "karate-do": {
-                      metrics: ["Explosive Power", "Speed", "Balance", "Reaction Time", "Technique Precision"],
-                      programs: ["Vertical Jump Test", "Punch Speed Test", "Balance Stability Test", "Reaction Timing Drill", "Kata Performance Scoring"]
-                    }
-                  };
-
-                  const selectedData = data[sportKey];
+                {(() => {
+                  const selectedData = getSportData(coach.sports);
 
                   if (!selectedData) return null;
 
                   return (
-                    <>
-                     
-                      <optgroup label="Training Programs">
-                        {selectedData.programs.map(p => <option key={p} value={p}>{p}</option>)}
-                      </optgroup>
-                    </>
+                    <optgroup label="Training Programs">
+                      {selectedData.programs.map((program) => (
+                        <option key={program} value={program}>
+                          {program}
+                        </option>
+                      ))}
+                    </optgroup>
                   );
                 })()}
               </select>

@@ -197,7 +197,7 @@ function Sidebar({ isOpen }) {
 
         <SidebarSection title="School">
           <SidebarLink to={`/sportEvent/${id}`} label="Sports Events" />
-          <SidebarLink to={`/staffs/${id}`} label="Staffs" />
+          <SidebarLink to={`/staffs/${id}`} label="Staff" />
         </SidebarSection>
 
         <SidebarSection>

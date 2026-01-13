@@ -38,20 +38,11 @@ router.put("/player-addTeam", async (req, res) => {
         .json({ message: "playerId and teamId are required" });
     }
 
-    // ✅ Check if team exists
-    const team = await Teams.findByPk(teamId);
-    if (!team) {
-      return res.status(404).json({ message: "Team not found" });
-    }
-
-    // ✅ Find the player
     const player = await playerAccounts.findByPk(playerId);
     if (!player) {
       return res.status(404).json({ message: "Player not found" });
     }
-
-    // ✅ Update player's teamId and status
-    player.teamId = team.id;
+    player.teamId = teamId;
     player.status = "In Team";
     await player.save();
 
@@ -64,7 +55,7 @@ router.put("/player-addTeam", async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
-// ✅ Create a new team
+
 router.post("/createTeams", async (req, res) => {
   try {
     const { teamId, teamName, sport, coach, description } = req.body;

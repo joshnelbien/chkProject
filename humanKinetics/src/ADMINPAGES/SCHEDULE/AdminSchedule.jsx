@@ -153,14 +153,14 @@ function AdminSchedule() {
             mergedSchedules[dateKey].push({
               id: ts.id || tournament.id,
               time: `${ts.startTime} - ${ts.endTime}`,
-              title: `${tournament.teamName} vs ${ts.opponent}`,
+              title: `${tournament.sport} vs ${ts.opponent}`,
               location: tournament.location,
               participants: `${tournament.teams} Teams`,
               type: "Tournament",
               teamId: tournament.teamId || null,
               status: ts.status || "Pending",
-              homeScore: ts.homeScore ?? null, // <-- FIXED
-              opponentScore: ts.opponentScore ?? null, // <-- FIXED
+              homeScore: ts.homeScore ?? null, 
+              opponentScore: ts.opponentScore ?? null, 
             });
           });
         });

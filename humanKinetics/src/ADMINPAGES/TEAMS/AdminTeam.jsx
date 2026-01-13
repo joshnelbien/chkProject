@@ -4,226 +4,276 @@ import { useParams } from "react-router-dom";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
-import BuildTeamModal from "./buildTeamModal";
-import TeamDetailsModal from "./TeamDetailsModal";
+import AddPlayerModal from "./AddPlayerModal";
+import PlayersUpdate from "./update";
+
+// Configuration for sport-specific progress bars
+const SPORT_TRAINING_FIELDS = {
+  "basketball-men": [
+    { key: "basketballSpeed", label: "Speed" },
+    { key: "basketballVerticalJump", label: "Vertical Jump" },
+    { key: "basketballAgility", label: "Agility" },
+    { key: "basketballEndurance", label: "Endurance" },
+    { key: "basketballShootingAccuracy", label: "Shooting Accuracy" },
+  ],
+  "basketball-women": [
+    { key: "basketballSpeed", label: "Speed" },
+    { key: "basketballVerticalJump", label: "Vertical Jump" },
+    { key: "basketballAgility", label: "Agility" },
+    { key: "basketballEndurance", label: "Endurance" },
+    { key: "basketballShootingAccuracy", label: "Shooting Accuracy" },
+  ],
+  "volleyball-men": [
+    { key: "volleyballVerticalJump", label: "Vertical Jump" },
+    { key: "volleyballReactionTime", label: "Reaction Time" },
+    { key: "volleyballUpperBodyPower", label: "Upper Body Power" },
+    { key: "volleyballAgility", label: "Agility" },
+    { key: "volleyballServeAccuracy", label: "Serve Accuracy" },
+  ],
+  "volleyball-women": [
+    { key: "volleyballVerticalJump", label: "Vertical Jump" },
+    { key: "volleyballReactionTime", label: "Reaction Time" },
+    { key: "volleyballUpperBodyPower", label: "Upper Body Power" },
+    { key: "volleyballAgility", label: "Agility" },
+    { key: "volleyballServeAccuracy", label: "Serve Accuracy" },
+  ],
+  cheerdance: [
+    { key: "cheerdanceFlexibility", label: "Flexibility" },
+    { key: "cheerdanceBalance", label: "Balance" },
+    { key: "cheerdanceMuscularEndurance", label: "Muscular Endurance" },
+    { key: "cheerdanceCoordination", label: "Coordination" },
+    { key: "cheerdanceExplosivePower", label: "Explosive Power" },
+  ],
+  futsal: [
+    { key: "futsalSpeed", label: "Speed" },
+    { key: "futsalAgility", label: "Agility" },
+    { key: "futsalAerobicEndurance", label: "Aerobic Endurance" },
+    { key: "futsalBallControl", label: "Ball Control" },
+    { key: "futsalShootingAccuracy", label: "Shooting Accuracy" },
+  ],
+  "sepak-takraw": [
+    { key: "takrawLegPower", label: "Leg Power" },
+    { key: "takrawFlexibility", label: "Flexibility" },
+    { key: "takrawBalance", label: "Balance" },
+    { key: "takrawReactionTime", label: "Reaction Time" },
+    { key: "takrawCoordination", label: "Coordination" },
+  ],
+  badminton: [
+    { key: "badmintonAgility", label: "Agility" },
+    { key: "badmintonSpeed", label: "Speed" },
+    { key: "badmintonEndurance", label: "Endurance" },
+    { key: "badmintonSmashPower", label: "Smash Power" },
+    { key: "badmintonAccuracy", label: "Accuracy" },
+  ],
+};
 
 function AdminTeam() {
-  const { id } = useParams(); // ✅ Admin/User ID from route
-  const [teams, setTeams] = useState([]);
-  const [admin, setAdmin] = useState([]);
-  const [playersByTeam, setPlayersByTeam] = useState({});
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const { id } = useParams(); 
   const API = import.meta.env.VITE_BBACKEND_URL;
 
-  const handleViewDetails = (team) => {
-    console.log("🟢 Selected Team ID:", team.id);
-    setSelectedTeam(team);
-    setDetailsOpen(true);
-  };
+  const [players, setPlayers] = useState([]);
+  const [coachSport, setCoachSport] = useState(""); // Track coach's sport for sorting
+  const [addPlayerOpen, setAddPlayerOpen] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
-  // ✅ Handle closing
-  const handleCloseDetails = () => {
-    setDetailsOpen(false);
-    setSelectedTeam(null);
-  };
-
-  // ✅ When “Add Player” clicked
-
-  // ✅ Fetch all teams for this admin/user
+  // 1. Fetch Coach Profile to get their designated sport
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchCoachData = async () => {
       try {
-        const res = await axios.get(
-          `${API}/teams/getTeams/${id}`
-        );
-        console.log(" Teams fetched:", res.data);
-
-        const resAdmin = await axios.get(
-          `${API}/adminAccounts/coaches-profile/${id}`
-        );
-        console.log(" Teams fetched:", resAdmin.data);
-
-        setAdmin(resAdmin.data);
-        setTeams(res.data);
-
-        // After teams are fetched, fetch players for each team
-        res.data.forEach((team) => fetchPlayersForTeam(team.id));
+        const res = await axios.get(`${API}/adminAccounts/coaches-profile/${id}`);
+        // Assuming the field is 'sports' based on your previous TournamentModal code
+        setCoachSport(res.data.sports || ""); 
       } catch (err) {
-        console.error(" Error fetching teams:", err);
+        console.error("Error fetching coach profile:", err);
       }
     };
-    fetchTeams();
-  }, [id]);
+    if (id) fetchCoachData();
+  }, [id, API]);
 
-  // ✅ Fetch players for a specific team
-  const fetchPlayersForTeam = async (teamId) => {
+  // 2. Fetch and Sort Players
+  const fetchPlayers = async () => {
     try {
-      const res = await axios.get(
-        `${API}/teams/player/${teamId}`
-      );
-      console.log(` Players for team ${teamId}:`, res.data);
+      const res = await axios.get(`${API}/teams/player/${id}`);
+      let rawPlayers = res.data;
 
-      setPlayersByTeam((prev) => ({
-        ...prev,
-        [teamId]: res.data,
-      }));
+      // Sorting Logic: 
+      // If player's sport matches coach's sport, they move to the top.
+      // Secondary sort by First Name.
+      const sorted = rawPlayers.sort((a, b) => {
+        const aMatches = a.sport === coachSport;
+        const bMatches = b.sport === coachSport;
+
+        if (aMatches && !bMatches) return -1;
+        if (!aMatches && bMatches) return 1;
+        
+        // If both match or both don't match, sort alphabetically
+        return a.firstName.localeCompare(b.firstName);
+      });
+
+      setPlayers([...sorted]);
     } catch (err) {
-      console.error(` Error fetching players for team ${teamId}:`, err);
+      console.error("Error fetching players:", err);
     }
   };
 
-  // ✅ When new team is created, update state
-  const handleTeamCreated = (newTeam) => {
-    console.log(" New Team Created:", newTeam);
-    setTeams((prev) => [...prev, newTeam]);
+  // Re-run fetch when coachSport is identified to ensure correct sorting
+  useEffect(() => {
+    if (id) fetchPlayers();
+  }, [id, coachSport]);
+
+  const handleKick = async (player) => {
+    const confirmKick = confirm(`Remove ${player.firstName} ${player.lastName} from the team?`);
+    if (!confirmKick) return;
+    try {
+      const res = await axios.put(`${API}/userAccounts/player-kick/${player.id}`);
+      if (res.status === 200) {
+        alert("Player removed.");
+        fetchPlayers();
+      }
+    } catch (err) {
+      alert("Kick failed.");
+    }
+  };
+
+  const calculateAge = (bDay) => {
+    if (!bDay) return "—";
+    const birthDate = new Date(bDay);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    if (today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) age--;
+    return age;
   };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Section */}
       <div className="flex flex-col flex-grow">
         <Navbar />
         <main className="flex-grow p-6 max-w-7xl mx-auto w-full mt-20">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 space-y-4 sm:space-y-0">
             <div>
-              <h2 className="text-2xl font-semibold text-green-700">
-                Team Management
-              </h2>
-              <p className="text-gray-500 text-sm sm:text-base">
-                Manage your teams and players
+              <h2 className="text-3xl font-bold text-green-700 tracking-tight">Team Management</h2>
+              <p className="text-gray-500 italic">
+                Displaying roster for <span className="text-green-600 font-bold uppercase">{coachSport || "All Sports"}</span>
               </p>
             </div>
 
             <button
-              onClick={() => setOpenModal(true)}
-              className="px-4 py-2 bg-green-700 text-white rounded-full shadow-md hover:bg-green-800 transition font-medium"
+              onClick={() => setAddPlayerOpen(true)}
+              className="px-6 py-2.5 bg-green-700 text-white rounded-full shadow-lg hover:bg-green-800 transition-all font-bold flex items-center gap-2"
             >
-              + Build New Team
+              <span className="text-xl">+</span> Add Player
             </button>
           </div>
 
-          {/* Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-8">
-            <OverviewCard label="Total Teams" value={teams.length} />
-            <OverviewCard
-              label="Total Players"
-              value={Object.values(playersByTeam).flat().length}
-            />
+          {/* Players Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {players.length > 0 ? (
+              players.map((p) => {
+                const isPrimarySport = p.sport === coachSport;
+                const stats = SPORT_TRAINING_FIELDS[p.sport] || [];
+                
+                return (
+                  <div 
+                    key={p.id} 
+                    className={`bg-white border rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 flex flex-col items-center relative overflow-hidden ${
+                      isPrimarySport ? 'border-green-400 ring-2 ring-green-100' : 'border-gray-200'
+                    }`}
+                  >
+                    
 
-    
-          </div>
-
-          {/* Teams Section */}
-          <section>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">
-                My Teams
-              </h3>
-            </div>
-
-            {teams.length === 0 ? (
-              <p className="text-gray-500 italic">
-                No teams have been created yet.
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {teams.map((team) => {
-                  const players = playersByTeam[team.id] || [];
-                  return (
-                    <div
-                      key={team.id}
-                      className="bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition"
-                    >
-                      <h4 className="text-lg font-bold text-green-700 mb-2">
-                        {team.teamName.toUpperCase()}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-1">
-                        <span className="font-semibold">Sport:</span>{" "}
-                        {team.sport.toUpperCase()}
-                      </p>
-                      <p className="text-sm text-gray-600 mb-1">
-                        <span className="font-semibold">Coach:</span>{" "}
-                        {team.coach.toUpperCase()}
-                      </p>
-                      <p className="text-sm text-gray-600 mb-3">
-                        {team.description.toUpperCase() || "No description provided."}
-                      </p>
-
-                      {/* ✅ Player List */}
-                      <div className="border-t pt-3 mt-3">
-                        <p className="font-semibold text-gray-700 mb-2">
-                          Players ({players.length})
-                        </p>
-                        {players.length === 0 ? (
-                          <p className="text-gray-400 text-sm italic">
-                            No players assigned.
-                          </p>
-                        ) : (
-                          <ul className="space-y-1 text-sm">
-                            {players.map((p) => (
-                              <li
-                                key={p.id}
-                                className="flex justify-between items-center bg-gray-50 p-2 rounded-md"
-                              >
-                                <span className="font-medium text-gray-800">
-                                  {p.firstName} {p.lastName}
-                                </span>
-                                <span className="text-xs text-green-700 font-semibold">
-                                  #{p.jerseyNo || "N/A"}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                    {/* Player Image */}
+                    <div className="relative mb-4">
+                      <img
+                        src={`${API}/userAccounts/player-photo/${p.id}`}
+                        alt={p.firstName}
+                        className={`w-24 h-24 rounded-full object-cover border-4 shadow-md ${
+                            isPrimarySport ? 'border-green-500' : 'border-gray-300'
+                        }`}
+                        onError={(e) => (e.currentTarget.src = "/lexi.jpg")}
+                      />
+                      <div className="absolute -bottom-1 -right-1 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white">
+                        #{p.jerseyNo || "00"}
                       </div>
+                    </div>
 
+                    <h4 className="text-xl font-black text-gray-800 uppercase tracking-tight">
+                      {p.firstName} {p.lastName}
+                    </h4>
+                    <div className="flex flex-col items-center mb-4">
+                        <p className="text-sm font-bold text-green-600">{p.position || "Player"}</p>
+                        <p className="text-[10px] text-gray-400 uppercase font-bold">{p.sport}</p>
+                    </div>
+
+                    {/* Performance Attributes */}
+                    <div className="w-full space-y-3 mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                      {stats.length > 0 ? (
+                        stats.map((stat) => (
+                          <div key={stat.key}>
+                            <div className="flex justify-between text-[10px] font-bold text-gray-500 uppercase mb-1">
+                              <span>{stat.label}</span>
+                              <span className="text-green-700">{p[stat.key] || 0}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5">
+                              <div
+                                className="h-1.5 rounded-full bg-green-600 transition-all duration-700"
+                                style={{ width: `${p[stat.key] || 0}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-[10px] text-gray-400 italic text-center py-2">No specific attributes set</p>
+                      )}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 w-full mt-auto">
                       <button
-                        onClick={() => handleViewDetails(team)} // ✅ open modal
-                        className="w-full py-2 mt-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                        onClick={() => { setSelectedPlayer(p); setShowUpdateModal(true); }}
+                        className="flex-1 py-2 bg-green-100 text-green-700 rounded-xl font-bold text-sm hover:bg-green-700 hover:text-white transition-colors border border-green-200"
                       >
-                        View Team Details
+                        Update
+                      </button>
+                      <button
+                        onClick={() => handleKick(p)}
+                        className="flex-1 py-2 bg-red-50 text-red-600 rounded-xl font-bold text-sm hover:bg-red-600 hover:text-white transition-colors border border-red-100"
+                      >
+                        Kick
                       </button>
                     </div>
-                  );
-                })}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+                <p className="text-gray-400 font-medium italic text-lg">No players registered to this team yet.</p>
               </div>
             )}
-          </section>
-
-          <TeamDetailsModal
-            open={detailsOpen}
-            onClose={handleCloseDetails}
-            team={selectedTeam}
-            players={selectedTeam ? playersByTeam[selectedTeam.id] || [] : []}
-          />
+          </div>
         </main>
-
         <Footer />
       </div>
 
-      {/* Build Team Modal */}
-      <BuildTeamModal
-        open={openModal}
-        data={admin}
-        onClose={() => setOpenModal(false)}
-        onTeamCreated={handleTeamCreated}
-      />
-    </div>
-  );
-}
+      {/* Modals */}
+      {addPlayerOpen && (
+        <AddPlayerModal
+          onClose={() => setAddPlayerOpen(false)}
+          onUpdatePlayer={fetchPlayers}
+          teamId={id}
+        />
+      )}
 
-/* ✅ Reusable Card for Overview Stats */
-function OverviewCard({ label, value }) {
-  return (
-    <div className="bg-white p-5 rounded-lg shadow-md text-center">
-      <p className="text-gray-500 text-sm">{label}</p>
-      <p className="text-2xl font-bold text-green-700">{value}</p>
+      {showUpdateModal && selectedPlayer && (
+        <PlayersUpdate
+          player={selectedPlayer}
+          onClose={() => { setShowUpdateModal(false); setSelectedPlayer(null); }}
+          onUpdate={fetchPlayers}
+        />
+      )}
     </div>
   );
 }
