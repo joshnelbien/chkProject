@@ -9,7 +9,7 @@ import PlayersUpdate from "./update";
 
 // Configuration for sport-specific progress bars
 const SPORT_TRAINING_FIELDS = {
-  "basketball-men": [
+ "basketball-men": [
     { key: "basketballSpeed", label: "Speed" },
     { key: "basketballVerticalJump", label: "Vertical Jump" },
     { key: "basketballAgility", label: "Agility" },
@@ -58,12 +58,40 @@ const SPORT_TRAINING_FIELDS = {
     { key: "takrawReactionTime", label: "Reaction Time" },
     { key: "takrawCoordination", label: "Coordination" },
   ],
+  "table-tennis": [
+    { key: "tableTennisReactionTime", label: "Reaction Time" },
+    { key: "tableTennisHandEyeCoordination", label: "Hand–Eye Coordination" },
+    { key: "tableTennisSpeed", label: "Speed" },
+    { key: "tableTennisAccuracy", label: "Accuracy" },
+    { key: "tableTennisEndurance", label: "Endurance" },
+  ],
   badminton: [
     { key: "badmintonAgility", label: "Agility" },
     { key: "badmintonSpeed", label: "Speed" },
     { key: "badmintonEndurance", label: "Endurance" },
     { key: "badmintonSmashPower", label: "Smash Power" },
     { key: "badmintonAccuracy", label: "Accuracy" },
+  ],
+  taekwondo: [
+    { key: "taekwondoKickingSpeed", label: "Kicking Speed" },
+    { key: "taekwondoExplosivePower", label: "Explosive Power" },
+    { key: "taekwondoFlexibility", label: "Flexibility" },
+    { key: "taekwondoReactionTime", label: "Reaction Time" },
+    { key: "taekwondoBalance", label: "Balance" },
+  ],
+  arnis: [
+    { key: "arnisHandSpeed", label: "Hand Speed" },
+    { key: "arnisReactionTime", label: "Reaction Time" },
+    { key: "arnisCoordination", label: "Coordination" },
+    { key: "arnisEndurance", label: "Endurance" },
+    { key: "arnisAccuracy", label: "Accuracy" },
+  ],
+  "karate-do": [
+    { key: "karateExplosivePower", label: "Explosive Power" },
+    { key: "karateSpeed", label: "Speed" },
+    { key: "karateBalance", label: "Balance" },
+    { key: "karateReactionTime", label: "Reaction Time" },
+    { key: "karateTechniquePrecision", label: "Technique Precision" },
   ],
 };
 

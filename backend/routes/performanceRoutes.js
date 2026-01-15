@@ -3,7 +3,8 @@ const router = express.Router();
 const PerformanceHistory = require("../db/model/performanceDB");
 
 const sportFields = {
-  basketball: [
+  
+  "basketball-men": [
     "strength",
     "speed",
     "agility",
@@ -19,7 +20,23 @@ const sportFields = {
     "basketballEndurance",
     "basketballShootingAccuracy",
   ],
-  volleyball: [
+  "basketball-women": [
+    "strength",
+    "speed",
+    "agility",
+    "endurance",
+    "accuracy",
+    "tactics",
+    "strategy",
+    "physicalFitness",
+    "teamCoordination",
+    "basketballSpeed",
+    "basketballVerticalJump",
+    "basketballAgility",
+    "basketballEndurance",
+    "basketballShootingAccuracy",
+  ],
+  "volleyball-men": [
     "strength",
     "speed",
     "agility",
@@ -35,7 +52,23 @@ const sportFields = {
     "volleyballAgility",
     "volleyballServeAccuracy",
   ],
-  cheerdance: [
+  "volleyball-women": [
+    "strength",
+    "speed",
+    "agility",
+    "endurance",
+    "accuracy",
+    "tactics",
+    "strategy",
+    "physicalFitness",
+    "teamCoordination",
+    "volleyballVerticalJump",
+    "volleyballReactionTime",
+    "volleyballUpperBodyPower",
+    "volleyballAgility",
+    "volleyballServeAccuracy",
+  ],
+  "cheerdance": [
     "strength",
     "speed",
     "agility",

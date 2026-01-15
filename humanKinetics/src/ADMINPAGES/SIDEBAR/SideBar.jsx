@@ -188,7 +188,7 @@ function AdminSidebar() {
         {/* MENU SECTIONS */}
         <SidebarSection title="Dashboard">
           <SidebarLink to={`/admin-overview/${id}`} label="Overview" />
-          <SidebarLink to={`/admin-team/${id}`} label="Teams" />
+          <SidebarLink to={`/admin-team/${id}`} label="Team" />
           <SidebarLink to={`/admin-athletes/${id}`} label="Athletes" />
         </SidebarSection>
 

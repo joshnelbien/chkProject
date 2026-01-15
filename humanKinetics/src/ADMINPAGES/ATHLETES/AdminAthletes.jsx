@@ -56,12 +56,40 @@ const SPORT_TRAINING_FIELDS = {
     { key: "takrawReactionTime", label: "Reaction Time" },
     { key: "takrawCoordination", label: "Coordination" },
   ],
+  "table-tennis": [
+    { key: "tableTennisReactionTime", label: "Reaction Time" },
+    { key: "tableTennisHandEyeCoordination", label: "Hand–Eye Coordination" },
+    { key: "tableTennisSpeed", label: "Speed" },
+    { key: "tableTennisAccuracy", label: "Accuracy" },
+    { key: "tableTennisEndurance", label: "Endurance" },
+  ],
   badminton: [
     { key: "badmintonAgility", label: "Agility" },
     { key: "badmintonSpeed", label: "Speed" },
     { key: "badmintonEndurance", label: "Endurance" },
     { key: "badmintonSmashPower", label: "Smash Power" },
     { key: "badmintonAccuracy", label: "Accuracy" },
+  ],
+  taekwondo: [
+    { key: "taekwondoKickingSpeed", label: "Kicking Speed" },
+    { key: "taekwondoExplosivePower", label: "Explosive Power" },
+    { key: "taekwondoFlexibility", label: "Flexibility" },
+    { key: "taekwondoReactionTime", label: "Reaction Time" },
+    { key: "taekwondoBalance", label: "Balance" },
+  ],
+  arnis: [
+    { key: "arnisHandSpeed", label: "Hand Speed" },
+    { key: "arnisReactionTime", label: "Reaction Time" },
+    { key: "arnisCoordination", label: "Coordination" },
+    { key: "arnisEndurance", label: "Endurance" },
+    { key: "arnisAccuracy", label: "Accuracy" },
+  ],
+  "karate-do": [
+    { key: "karateExplosivePower", label: "Explosive Power" },
+    { key: "karateSpeed", label: "Speed" },
+    { key: "karateBalance", label: "Balance" },
+    { key: "karateReactionTime", label: "Reaction Time" },
+    { key: "karateTechniquePrecision", label: "Technique Precision" },
   ],
 };
 
@@ -70,6 +98,7 @@ function AdminAthletes() {
   const [players, setPlayers] = useState([]);
   const [coachSport, setCoachSport] = useState("");
   const API = import.meta.env.VITE_BBACKEND_URL;
+  const [search, setSearch] = useState("");
 
   // 1. Fetch Coach to get their sport
   useEffect(() => {
@@ -98,7 +127,17 @@ function AdminAthletes() {
   }, [API]);
 
   // 3. Filter only players that match the coach's sport
-  const filteredPlayers = players.filter(p => p.sport === coachSport);
+  const filteredPlayers = players.filter((p) => {
+    const matchesSport = p.sport === coachSport;
+
+    const matchesSearch =
+      p.firstName?.toLowerCase().includes(search.toLowerCase()) ||
+      p.lastName?.toLowerCase().includes(search.toLowerCase()) ||
+      p.studentNumber?.toString().includes(search) ||
+      p.course?.toLowerCase().includes(search.toLowerCase());
+
+    return matchesSport && matchesSearch;
+  });
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -110,7 +149,15 @@ function AdminAthletes() {
             <h2 className="text-3xl font-bold text-green-700 tracking-tight">Athletes</h2>
             <p className="text-gray-500 italic">Showing athletes for <span className="font-bold text-green-600 uppercase">{coachSport}</span></p>
           </div>
-
+          <div className="mb-6">
+            <input
+              type="text"
+              placeholder="Search athlete name, student number, or course..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full md:w-1/2 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm shadow-sm"
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredPlayers.length > 0 ? (
               filteredPlayers.map((player) => (
