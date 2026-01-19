@@ -3,12 +3,15 @@ import axios from "axios";
 import Footer from "../FOOTER/footer";
 import Navbar from "../NAVBAR/navbar";
 import Sidebar from "../SIDEBAR/SideBar";
+import { useParams } from "react-router-dom";
 
 function AdminAttendance() {
   const API = import.meta.env.VITE_BBACKEND_URL;
   const [attendanceData, setAttendanceData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [filter, setFilter] = useState("all"); // all / today / week / month
+  const [filter, setFilter] = useState("all");
+  const { id } = useParams();
+  const [coachSport, setCoachSport] = useState("");
 
   const calculateDuration = (timeIn, timeOut) => {
     if (!timeIn || !timeOut) return "-";
@@ -67,15 +70,44 @@ function AdminAttendance() {
     fetchAttendance();
   }, []);
 
+  useEffect(() => {
+    const fetchCoachData = async () => {
+      try {
+        const res = await axios.get(`${API}/adminAccounts/coaches-profile/${id}`);
+        setCoachSport(res.data.sports || "");
+        console.log(res.data.sports);
+      } catch (err) {
+        console.error("Error fetching coach profile:", err);
+      }
+    };
+    if (id) fetchCoachData();
+  }, [id, API]);
+
+  useEffect(() => {
+    if (!coachSport) return;
+
+    const filteredBySport = attendanceData.filter(
+      (a) =>
+        a.sport &&
+        a.sport.toLowerCase() === coachSport.toLowerCase()
+    );
+
+    setFilteredData(filteredBySport);
+  }, [coachSport, attendanceData]);
+
   // Filter data based on selected period
   const applyFilter = (type) => {
     setFilter(type);
     const now = new Date();
 
-    let filtered = attendanceData;
+    let filtered = attendanceData.filter(
+      (a) =>
+        a.sport &&
+        a.sport.toLowerCase() === coachSport.toLowerCase()
+    );
 
     if (type === "today") {
-      filtered = attendanceData.filter((a) => {
+      filtered = filtered.filter((a) => {
         const aDate = new Date(a.date);
         return (
           aDate.getFullYear() === now.getFullYear() &&
@@ -86,12 +118,12 @@ function AdminAttendance() {
     } else if (type === "week") {
       const weekAgo = new Date();
       weekAgo.setDate(now.getDate() - 7);
-      filtered = attendanceData.filter((a) => {
+      filtered = filtered.filter((a) => {
         const aDate = new Date(a.date);
         return aDate >= weekAgo && aDate <= now;
       });
     } else if (type === "month") {
-      filtered = attendanceData.filter((a) => {
+      filtered = filtered.filter((a) => {
         const aDate = new Date(a.date);
         return (
           aDate.getMonth() === now.getMonth() &&
@@ -129,22 +161,20 @@ function AdminAttendance() {
                 <button
                   key={type}
                   onClick={() => applyFilter(type)}
-                  className={`px-4 py-2 rounded-full border ${
-                    filter === type
+                  className={`px-4 py-2 rounded-full border ${filter === type
                       ? "bg-green-600 text-white border-green-600"
                       : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                  }`}
+                    }`}
                 >
                   {type.charAt(0).toUpperCase() + type.slice(1)}
                 </button>
               ))}
               <button
                 onClick={() => applyFilter("all")}
-                className={`px-4 py-2 rounded-full border ${
-                  filter === "all"
+                className={`px-4 py-2 rounded-full border ${filter === "all"
                     ? "bg-green-600 text-white border-green-600"
                     : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 All
               </button>
@@ -183,9 +213,8 @@ function AdminAttendance() {
                 {filteredData.map((athlete) => (
                   <tr key={athlete.id}>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      {`${athlete.firstName || ""} ${
-                        athlete.middleName || ""
-                      } ${athlete.lastName || ""}`}
+                      {`${athlete.firstName || ""} ${athlete.middleName || ""
+                        } ${athlete.lastName || ""}`}
                     </td>
                     <td className="px-4 py-3">
                       {athlete.sport?.toUpperCase() || "-"}
@@ -218,10 +247,10 @@ function OverviewCard({ label, value, color }) {
     color === "green"
       ? "text-green-600"
       : color === "yellow"
-      ? "text-yellow-600"
-      : color === "red"
-      ? "text-red-600"
-      : "text-gray-900";
+        ? "text-yellow-600"
+        : color === "red"
+          ? "text-red-600"
+          : "text-gray-900";
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md text-center sm:text-left">

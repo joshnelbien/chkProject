@@ -50,6 +50,9 @@ function MedalTally() {
     }
   };
 
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - i);
+
   // SORTING FUNCTION
   const handleSort = (column) => {
     const direction =
@@ -109,7 +112,7 @@ function MedalTally() {
               </button>
             </div>
 
-<div className="relative w-64 mb-4">
+            <div className="relative w-64 mb-4">
               <input
                 type="text"
                 placeholder="Search "
@@ -201,30 +204,54 @@ function MedalTally() {
 
         {/* Modal */}
         {isModalOpen && (
+
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white rounded-lg shadow-lg w-96 p-6">
               <h2 className="text-xl font-bold mb-4">Add Medal</h2>
+
               <form onSubmit={handleAddMedal} className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="Year"
+                {/* Year Dropdown */}
+                <select
                   value={newMedal.year}
                   onChange={(e) =>
                     setNewMedal({ ...newMedal, year: e.target.value })
                   }
                   className="w-full border px-3 py-2 rounded"
                   required
-                />
-                <input
-                  type="text"
-                  placeholder="Sport"
+                >
+                  <option value="">Select Year</option>
+                  {yearOptions.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Sport Dropdown */}
+                <select
                   value={newMedal.sports}
                   onChange={(e) =>
                     setNewMedal({ ...newMedal, sports: e.target.value })
                   }
                   className="w-full border px-3 py-2 rounded"
                   required
-                />
+                >
+                  <option value="">Select Sport</option>
+                  <option value="basketball-men">Basketball Men</option>
+                  <option value="basketball-women">Basketball Women</option>
+                  <option value="volleyball-men">Volleyball Men</option>
+                  <option value="volleyball-women">Volleyball Women</option>
+                  <option value="cheerdance">CheerDance</option>
+                  <option value="futsal">Futsal</option>
+                  <option value="sepak-takraw">Sepak Takraw</option>
+                  <option value="table-tennis">Table Tennis</option>
+                  <option value="badminton">Badminton</option>
+                  <option value="taekwondo">Taekwondo</option>
+                  <option value="arnis">Arnis</option>
+                  <option value="karate-do">Karate-Do</option>
+                </select>
+
+                {/* Medal Inputs */}
                 <input
                   type="number"
                   placeholder="Gold"
@@ -233,7 +260,9 @@ function MedalTally() {
                     setNewMedal({ ...newMedal, gold: e.target.value })
                   }
                   className="w-full border px-3 py-2 rounded"
+                  min="0"
                 />
+
                 <input
                   type="number"
                   placeholder="Silver"
@@ -242,7 +271,9 @@ function MedalTally() {
                     setNewMedal({ ...newMedal, silver: e.target.value })
                   }
                   className="w-full border px-3 py-2 rounded"
+                  min="0"
                 />
+
                 <input
                   type="number"
                   placeholder="Bronze"
@@ -251,7 +282,10 @@ function MedalTally() {
                     setNewMedal({ ...newMedal, bronze: e.target.value })
                   }
                   className="w-full border px-3 py-2 rounded"
+                  min="0"
                 />
+
+                {/* Buttons */}
                 <div className="flex justify-end gap-2 mt-3">
                   <button
                     type="button"
