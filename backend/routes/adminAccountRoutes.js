@@ -11,6 +11,20 @@ require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const Admin = require("../db/model/adminAccountDB");
 const Players = require("../db/model/playerAccountsDb");
+const axios = require("axios");
+
+const sendEmailJS = async ({ toEmail, templateParams }) => {
+  return axios.post("https://api.emailjs.com/api/v1.0/email/send", {
+    service_id: process.env.SERVICE_ID,
+    template_id: process.env.TEMPLATE_ID, // or ADMIN_TEMPLATE_ID
+    user_id: process.env.PUBLIC_KEY,
+    accessToken: process.env.PRIVATE_KEY,
+    template_params: {
+      to_email: toEmail,
+      ...templateParams,
+    },
+  });
+};
 
 router.get("/counts", async (req, res) => {
   try {
@@ -55,7 +69,7 @@ const upload = multer({ storage });
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// ✅ Admin Registration with Email Verification
+
 router.post("/admin-register", async (req, res) => {
   console.log("📥 Incoming admin registration:", req.body);
 
@@ -73,7 +87,6 @@ router.post("/admin-register", async (req, res) => {
     confirmPassword,
   } = req.body;
 
-  // Validation
   if (password !== confirmPassword) {
     return res.status(400).json({ message: "Passwords do not match." });
   }
@@ -95,7 +108,6 @@ router.post("/admin-register", async (req, res) => {
   }
 
   try {
-    // Check for existing admin (by email)
     const existingAdmin = await Admin.findOne({ where: { email } });
     if (existingAdmin) {
       return res
@@ -103,12 +115,10 @@ router.post("/admin-register", async (req, res) => {
         .json({ message: "An account with this email already exists." });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create admin account (unverified initially)
-    const newAdmin = await Admin.create({
+    await Admin.create({
       lastName,
       firstName,
       middleName,
@@ -122,30 +132,24 @@ router.post("/admin-register", async (req, res) => {
       isVerified: false,
     });
 
-    // Generate verification token
+    // ✅ Generate verification token
     const token = jwt.sign({ email }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
-    // ✅ Fix this line in admin register route
+
     const verifyLink = `${process.env.BACKEND_URL}/adminAccounts/admin-verify-email?token=${token}`;
 
-    // Send verification email
-    const msg = {
-      to: email,
-      from: process.env.FROM_EMAIL, // Verified sender in SendGrid
-      subject: "Verify your Admin E-Athleta Account",
-      html: `
-        <h2>Welcome to E-Athleta, ${firstName}!</h2>
-        <p>Please verify your email address to activate your account.</p>
-        <a href="${verifyLink}" style="background:#166534;color:white;padding:10px 15px;border-radius:5px;text-decoration:none;">Verify Email</a>
-        <p>If the button doesn’t work, click this link:</p>
-        <p>${verifyLink}</p>
-        <p>This link will expire in 24 hours.</p>
-      `,
-    };
+    // ✅ Send Admin Verification Email via EmailJS
+    await sendEmailJS({
+      toEmail: email,
+      templateParams: {
+        first_name: firstName,
+        verify_link: verifyLink,
+        role: "Administrator",
+      },
+    });
 
-    await sgMail.send(msg);
-    console.log("📧 Email sent successfully!");
+    console.log("📧 Admin verification email sent via EmailJS");
 
     res.status(201).json({
       message:
@@ -156,6 +160,30 @@ router.post("/admin-register", async (req, res) => {
     res.status(500).json({ message: "Server error during registration." });
   }
 });
+
+router.get("/admin-verify-email", async (req, res) => {
+  const { token } = req.query;
+
+  if (!token) return res.status(400).send("Invalid verification link.");
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const admin = await Admin.findOne({ where: { email: decoded.email } });
+
+    if (!admin) return res.status(404).send("Admin not found.");
+    if (admin.isVerified)
+      return res.status(400).send("Email already verified.");
+
+    await admin.update({ isVerified: true });
+
+    // Redirect to confirmation page
+    res.redirect(`${process.env.FRONTEND_URL}/admin-verified-success`);
+  } catch (error) {
+    console.error("Admin Verification Error:", error);
+    res.status(400).send("Invalid or expired verification token.");
+  }
+});
+
 
 router.get("/coaches", async (req, res) => {
   try {
@@ -332,28 +360,7 @@ router.get("/coach-photo/:id", async (req, res) => {
 });
 
 // ✅ Email Verification Route
-router.get("/admin-verify-email", async (req, res) => {
-  const { token } = req.query;
 
-  if (!token) return res.status(400).send("Invalid verification link.");
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const admin = await Admin.findOne({ where: { email: decoded.email } });
-
-    if (!admin) return res.status(404).send("Admin not found.");
-    if (admin.isVerified)
-      return res.status(400).send("Email already verified.");
-
-    await admin.update({ isVerified: true });
-
-    // Redirect to confirmation page
-    res.redirect(`${process.env.FRONTEND_URL}/admin-verified-success`);
-  } catch (error) {
-    console.error("Admin Verification Error:", error);
-    res.status(400).send("Invalid or expired verification token.");
-  }
-});
 
 // ✅ Admin Login
 router.post("/admin-login", async (req, res) => {

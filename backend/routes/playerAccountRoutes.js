@@ -11,6 +11,26 @@ const playerAccounts = require("../db/model/playerAccountsDb");
 const PerformanceHistory = require("../db/model/performanceDB");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+const axios = require("axios");
+
+
+const sendVerificationEmail = async ({
+  toEmail,
+  firstName,
+  verifyLink,
+}) => {
+  return axios.post("https://api.emailjs.com/api/v1.0/email/send", {
+    service_id: process.env.SERVICE_ID,
+    template_id: process.env.TEMPLATE_ID,
+    user_id: process.env.PUBLIC_KEY,
+    accessToken: process.env.PRIVATE_KEY,
+    template_params: {
+      to_email: toEmail,
+      first_name: firstName,
+      verify_link: verifyLink,
+    },
+  });
+};
 
 const fs = require("fs");
 
@@ -133,25 +153,15 @@ router.post("/register", async (req, res) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
+
     const verifyLink = `${process.env.BACKEND_URL}/userAccounts/verify-email?token=${token}`;
+    await sendVerificationEmail({
+      toEmail: email,
+      firstName,
+      verifyLink,
+    });
 
-    // ✅ Send Verification Email
-    const msg = {
-      to: email,
-      from: process.env.FROM_EMAIL, // Verified sender in SendGrid
-      subject: "Verify your E-Athleta Account",
-      html: `
-    <h2>Welcome to E-Athleta, ${firstName}!</h2>
-    <p>Please verify your email address to activate your account.</p>
-    <a href="${verifyLink}" style="background:#166534;color:white;padding:10px 15px;border-radius:5px;text-decoration:none;">Verify Email</a>
-    <p>If the button doesn’t work, click this link:</p>
-    <p>${verifyLink}</p>
-    <p>This link will expire in 24 hours.</p>
-  `,
-    };
-
-    await sgMail.send(msg);
-    console.log("📧 Email sent successfully!");
+    console.log("📧 Verification email sent via EmailJS!");
 
     res.status(201).json({
       message:
