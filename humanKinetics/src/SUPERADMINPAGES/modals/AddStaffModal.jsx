@@ -64,13 +64,7 @@ function AddStaffModal({ onClose, refresh }) {
           onChange={(e) => setForm({ ...form, position: e.target.value })}
         >
           <option value="">Select Position</option>
-          <option value="CITY MAYOR/CHAIR, PLSP BOARD OF REGENTS">CITY MAYOR/CHAIR, PLSP BOARD OF REGENTS</option>
-          <option value="EXECUTIVE ASSISTANT FOR PLSP">EXECUTIVE ASSISTANT FOR PLSP</option>
-          <option value="UNIVERSITY PRESIDENT">UNIVERSITY PRESIDENT</option>
-          <option value="COLLEGE ADMINISTRATOR">COLLEGE ADMINISTRATOR</option>
           <option value="DIRECTOR, INSTITUTE OF HUMAN KINETICS">DIRECTOR, INSTITUTE OF HUMAN KINETICS</option>
-          <option value="SECRETARY IHK">SECRETARY IHK</option>
-          <option value="DEAN COLLEGE OF TEACHER EDUCATION">DEAN COLLEGE OF TEACHER EDUCATION</option>
           <option value="PE LECTURERS AND SPORTS COACHES">PE LECTURERS AND SPORTS COACHES</option>
         </select>
 

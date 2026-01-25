@@ -95,38 +95,8 @@ function Staff() {
           </h1>
 
           <Section
-            title="CITY MAYOR/CHAIR, PLSP BOARD OF REGENTS"
-            position="CITY MAYOR/CHAIR, PLSP BOARD OF REGENTS"
-          />
-
-          <Section
-            title="EXECUTIVE ASSISTANT FOR PLSP"
-            position="EXECUTIVE ASSISTANT FOR PLSP"
-          />
-
-          <Section
-            title="UNIVERSITY PRESIDENT"
-            position="UNIVERSITY PRESIDENT"
-          />
-
-          <Section
-            title="COLLEGE ADMINISTRATOR"
-            position="COLLEGE ADMINISTRATOR"
-          />
-
-          <Section
             title="DIRECTOR, INSTITUTE OF HUMAN KINETICS"
             position="DIRECTOR, INSTITUTE OF HUMAN KINETICS"
-          />
-
-          <Section
-            title="SECRETARY IHK"
-            position="SECRETARY IHK"
-          />
-
-          <Section
-            title="DEAN COLLEGE OF TEACHER EDUCATION"
-            position="DEAN COLLEGE OF TEACHER EDUCATION"
           />
 
           <Section
